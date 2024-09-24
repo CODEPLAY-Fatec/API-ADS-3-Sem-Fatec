@@ -111,8 +111,6 @@ As seguintes ferramentas, linguagens, bibliotecas e tecnologias foram usadas na 
     alt="Alt text"
     title="JavaScript"
     style="display: inline-block; margin: 0 auto; width: 60px"></th>
-    <th><img
-    src="https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/nestjs/nestjs-original.svg" /></th>
      <th><img
     src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg"
     alt="Alt text"
@@ -130,7 +128,6 @@ As seguintes ferramentas, linguagens, bibliotecas e tecnologias foram usadas na 
     <td>MySQL</td>
     <td>React</td>
     <td>JavaScript</td>
-    <td>NestJS</td>
     <td>Typescript</td>
     <td>Node.Js</td>
   </tbody>

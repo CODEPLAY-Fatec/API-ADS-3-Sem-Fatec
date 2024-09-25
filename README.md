@@ -142,14 +142,14 @@ As seguintes ferramentas, linguagens, bibliotecas e tecnologias foram usadas na 
 
 |    Função     | Nome                             |                                                                                                                                                            LinkedIn & GitHub                                                                                                                                                            |
 | :-----------: | :------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------: |
-| Product Owner | Daniel Sandret       |          [![Linkedin Badge] [![GitHub Badge]           |
-| Scrum Master  | Breno    |            [![Linkedin Badge] [![GitHub Badge]           |
-|   Dev Team    | André Neves | [![Linkedin Badge][![GitHub Badge] |
-|   Dev Team    | Gabriel Carvalho | [![Linkedin Badge][![GitHub Badge] |
-|   Dev Team    | Gabriel Vasconcelos      |     [![Linkedin Badge] [![GitHub Badge]     |
-|   Dev Team    | Gabriel                   |          [![Linkedin Badge] [![GitHub Badge]         |
-|   Dev Team    | Guilherme Dharen              |                  [![Linkedin Badge] [![GitHub Badge]                |
-|   Dev Team    | Matheus Marques        |           [![Linkedin Badge] [![GitHub Badge]           |
+| Product Owner | Daniel Sandret       |[![Linkedin Badge](https://www.linkedin.com/in/danielbroder/) [![GitHub Badge](https://github.com/d-broder)           |
+| Scrum Master  | Breno Jesus    |[![Linkedin Badge](https://www.linkedin.com/in/brenoaugusto1910/) [![GitHub Badge] (https://github.com/brenoasj)         |
+|   Dev Team    | André Neves |[![Linkedin Badge] (https://www.linkedin.com/in/andre-neves-44807a209/?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app) [![GitHub Badge] (https://github.com/andreN4vs) |
+|   Dev Team    | Gabriel Carvalho |[![Linkedin Badge] (https://www.linkedin.com/in/gabriel-carvalho-30598b292/)[![GitHub Badge] (https://github.com/Gabriecarvalho) |
+|   Dev Team    | Gabriel Vasconcelos      |[![Linkedin Badge] (https://www.linkedin.com/in/gabriel-vasconcelos-255979262/?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app) [![GitHub Badge] (https://github.com/gabrielvascf)|
+|   Dev Team    | Gabriel Silva  |[![Linkedin Badge] (https://www.linkedin.com/in/gabriel-silva--cs/) [![GitHub Badge] (https://github.com/gabrielfelip)         |
+|   Dev Team    | Guilherme Dharen|[![Linkedin Badge] (https://www.linkedin.com/in/gu%C3%ADlherm-p%C3%AAreira-7993aa7a/) [![GitHub Badge]  (https://github.com/gui863)              |
+|   Dev Team    | Matheus Marques        |[![Linkedin Badge] (https://www.linkedin.com/in/matmarquesx/) [![GitHub Badge]  (https://github.com/matmarquesx)         |
 
 
 → [Voltar ao topo](#topo)

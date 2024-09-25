@@ -4,7 +4,7 @@
 
 
 <p align="center">
-      <img src="/docs/img/" alt="CODEPLAY">
+      <img src="/docs/img/codeplay.png" alt="CODEPLAY">
 
 <span id="topo">
 <p align="center">

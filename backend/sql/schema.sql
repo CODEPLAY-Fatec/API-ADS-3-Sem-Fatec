@@ -1,0 +1,19 @@
+CREATE DATABASE IF NOT EXISTS user_management;
+
+USE user_management;
+
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    isAdmin BOOLEAN DEFAULT FALSE,
+    isLeader BOOLEAN DEFAULT FALSE,
+    password VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS user_leader (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    leader_id INT,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (leader_id) REFERENCES users(id) ON DELETE CASCADE
+);

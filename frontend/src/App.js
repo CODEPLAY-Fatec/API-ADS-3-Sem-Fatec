@@ -8,9 +8,6 @@ const App = () => {
     const [editingUser, setEditingUser] = useState(null);
     const [availableLeaders, setAvailableLeaders] = useState([]);
 
-    console.log("Available leaders:", availableLeaders);
-    console.log("Users:", users);
-
     useEffect(() => {
         fetchUsers();
         fetchLeaders();
@@ -42,8 +39,9 @@ const App = () => {
             } else {
                 await axios.post("http://localhost:3001/users", user);
             }
-            fetchUsers();
-            setEditingUser(null); // Reset the form after saving
+            fetchUsers(); // Atualiza a lista de usuários
+            fetchLeaders(); // Atualiza a lista de líderes
+            setEditingUser(null); // Reseta o formulário após salvar
         } catch (error) {
             console.error("Erro ao salvar usuário:", error);
         }
@@ -57,7 +55,8 @@ const App = () => {
     const handleDeleteUser = async (userId) => {
         try {
             await axios.delete(`http://localhost:3001/users/${userId}`);
-            fetchUsers();
+            fetchUsers(); // Atualiza a lista de usuários
+            fetchLeaders(); // Atualiza a lista de líderes
         } catch (error) {
             console.error("Erro ao deletar usuário:", error);
         }

@@ -60,29 +60,68 @@ As entregas de valor de cada sprint. Os stakeholders podem acompanhar de perto o
 
 ## :dart: Backlog do Produto
 
+| **Sprint** | **Prioridade** | **User Story** | **Estimativa** | **Requisito** | **Critério de Aceitação** |
+|------------|----------------|----------------|----------------|---------------|---------------------------|
+| **1** | Alta | Eu, como usuário, quero usar uma interface navegável e finalizada para ter uma experiência consistente e intuitiva ao navegar e interagir com o sistema. | 8h | - | Protótipo navegável validado |
+|       | Alta | Eu, como usuário, quero ver uma tela funcional para o cadastro de líderes e liderados para inserir e gerenciar os dados de forma eficiente. | 10h | RF1 | Tela de cadastro funcional e validada |
+|       | Alta | Eu, como desenvolvedor, quero modelar um banco de dados relacional para garantir a integridade referencial dos dados. | 8h | RNF2 | Esquema de banco de dados validado |
+|       | Alta | Eu, como desenvolvedor, quero definir os requisitos detalhados do sistema para garantir que o desenvolvimento esteja alinhado às expectativas do parceiro. | 6h | - | Requisitos documentados e validados |
+| **2** | Alta | Eu, como desenvolvedor, quero implementar autenticação e controle de acesso para garantir que os usuários possam acessar apenas as informações pertinentes ao seu nível de acesso. | 10h | RF1 | Autenticação funcional |
+|       | Alta | Eu, como desenvolvedor, quero criar uma API para o cadastro de perguntas e categorias para permitir a inserção e gerenciamento das perguntas de forma eficiente. | 12h | RF2, RF3, RF4 | API funcional com testes |
+| **3** | Alta | Eu, como usuário, quero acessar o dashboard geral para Admin para visualizar todas as informações e comparar avaliações de maneira abrangente. | 16h | RF5 | Dashboard funcional para Admin |
+|       | Alta | Eu, como usuário, quero utilizar filtros de data nos dashboards para visualizar informações em diferentes períodos de tempo. | 6h | RF6 | Filtros de data funcionando |
+| **4** | Alta | Eu, como usuário, quero acessar o dashboard pessoal para visualizar e acompanhar meus dados de autoavaliação. | 12h | RF5 | Dashboard funcional para autoavaliação |
+|       | Média | Eu, como usuário, quero baixar meus dashboards em PDF para poder ter uma cópia offline das minhas informações. | 4h | RF7 | PDF gerado e funcional para todos os perfis |
+|       | Baixa | Eu, como desenvolvedor, quero revisar e refatorar o código para garantir que ele esteja legível, mantenível e eficiente. | 6h | RNF4 | Código revisado e otimizado |
+|       | Média | Eu, como desenvolvedor, quero completar a documentação da API para fornecer informações claras e completas para outros desenvolvedores. | 6h | RNF3 | Documentação disponível |
+|       | Média | Eu, como usuário, quero garantir que a interface seja responsiva e amigável em diferentes dispositivos e tamanhos de tela para ter uma boa experiência de uso. | 8h | RNF1 | Interface testada em diferentes dispositivos e tamanhos de tela |
+
 <p align="center">
-      <img src="/docs/img/--------" alt="Backlog do Produto">
+     
 
 <span id="requisitosfuncionais">
 
 ## :dart: Lista de Requisitos Funcionais
 
+1. **RF1** – O sistema deve permitir o cadastro de usuários com diferentes níveis de acesso (Admin, Líder, Liderado).
+2. **RF2** – O Admin deve poder cadastrar pesquisas de autoavaliação, avaliação de liderança e avaliação de liderado.
+3. **RF3** – O Admin deve poder cadastrar categorias de perguntas para organizar as pesquisas.
+4. **RF4** – As perguntas devem ser cadastradas nos formatos texto longo, escolha única e múltipla escolha.
+5. **RF5** – Todos os usuários devem poder acessar seus dashboards (pessoal, liderados, geral) de acordo com o nível de acesso.
+6. **RF6** – Dashboards devem apresentar filtros de data para visualização de informações ao longo do tempo.
+7. **RF7** – Todos os usuários devem poder fazer download do dashboard em PDF.
+
 <p align="center">
-      <img src="/docs/img/Requisitos_Funcionais.jpg" alt="Lista de Requisitos Funcionais">
+    
 
 <span id="requisitosnfuncionais">
 
 ## :dart: Lista de Requisitos Não Funcionais
 
+1. **RNF1** – A aplicação deve ser responsiva e acessível em diferentes dispositivos.
+2. **RNF2** – O banco de dados deve ser relacional e garantir integridade referencial.
+3. **RNF3** – A documentação da API deve estar completa e disponível para os desenvolvedores.
+4. **RNF4** – O código deve ser revisado para garantir legibilidade, manutenção e eficiência.
+
 <p align="center">
-      <img src="/docs/img/Requisitos_NFuncionais.jpg" alt="Lista de Requisitos Não Funcionais">
+    
 
 <span id="planejamento">
 
-## :dart: Planejamento das Sprints
+## :dart: MVP das Sprints
 
-<p align="center">
-      <img src="/docs/img/Planejamento_das_sprints.jpg" alt="Planejamento das Sprints">
+| **MVP** |
+|------------|
+|**Sprint 1 –** *"Estruturação, Protótipo e Banco de Dados"*  
+  **MVP:** Definição do backlog, criação do protótipo navegável, desenvolvimento da tela funcional de cadastro de líderes e liderados, modelagem do banco de dados relacional, e organização dos requisitos principais.|
+|**Sprint 2 –** *"Autenticação e API"*  
+  **MVP:** Autenticação funcional e API para cadastro de perguntas e categorias.|
+|**Sprint 3 –** *"Dashboards Interativos"*  
+  **MVP:** Dashboard geral para Admin e filtros de data implementados.|
+|**Sprint 4 –** *"Funcionalidades Avançadas e Refinamento"*  
+  **MVP:** Dashboard pessoal funcional, funcionalidade de download em PDF, interface responsiva e amigável, código revisado e documentado.|
+
+
 
 → [Voltar ao topo](#topo)
 
@@ -150,7 +189,7 @@ As seguintes ferramentas, linguagens, bibliotecas e tecnologias foram usadas na 
 |   Dev Team    | Gabriel Silva  |[![Linkedin Badge](https://img.shields.io/badge/Linkedin-blue?style=flat-square&logo=Linkedin&logoColor=white)](https://www.linkedin.com/in/gabriel-silva--cs/)[![GitHub Badge](https://img.shields.io/badge/GitHub-111217?style=flat-square&logo=github&logoColor=white)](https://github.com/gabrielfelip)         |
 |   Dev Team    | Guilherme Dharen|[![Linkedin Badge](https://img.shields.io/badge/Linkedin-blue?style=flat-square&logo=Linkedin&logoColor=white)](https://www.linkedin.com/in/gu%C3%ADlherm-p%C3%AAreira-7993aa7a/)[![GitHub Badge](https://img.shields.io/badge/GitHub-111217?style=flat-square&logo=github&logoColor=white)](https://github.com/gui863)              |
 |   Dev Team    | Matheus Marques        |[![Linkedin Badge](https://img.shields.io/badge/Linkedin-blue?style=flat-square&logo=Linkedin&logoColor=white)](https://www.linkedin.com/in/matmarquesx/) [![GitHub Badge](https://img.shields.io/badge/GitHub-111217?style=flat-square&logo=github&logoColor=white)](https://github.com/matmarquesx)         |
-
+|   Dev Team    | Ana Clara        |[![Linkedin Badge](https://img.shields.io/badge/Linkedin-blue?style=flat-square&logo=Linkedin&logoColor=white)]([https://www.linkedin.com/in/matmarquesx/](https://www.linkedin.com/in/anaclaratolomelli?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app )[![GitHub Badge](https://img.shields.io/badge/GitHub-111217?style=flat-square&logo=github&logoColor=white)](https://github.com/ninabtolo/sla)   |
 
 → [Voltar ao topo](#topo)
 

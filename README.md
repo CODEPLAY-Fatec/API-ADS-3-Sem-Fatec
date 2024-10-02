@@ -47,12 +47,13 @@ Fomentar o desenvolvimento profissional dos colaboradores.
 ### 🏁 Entregas das Sprints
 
 As entregas de valor de cada sprint. Os stakeholders podem acompanhar de perto o desenvolvimento do projeto e entender como as metas e objetivos estão sendo alcançados ao longo do tempo.
-| Sprint | Previsão de entrega | Status |
-|:--:|:----------:|:-------------------|
-| 01 | 14/04/2024 | :white_check_mark: Concluído |
-| 02 | 05/05/2024 | :white_check_mark: Concluído |
-| 03 | 26/05/2024 | :white_check_mark: Concluído |
-| 04 | 16/06/2024 | :white_check_mark: Concluído |
+| Sprint | Previsão de Entrega | Status              | Descrição                                                                                 | MVP                                                                                                  |
+|:------:|:------------------:|:-------------------:|:-----------------------------------------------------------------------------------------|:----------------------------------------------------------------------------------------------------|
+|   01   |    29/09/2024       | ✅ Concluído         | *"Estruturação, Protótipo e Banco de Dados"*                                              | Definição do backlog, criação do protótipo navegável, tela de cadastro de líderes e liderados, modelagem do banco de dados. |
+|   02   |    20/10/2024       | ❌ Não Concluído     | *"Autenticação e API"*                                                                    | Autenticação funcional e API para cadastro de perguntas e categorias.                              |
+|   03   |    10/11/2024       | ❌ Não Concluído     | *"Dashboards Interativos"*                                                                | Dashboard geral para Admin com filtros de data.                                                     |
+|   04   |    01/12/2024       | ❌ Não Concluído     | *"Funcionalidades Avançadas e Refinamento"*                                                | Dashboard pessoal funcional, funcionalidade de download em PDF, interface responsiva e código revisado. |
+
 
 → [Voltar ao topo](#topo)
 

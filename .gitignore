@@ -1,5 +1,5 @@
-*/node_modules
+node_modules
 
 chatgpt-prompt.md
 
-backend/.env
+.env

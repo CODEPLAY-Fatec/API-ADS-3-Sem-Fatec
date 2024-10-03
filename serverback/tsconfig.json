@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+      "target": "ES6",                         // Define o alvo da compilação (versão do JavaScript)
+      "module": "commonjs",                    // Tipo de módulo (usado para Node.js)
+      "rootDir": "./src",                      // Diretório raiz dos arquivos TypeScript
+      "outDir": "./dist",                      // Diretório de saída para os arquivos compilados
+      "strict": true,                          // Ativa verificações estritas de tipagem
+      "esModuleInterop": true,                 // Permite compatibilidade com módulos ES
+      "skipLibCheck": true,                    // Ignora checagem de tipo em arquivos de declaração
+      "forceConsistentCasingInFileNames": true // Força o uso consistente de maiúsculas/minúsculas
+    },
+    "include": ["src"],                        // Define quais arquivos serão incluídos na compilação
+    "exclude": ["node_modules", "dist"]        // Exclui esses diretórios da compilação
+  }
+  

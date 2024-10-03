@@ -44,14 +44,14 @@ CREATE TABLE `survey_answer` (
   `data` JSON NOT NULL
 );
 
-ALTER TABLE `team` ADD FOREIGN KEY (`id`) REFERENCES `team_leader` (`team_id`) ON DELETE CASCADE;
+ALTER TABLE `team_leader` ADD FOREIGN KEY (`team_id`) REFERENCES `team` (`id`) ON DELETE CASCADE;
 
-ALTER TABLE `users` ADD FOREIGN KEY (`id`) REFERENCES `team_leader` (`user_id`) ON DELETE CASCADE;
+ALTER TABLE `team_leader` ADD FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
-ALTER TABLE `team` ADD FOREIGN KEY (`id`) REFERENCES `team_member` (`team_id`) ON DELETE CASCADE;
+ALTER TABLE `team_member` ADD FOREIGN KEY (`team_id`) REFERENCES `team` (`id`) ON DELETE CASCADE;
 
-ALTER TABLE `users` ADD FOREIGN KEY (`id`) REFERENCES `team_member` (`user_id`) ON DELETE CASCADE;
+ALTER TABLE `team_member` ADD FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
-ALTER TABLE `survey` ADD FOREIGN KEY (`id`) REFERENCES `survey_answer` (`survey_id`) ON DELETE CASCADE;
+ALTER TABLE `survey_answer` ADD FOREIGN KEY (`survey_id`) REFERENCES `survey` (`id`) ON DELETE CASCADE;
 
 ALTER TABLE `survey_answer` ADD FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;

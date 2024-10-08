@@ -5,7 +5,7 @@ export default class Page extends React.Component {
     render() {
         return (
             <div>
-                <h1>Perfil pessoal</h1>
+                <h1>Cadastro Usuarios</h1>
             </div>
         )
     }

@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import "./globals.css";
-
-// Importando a fonte Kumbh Sans do Google Fonts
-import React from "react";
+import "./globals.css"; // Importação do arquivo de estilos
 
 const geistSans = localFont({
     src: "./fonts/GeistVF.woff",
@@ -15,11 +12,6 @@ const geistMono = localFont({
     variable: "--font-geist-mono",
     weight: "100 900",
 });
-
-// Adicionando o link da fonte Kumbh Sans
-const KumbhSans = `
-   @import url('https://fonts.googleapis.com/css2?family=Kumbh+Sans:wght@400;700&display=swap');
-`;
 
 export const metadata: Metadata = {
     title: "Create Next App",
@@ -34,7 +26,7 @@ export default function RootLayout({
     return (
         <html lang="en">
             <head>
-                <style>{KumbhSans}</style> {/* Adicionando a importação da fonte */}
+                {/* Preconnects para otimizar o carregamento da fonte */}
                 <link rel="preconnect" href="https://fonts.googleapis.com" />
                 <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
                 <link href="https://fonts.googleapis.com/css2?family=Kumbh+Sans:wght@400;700&display=swap" rel="stylesheet" />

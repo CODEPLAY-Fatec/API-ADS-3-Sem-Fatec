@@ -7,7 +7,6 @@ CREATE TABLE `users` (
   `name` VARCHAR(255) NOT NULL,
   `email` VARCHAR(255) NOT NULL,
   `isAdmin` BOOLEAN DEFAULT false,
-  `isLeader` BOOLEAN DEFAULT false,
   `password` VARCHAR(255) NOT NULL
 );
 

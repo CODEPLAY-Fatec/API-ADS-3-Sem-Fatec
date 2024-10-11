@@ -1,12 +1,21 @@
-// routes/userRoutes.ts
 import { Router } from 'express';
-import { getUsersController, createUserController, updateUserController, deleteUserController } from '../controllers/userController';
+import {
+    getUsersController,
+    createUserController,
+    updateUserController,
+    deleteUserController,
+    getLeadersController,
+} from '../controllers/userController';
 
 const router = Router();
 
-router.get('/', getUsersController);
-router.post('/', createUserController);
-router.put('/:id', updateUserController);
-router.delete('/:id', deleteUserController);
+// Rotas para usuários
+//router.get('/users', getUsersController);
+router.post('/users', createUserController);
+router.put('/users/:id', updateUserController);
+router.delete('/users/:id', deleteUserController);
+
+// Rota para obter líderes
+router.get('/leaders', getLeadersController);
 
 export default router;

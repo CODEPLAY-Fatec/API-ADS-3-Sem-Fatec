@@ -10,7 +10,7 @@ import {
 const router = Router();
 
 // Rotas para usuários
-//router.get('/users', getUsersController);
+router.get('/users', getUsersController);
 router.post('/users', createUserController);
 router.put('/users/:id', updateUserController);
 router.delete('/users/:id', deleteUserController);

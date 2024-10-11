@@ -53,4 +53,8 @@ ALTER TABLE `team_member` ADD FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) 
 
 ALTER TABLE `survey_answer` ADD FOREIGN KEY (`survey_id`) REFERENCES `survey` (`id`) ON DELETE CASCADE;
 
-ALTER TABLE `survey_answer` ADD FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+ALTER TABLE `survey_answer` ADD FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;  
+
+--ao criar o schema no seu proprio pc adiconar essa linha
+--INSERT INTO users (name, email, password, isAdmin) VALUES ('daniel', 'daniel@gmail.com','$2b$10$t2USd40dO76L.tsQSOo3WO75faZlQFC.CGDJISS.LJgufLd7ru/Hm', 1 ) 
+--q cria um usuario como admin 

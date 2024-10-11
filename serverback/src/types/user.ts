@@ -1,7 +1,7 @@
 export interface User {
   id: number;
   name: string;
-  email: string; // Adiciona o campo email
+  email: string;
   password: string;
   isAdmin: boolean;
   leaders?: string[]; // Relacionamento opcional

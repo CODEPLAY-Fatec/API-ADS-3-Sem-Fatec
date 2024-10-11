@@ -12,9 +12,6 @@ const Page: React.FC = () => {
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         
-
-        //POR ENQUANTO NAO ESTA FAZENDO O HASH DA SENHA
-
         try {
             const response = await fetch('http://localhost:3001/api/users', { // Ajuste o endpoint conforme necessário
                 method: 'POST',
@@ -35,7 +32,7 @@ const Page: React.FC = () => {
             if (error instanceof Error) {
                 setError(error.message);
             } else {
-                setError('Erro desconhecido'); // Caso o erro não seja uma instância de Error
+                setError('Erro desconhecido'); 
             }
             setSuccess('');
         }
@@ -43,7 +40,7 @@ const Page: React.FC = () => {
 
     return (
         <div>
-            <h1>Cadastro de Usuários</h1>
+            <h1 className="text-center">Cadastro de Usuários</h1>
             <form className="p-4 mb-3 bg-light rounded shadow-sm" onSubmit={handleSubmit}>
                 <div className="mb-3">
                     <label htmlFor="name" className="form-label">
@@ -112,3 +109,5 @@ const Page: React.FC = () => {
 };
 
 export default Page;
+
+

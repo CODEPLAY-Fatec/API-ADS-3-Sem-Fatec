@@ -4,7 +4,7 @@ import "./Navbar.css";
 
 const Navbar: React.FC = () => {
     return (
-        <div className="d-flex flex-column vh-100 text-white" style={{ width: "250px", backgroundColor: "#152259" }}>
+        <div className="d-flex flex-column v-100 text-white" style={{ width: "250px", backgroundColor: "#152259" }}>
             <div className="text-center my-3">
                 <img src="/images/logo.png" alt="Logo" className="img-fluid mx-auto d-block" style={{ maxHeight: "100px" }} />
                 <h4 className="mt-2 mb-0 text-center">

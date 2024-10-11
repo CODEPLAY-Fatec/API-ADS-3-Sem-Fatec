@@ -4,12 +4,11 @@ import { db } from '../config/database2';
 import { User } from '../types/user';
 
 const secretKey = 'secreta-chave';
+const userSecretKey = 'outra-chave-secreta'; // Chave secreta para usuários comuns
 
-export const login = async (name: string, password: string): Promise<string | null> => {
-  const query = 'SELECT * FROM users WHERE name = ?';
-
-  // Removido o argumento de tipo diretamente na função `query`
-  const [results]: any = await db.query(query, [name]);
+export const login = async (email: string, password: string): Promise<{ token?: string; userToken?: string }> => {
+  const query = 'SELECT * FROM users WHERE email = ?';
+  const [results]: any = await db.query(query, [email]);
 
   if (results.length === 0) {
     throw new Error('Usuário não encontrado.');
@@ -19,11 +18,14 @@ export const login = async (name: string, password: string): Promise<string | nu
   const isPasswordCorrect = await bcrypt.compare(password, user.password);
 
   if (isPasswordCorrect) {
-    const token = jwt.sign({ id: user.id, name: user.name, isAdmin: user.isAdmin }, secretKey, { expiresIn: '1h' });
-    return token;
+    if (user.isAdmin) {
+      const token = jwt.sign({ id: user.id, name: user.name, isAdmin: user.isAdmin }, secretKey, { expiresIn: '1h' });
+      return { token }; // Retorna apenas o token de admin
+    } else {
+      const userToken = jwt.sign({ id: user.id, name: user.name, isAdmin: user.isAdmin }, userSecretKey, { expiresIn: '1h' });
+      return { userToken }; // Retorna o token de usuário
+    }
   } else {
     throw new Error('Senha incorreta.');
   }
 };
-
-

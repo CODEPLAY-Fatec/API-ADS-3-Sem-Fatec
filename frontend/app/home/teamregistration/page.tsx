@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Collapse } from 'react-bootstrap';
+import './teamregistration.css';
+
 
 interface Team {
     id: number;
@@ -71,15 +73,14 @@ const TeamRegistration = () => {
             setFeedbackMessage('O nome do time não pode estar vazio.');
             return;
         }
-
+    
         try {
             const response = await axios.post('http://localhost:3001/api/team', { name: teamName });
-            const newTeam = response.data;
-
-            setTeams((prevTeams) => [...prevTeams, newTeam]);
-            setTeamLeaders((prevLeaders) => ({ ...prevLeaders, [newTeam.id]: [] }));
-            setTeamMembers((prevMembers) => ({ ...prevMembers, [newTeam.id]: [] }));
-            setTeamName('');
+            const newTeam = response.data.team; 
+            setTeams((prevTeams) => [...prevTeams, newTeam]); 
+            setTeamLeaders((prevLeaders) => ({ ...prevLeaders, [newTeam.id]: [] })); 
+            setTeamMembers((prevMembers) => ({ ...prevMembers, [newTeam.id]: [] })); 
+            setTeamName(''); 
             setFeedbackMessage('Time criado com sucesso!');
         } catch (error) {
             console.error('Erro ao cadastrar time:', error);
@@ -192,7 +193,7 @@ const TeamRegistration = () => {
                             <div className="card-body">
                                 <div className="d-flex justify-content-between align-items-center">
                                     <h5
-                                        className="card-title"
+                                        className="card-title team-title"
                                         onClick={() => setOpen({ ...open, [team.id]: !open[team.id] })}
                                     >
                                         {team.name}

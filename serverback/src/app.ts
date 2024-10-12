@@ -23,4 +23,5 @@ app.listen(PORT, () => {
 //ao criar o schema no seu proprio pc adiconar essa linha
 //INSERT INTO users (name, email, password, isAdmin) VALUES ('daniel', 'daniel@gmail.com','$2b$10$t2USd40dO76L.tsQSOo3WO75faZlQFC.CGDJISS.LJgufLd7ru/Hm', 1 ) 
 //q cria um usuario como admin 
+// a senha é 123456
 

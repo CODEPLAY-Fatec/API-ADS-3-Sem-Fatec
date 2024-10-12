@@ -1,4 +1,4 @@
-const { addTeam, assignLeader, assignMember,getAllTeams,getAllUsers,getLeadersByTeamId,getMembersByTeamId } = require('../services/teamService');
+const { addTeam, assignLeader, assignMember,getAllTeams,getAllUsers,getLeadersByTeamId,getMembersByTeamId,removeTeam,removeUserFromTeam } = require('../services/teamService');
 import { Request, Response } from 'express';
 
 
@@ -73,6 +73,26 @@ export const getMembersController = async (req: Request, res: Response) => {
   try {
       const members = await getMembersByTeamId(parseInt(teamId));
       res.status(200).json(members); // Retorna a lista de membros
+  } catch (error: any) {
+      res.status(500).json({ error: error.message });
+  }
+};
+
+export const removeTeamController = async (req: Request, res: Response) => {
+  const { teamId } = req.params;
+  try {
+      await removeTeam(parseInt(teamId));
+      res.status(200).json({ message: 'Time removido com sucesso!' });
+  } catch (error: any) {
+      res.status(500).json({ error: error.message });
+  }
+};
+
+export const removeUserFromTeamController = async (req: Request, res: Response) => {
+  const { teamId, userId } = req.params;
+  try {
+      await removeUserFromTeam(parseInt(teamId), parseInt(userId));
+      res.status(200).json({ message: 'Usuário removido do time com sucesso!' });
   } catch (error: any) {
       res.status(500).json({ error: error.message });
   }

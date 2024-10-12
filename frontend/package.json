@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@types/react-bootstrap": "^0.32.37",
     "axios": "^1.7.7",
     "bootstrap": "^5.3.3",
     "js-cookie": "^3.0.5",
@@ -16,6 +17,7 @@
     "next": "14.2.14",
     "nookies": "^2.5.2",
     "react": "^18",
+    "react-bootstrap": "^2.10.5",
     "react-dom": "^18"
   },
   "devDependencies": {

@@ -51,3 +51,15 @@ export const getMembersByTeamId = async (teamId: number) => {
     const members = await db.query('SELECT u.id, u.name FROM team_member tm JOIN users u ON tm.user_id = u.id WHERE tm.team_id = ?', [teamId]);
     return members[0]; // Retorna a lista de membros
 };
+
+export const removeTeam = async (teamId: number): Promise<void> => {
+    await db.query('DELETE FROM team WHERE id = ?', [teamId]);
+};
+
+export const removeUserFromTeam = async (teamId: number, userId: number): Promise<void> => {
+    // Tenta remover da tabela de líderes e membros
+    await db.query('DELETE FROM team_leader WHERE team_id = ? AND user_id = ?', [teamId, userId]);
+    await db.query('DELETE FROM team_member WHERE team_id = ? AND user_id = ?', [teamId, userId]);
+};
+
+

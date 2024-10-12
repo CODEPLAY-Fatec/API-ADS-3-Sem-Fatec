@@ -50,7 +50,7 @@ export default function Login() {
           <p style={{ marginBottom: "15px", textAlign: "center" }}>É um grande prazer ter você a bordo!</p>
 
           <form onSubmit={handleLogin}>
-            {error && <p className="alert alert-danger" style={{ color: 'red'}}>{error}</p>}
+            {error && <p className="alert alert-danger" style={{ color: 'red' }}>{error}</p>}
 
             <div className="mb-3">
               <input
@@ -102,6 +102,11 @@ export default function Login() {
               Login
             </button>
           </form>
+
+          {/* Link Esqueceu sua senha */}
+          <p style={{ marginTop: "20px" }}>
+            <a href="/codeforpassword" style={{ color: "#357edd" }}>Esqueceu sua senha?</a>
+          </p>
         </div>
       </div>
     </div>

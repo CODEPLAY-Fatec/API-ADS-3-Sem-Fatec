@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import Cookie from "js-cookie"; // Importa js-cookie
-import {jwtDecode} from "jwt-decode"; // Importa jwt-decode corretamente
+import { jwtDecode } from "jwt-decode"; // Importa jwt-decode corretamente
 import "./Navbar.css";
 
 const Navbar: React.FC = () => {
@@ -110,6 +110,14 @@ const Navbar: React.FC = () => {
               </li>
             </>
           )}
+
+          <li className="nav-item">
+            <Link href="/home/changepasswordin" className="nav-link text-white">
+              <div className="link-content">
+                <i className="bi bi-journal-text me-2"></i> Alterar informações
+              </div>
+            </Link>
+          </li>
         </ul>
       </nav>
 

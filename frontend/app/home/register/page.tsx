@@ -13,7 +13,7 @@ const Page: React.FC = () => {
         event.preventDefault();
         
         try {
-            const response = await fetch('http://localhost:3001/api/users', { // Ajuste o endpoint conforme necessário
+            const response = await fetch('http://localhost:3001/api/users', { 
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -40,7 +40,7 @@ const Page: React.FC = () => {
 
     return (
         <div>
-            <h1 className="text-center">Cadastro de Usuários</h1>
+            <h1 className="text-center font-bold mb-4">Cadastro de Usuários</h1>
             <form className="p-4 mb-3 bg-light rounded shadow-sm" onSubmit={handleSubmit}>
                 <div className="mb-3">
                     <label htmlFor="name" className="form-label">

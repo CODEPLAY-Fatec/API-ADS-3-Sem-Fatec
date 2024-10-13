@@ -18,12 +18,19 @@ export const login = async (email: string, password: string): Promise<{ token?: 
   const isPasswordCorrect = await bcrypt.compare(password, user.password);
 
   if (isPasswordCorrect) {
+    const payload = {
+      id: user.id,
+      name: user.name,
+      email: user.email, 
+      isAdmin: user.isAdmin
+    };
+
     if (user.isAdmin) {
-      const token = jwt.sign({ id: user.id, name: user.name, isAdmin: user.isAdmin }, secretKey, { expiresIn: '1h' });
-      return { token }; // Retorna apenas o token de admin
+      const token = jwt.sign(payload, secretKey, { expiresIn: '1h' });
+      return { token }; 
     } else {
-      const userToken = jwt.sign({ id: user.id, name: user.name, isAdmin: user.isAdmin }, userSecretKey, { expiresIn: '1h' });
-      return { userToken }; // Retorna o token de usuário
+      const userToken = jwt.sign(payload, userSecretKey, { expiresIn: '1h' });
+      return { userToken }; 
     }
   } else {
     throw new Error('Senha incorreta.');

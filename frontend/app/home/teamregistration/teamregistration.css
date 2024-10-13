@@ -1,11 +1,10 @@
 .team-title {
     cursor: pointer;
     transition: color 0.3s ease;
-     /*padding: 8px 20px;  */
 }
 
 .team-title:hover {
-    color: #007bff; /* Tom levemente azul */
-    background-color: rgba(173, 216, 230, 0.7); /* Azul claro com transparência */
-    border-radius: 5px; /* Bordas arredondadas */
+    color: #007bff; 
+    background-color: rgba(173, 216, 230, 0.7);
+    border-radius: 5px; 
 }

@@ -172,7 +172,7 @@ const TeamRegistration = () => {
 
     return (
         <div className="container mt-4">
-            <h1 className="text-center mb-4">Cadastro de Times</h1>
+            <h1 className="text-center font-bold mb-4">Cadastro de Times</h1>
             {feedbackMessage && <div className="alert alert-info">{feedbackMessage}</div>}
             <div className="mb-3">
                 <input

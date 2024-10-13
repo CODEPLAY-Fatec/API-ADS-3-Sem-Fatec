@@ -1,14 +1,12 @@
-/* src/pages/Home.css */
-
 
 .link-content {
-    padding: 8px 20px; /* Controle do padding para limitar a largura do hover */
-    transition: background-color 0.3s ease; /* Transições suaves */
+    padding: 8px 20px; 
+    transition: background-color 0.3s ease; 
 }
 
 .link-content:hover {
-    background-color: rgba(173, 216, 230, 0.7); /* Azul claro com transparência */
-    border-radius: 5px; /* Bordas arredondadas */
+    background-color: rgba(173, 216, 230, 0.7); 
+    border-radius: 5px; 
 }
 
 

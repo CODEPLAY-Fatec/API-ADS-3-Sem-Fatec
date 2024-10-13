@@ -4,12 +4,14 @@ import { getAllUsersWithDetails, createUser,updateUser,deleteUser, getLeaders } 
 
 export const getUsersController = async (req: Request, res: Response) => {
   try {
-    const users = await getAllUsersWithDetails(); // Função que retorna usuario com mais informaçoes, arrumar depois para verificar sua posiçao nos times
+    const users = await getAllUsersWithDetails();
     res.status(200).json(users);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
 };
+
+
 
 
 // Adicione outras funções conforme necessário

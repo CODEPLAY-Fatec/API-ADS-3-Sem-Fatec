@@ -18,10 +18,10 @@ export default function Login() {
       const { token, userToken } = response.data;
 
       if (token) {
-        Cookie.set("authToken", token);  // Armazena o token em cookies
-        window.location.href = '/home/profile';  // Redireciona para a página de perfil
+        Cookie.set("authToken", token);  
+        window.location.href = '/home/profile';  
       } else if (userToken) {
-        Cookie.set("userToken", userToken);  // Armazena userToken se necessário
+        Cookie.set("userToken", userToken);  
         window.location.href = '/home/profile';
       }
     } catch (error: unknown) {
@@ -102,8 +102,6 @@ export default function Login() {
               Login
             </button>
           </form>
-
-          {/* Link Esqueceu sua senha */}
           <p style={{ marginTop: "20px" }}>
             <a href="/codeforpassword" style={{ color: "#357edd" }}>Esqueceu sua senha?</a>
           </p>

@@ -1,14 +1,17 @@
 import { db } from '../config/database2'; 
 import { Team } from '../types/team'; 
 import { User } from '../types/user'; 
-import { ResultSetHeader } from 'mysql2';
 
 // Função para adicionar um time
-export const addTeam = async (name: string): Promise<number> => {
+export const addTeam = async (name: string): Promise<Team> => {
     const [result]: any = await db.query('INSERT INTO team (name) VALUES (?)', [name]);
 
     if (result && 'insertId' in result) {
-        return result.insertId; // Retorna o ID do time criado
+        const newTeam: Team = {
+            id: result.insertId,
+            name: name,
+        };
+        return newTeam; 
     } else {
         throw new Error('Erro ao criar o time. insertId não encontrado.');
     }

@@ -2,21 +2,19 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import Cookie from "js-cookie"; // Importa js-cookie
-import { jwtDecode } from "jwt-decode"; // Importa jwt-decode corretamente
+import Cookie from "js-cookie"; 
+import { jwtDecode } from "jwt-decode"; 
 import "./Navbar.css";
 
 const Navbar: React.FC = () => {
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
   useEffect(() => {
-    // Busca o token de admin nos cookies
     const token = Cookie.get("authToken");
     if (token) {
       try {
-        // Decodifique o token para verificar se o usuário é admin
         const decodedToken: { isAdmin: boolean } = jwtDecode(token);
-        setIsAdmin(decodedToken.isAdmin); // Atualiza o estado baseado no valor isAdmin do token
+        setIsAdmin(decodedToken.isAdmin); 
       } catch (error) {
         console.error("Erro ao decodificar o token:", error);
       }
@@ -28,8 +26,8 @@ const Navbar: React.FC = () => {
     Cookie.remove("authToken");
     Cookie.remove("userToken");
 
-    // Redireciona para a página de login ou outra página desejada
-    window.location.href = "/"; // Ou o caminho desejado para a página inicial
+
+    window.location.href = "/"; 
   };
 
   return (

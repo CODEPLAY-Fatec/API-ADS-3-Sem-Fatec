@@ -3,22 +3,50 @@ import { User } from '../types/user';
 import bcrypt from 'bcrypt';
 
 // Obtém todos os usuários
-export const getAllUsersWithDetails = async () => {
-  const query = `
-    SELECT 
-      u.id, u.name, u.email, u.isAdmin,
-      GROUP_CONCAT(DISTINCT t.name) as teams,
-      IF(tl.user_id IS NOT NULL, 'Líder', 'Liderado') as role
-    FROM users u
-    LEFT JOIN team_leader tl ON u.id = tl.user_id
-    LEFT JOIN team_member tm ON u.id = tm.user_id
-    LEFT JOIN team t ON tl.team_id = t.id OR tm.team_id = t.id
-    GROUP BY u.id
-  `;
+export const getAllUsersWithDetails = async (): Promise<User[]> => {
+  const usersQuery = `SELECT u.id, u.name, u.email, u.isAdmin FROM users u;`;
+  const [usersRows]: any = await db.query(usersQuery); 
 
-  const [rows] = await db.query(query);
-  return rows;
+  
+  const leadersQuery = `SELECT tl.user_id, t.name AS team_name FROM team_leader tl JOIN team t ON tl.team_id = t.id;`;
+  const [leadersRows]: any = await db.query(leadersQuery); 
+
+  
+  const membersQuery = `SELECT tm.user_id, t.name AS team_name FROM team_member tm JOIN team t ON tm.team_id = t.id;`;
+  const [membersRows]: any = await db.query(membersQuery); 
+
+  // Criar um objeto para armazenar as funções dos usuários
+  const teamRoles: { [key: number]: { team: string; role: string }[] } = {};
+
+  // Adicionar líderes
+  leadersRows.forEach((row: any) => {
+      const { user_id, team_name } = row;
+      if (!teamRoles[user_id]) {
+          teamRoles[user_id] = [];
+      }
+      teamRoles[user_id].push({ team: team_name, role: 'Líder' });
+  });
+
+  // Adicionar membros
+  membersRows.forEach((row: any) => {
+      const { user_id, team_name } = row;
+      if (!teamRoles[user_id]) {
+          teamRoles[user_id] = [];
+      }
+      teamRoles[user_id].push({ team: team_name, role: 'Membro' });
+  });
+
+  return usersRows.map((user: any) => ({
+      ...user,
+      teamRoles: teamRoles[user.id] || [],
+  }));
 };
+
+
+
+
+
+
 
 // Cria um novo usuário
 export const createUser = async (name: string, email: string, password: string, isAdmin: boolean) => {

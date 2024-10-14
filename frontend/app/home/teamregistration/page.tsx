@@ -73,6 +73,12 @@ const TeamRegistration = () => {
             setFeedbackMessage('O nome do time não pode estar vazio.');
             return;
         }
+        
+        const teamExists = teams.some(team => team.name.toLowerCase() === teamName.toLowerCase());
+        if (teamExists) {
+            setFeedbackMessage('O time já existe.');
+            return;
+        }
     
         try {
             const response = await axios.post('http://localhost:3001/api/team', { name: teamName });

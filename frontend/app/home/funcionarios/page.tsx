@@ -1,9 +1,9 @@
 "use client";
-import './funcionarios.css';
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import Cookie from "js-cookie";
+import './funcionarios.css';
 
 interface TeamRole {
   team: string;
@@ -30,6 +30,7 @@ export default function Page() {
   const [error, setError] = useState<string | null>(null);
   const [loggedInUserName, setLoggedInUserName] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
 
   useEffect(() => {
     const token = Cookie.get("authToken") || Cookie.get("userToken");
@@ -43,7 +44,6 @@ export default function Page() {
       }
     }
 
-    // Busca os usuários do backend
     const fetchUsers = async () => {
       try {
         const response = await axios.get('http://localhost:3001/api/users');
@@ -64,26 +64,36 @@ export default function Page() {
     fetchUsers();
   }, []);
 
+  const handleDeleteUser = async (id: number) => {
+    try {
+      await axios.delete(`http://localhost:3001/api/users/${id}`);
+      setUsers(prevUsers => prevUsers.filter(user => user.id !== id));
+      setConfirmDelete(null); // Reset the confirmation state
+    } catch (error) {
+      console.error("Erro ao excluir usuário:", error);
+      setError('Erro ao excluir usuário');
+    }
+  };
+
   if (error) {
     return <div>Erro ao carregar dados: {error}</div>;
   }
 
-  // Função para filtrar usuários com base no termo de pesquisa
   const filteredUsers = users.filter(user =>
     user.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
     <div className="container mt-4">
-      <h1 className=" text-center font-bold mb-4">Lista de Funcionários</h1>
-      
+      <h1 className="text-center font-bold mb-4">Lista de Funcionários</h1>
+
       <div className="mb-3">
         <input
           type="text"
           className="form-control"
           placeholder="Pesquisar funcionários..."
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)} 
+          onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
 
@@ -98,12 +108,39 @@ export default function Page() {
                 <p className="card-text"><strong>Função:</strong> {user.isAdmin ? "Admin" : "Usuário"}</p>
                 <p className="card-text"><strong>Times:</strong></p>
                 <ul>
-                  {user.teamRoles.map((teamRole, index) => (
-                    <li key={index}>
-                      {teamRole.team} ({teamRole.role})
-                    </li>
-                  ))}
+                  {user.teamRoles.length > 0 ? (
+                    user.teamRoles.map((teamRole, index) => (
+                      <li key={index}>
+                        {teamRole.team} ({teamRole.role})
+                      </li>
+                    ))
+                  ) : (
+                    <li>Não participa de nenhum time no momento</li>
+                  )}
                 </ul>
+                <button
+                  className="btn btn-danger"
+                  onClick={() => setConfirmDelete(user.id)}
+                >
+                  Excluir usuário
+                </button>
+                {confirmDelete === user.id && (
+                  <div className="alert alert-warning mt-2">
+                    Tem certeza?
+                    <button
+                      className="btn btn-primary ms-2"
+                      onClick={() => handleDeleteUser(user.id)}
+                    >
+                      Sim
+                    </button>
+                    <button
+                      className="btn btn-secondary ms-2"
+                      onClick={() => setConfirmDelete(null)}
+                    >
+                      Não
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           ))}

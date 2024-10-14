@@ -72,10 +72,13 @@ export default function Page() {
               <strong>Email:</strong> {userData.email}
             </p>
             <p className="text-lg">
-              <strong>Telefone:</strong> +5512999999999 {/* No futuro é so coletar o numero no login e colocar aqui nao tem numero no banco de dados ainda */}
+              <strong>Telefone:</strong> +5512999999999 {/* No futuro é so coletar o numero no login e colocar aqui nao tem numero no banco de dados ainda e nao sei se vai ter */}
             </p>
             <p className="text-lg">
-              <strong>Times e funções:</strong> Operação {/* Em andamento essa funçao */}
+              <strong>Função:</strong> {userData.isAdmin ? "Admin" : "Membro"}
+            </p>
+            <p className="text-lg">
+              <strong>Times:</strong>EM ANDAMENTO {/* Em andamento essa funçao */}
             </p>
           </div>
         </div>

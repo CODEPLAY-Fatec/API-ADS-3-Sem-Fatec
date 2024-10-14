@@ -1,33 +1,34 @@
 "use client";
-
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import Cookie from "js-cookie"; 
-import { jwtDecode } from "jwt-decode"; 
+import Cookie from "js-cookie";
+import {jwtDecode} from "jwt-decode";
 import "./Navbar.css";
 
 const Navbar: React.FC = () => {
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
+  const [isTeamLeader, setIsTeamLeader] = useState<boolean>(false);
 
+
+  //defindo se é admin ou nao e se é lider ou nao para restringir os links
   useEffect(() => {
-    const token = Cookie.get("authToken");
+    const token = Cookie.get("authToken") || Cookie.get("userToken");
     if (token) {
       try {
-        const decodedToken: { isAdmin: boolean } = jwtDecode(token);
-        setIsAdmin(decodedToken.isAdmin); 
+        const decodedToken = jwtDecode<{ isAdmin: boolean; isTeamLeader: boolean }>(token);
+        setIsAdmin(decodedToken.isAdmin || false);
+        setIsTeamLeader(decodedToken.isTeamLeader || false);
       } catch (error) {
         console.error("Erro ao decodificar o token:", error);
       }
     }
   }, []);
 
+  //funçao para sair ai ja remove o token
   const handleLogout = () => {
-    // Remove os tokens dos cookies
     Cookie.remove("authToken");
     Cookie.remove("userToken");
-
-
-    window.location.href = "/"; 
+    window.location.href = "/";
   };
 
   return (
@@ -52,8 +53,7 @@ const Navbar: React.FC = () => {
             </Link>
           </li>
 
-          {/* Exibe Dashboards apenas se for admin */}
-          {isAdmin && (
+          {(isAdmin || isTeamLeader) && (
             <li className="nav-item">
               <Link href="/home/dashboards" className="nav-link text-white">
                 <div className="link-content">
@@ -63,8 +63,7 @@ const Navbar: React.FC = () => {
             </li>
           )}
 
-          {/* Exibe Lista de Funcionários apenas se for admin */}
-          {isAdmin && (
+          {(isAdmin || isTeamLeader) && (
             <li className="nav-item">
               <Link href="/home/funcionarios" className="nav-link text-white">
                 <div className="link-content">
@@ -82,7 +81,6 @@ const Navbar: React.FC = () => {
             </Link>
           </li>
 
-          {/* Exibe opções de admin */}
           {isAdmin && (
             <>
               <li className="nav-item">

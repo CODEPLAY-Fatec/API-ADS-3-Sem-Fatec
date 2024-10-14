@@ -6,4 +6,5 @@ export interface User {
   isAdmin: boolean;
   leaders?: string[]; // Relacionamento opcional
   subordinates?: string[]; // Relacionamento opcional
+  isTeamLeader?: boolean;  //funçao opcional 
 }

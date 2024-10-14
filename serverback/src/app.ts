@@ -24,4 +24,5 @@ app.listen(PORT, () => {
 //INSERT INTO users (name, email, password, isAdmin) VALUES ('daniel', 'daniel@gmail.com','$2b$10$t2USd40dO76L.tsQSOo3WO75faZlQFC.CGDJISS.LJgufLd7ru/Hm', 1 ) 
 //q cria um usuario como admin 
 // a senha é 123456
+//antes de iniciar a aplicaçao verificar os dois .env 1 aqui na pasta raiz , e outro no /services
 

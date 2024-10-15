@@ -1,8 +1,8 @@
 "use client";
-
 import React, { useEffect, useState } from "react";
-import { jwtDecode } from "jwt-decode"; 
+import { jwtDecode } from "jwt-decode";
 import Cookie from "js-cookie";
+import axios from "axios";
 
 interface DecodedToken {
   id: string;
@@ -11,17 +11,45 @@ interface DecodedToken {
   isAdmin: boolean;
 }
 
+interface TeamRole {
+  team: string;
+  role: string;
+}
+
+interface UserData {
+  id: string;
+  name: string;
+  email: string;
+  isAdmin: boolean;
+  teamRoles: TeamRole[];
+}
+
 export default function Page() {
   const [userData, setUserData] = useState<DecodedToken | null>(null);
+  const [userTeams, setUserTeams] = useState<TeamRole[]>([]);
 
   useEffect(() => {
     const token = Cookie.get("authToken") || Cookie.get("userToken");
 
     if (token) {
       try {
-        
         const decoded = jwtDecode<DecodedToken>(token);
         setUserData(decoded);
+
+        // Fazendo a requisição para pegar os times e funções do usuário
+        axios.get("http://localhost:3001/api/users")
+          .then(response => {
+            const allUsers: UserData[] = response.data;
+
+            // Filtrando o usuário logado com base no id
+            const currentUser = allUsers.find(user => user.id === decoded.id);
+            if (currentUser) {
+              setUserTeams(currentUser.teamRoles);
+            }
+          })
+          .catch(error => {
+            console.error("Erro ao buscar os times do usuário:", error);
+          });
       } catch (error) {
         console.error("Erro ao decodificar o token:", error);
       }
@@ -78,7 +106,14 @@ export default function Page() {
               <strong>Função:</strong> {userData.isAdmin ? "Admin" : "Membro"}
             </p>
             <p className="text-lg">
-              <strong>Times:</strong>EM ANDAMENTO {/* Em andamento essa funçao */}
+              <strong>Times:</strong> 
+              {userTeams.length > 0 ? (
+                userTeams.map((teamRole, index) => (
+                  <span key={index}>{teamRole.team} ({teamRole.role}){index < userTeams.length - 1 ? ", " : ""}</span>
+                ))
+              ) : (
+                "Nenhum time associado"
+              )}
             </p>
           </div>
         </div>

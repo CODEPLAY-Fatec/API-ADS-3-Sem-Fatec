@@ -63,7 +63,7 @@ const Navbar: React.FC = () => {
             </li>
           )}
 
-          {(isAdmin) && (
+          {isAdmin && (
             <li className="nav-item">
               <Link href="/home/funcionarios" className="nav-link text-white">
                 <div className="link-content">
@@ -80,6 +80,16 @@ const Navbar: React.FC = () => {
               </div>
             </Link>
           </li>
+
+          {isTeamLeader &&(
+          <li className="nav-item">
+            <Link href="/home/funcionarioslider" className="nav-link text-white">
+              <div className="link-content">
+                <i className="bi bi-journal-text me-2"></i> Membros da minha equipe
+              </div>
+            </Link>
+          </li>
+          )}
 
           {isAdmin && (
             <>

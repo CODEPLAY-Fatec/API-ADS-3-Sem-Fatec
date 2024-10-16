@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { jwtDecode } from "jwt-decode";
+import {jwtDecode} from "jwt-decode";
 import Cookie from "js-cookie";
 import './funcionarios.css';
 
@@ -68,7 +68,7 @@ export default function Page() {
     try {
       await axios.delete(`http://localhost:3001/api/users/${id}`);
       setUsers(prevUsers => prevUsers.filter(user => user.id !== id));
-      setConfirmDelete(null); // Reset the confirmation state
+      setConfirmDelete(null); 
     } catch (error) {
       console.error("Erro ao excluir usuário:", error);
       setError('Erro ao excluir usuário');
@@ -97,54 +97,61 @@ export default function Page() {
         />
       </div>
 
-      <div className="employee-list">
-        {filteredUsers
-          .filter(user => user.name !== loggedInUserName)
-          .map(user => (
-            <div key={user.id} className="employee-card card mb-3">
-              <div className="card-body">
-                <h3 className="card-title">{user.name}</h3>
-                <p className="card-text"><strong>Email:</strong> {user.email}</p>
-                <p className="card-text"><strong>Função:</strong> {user.isAdmin ? "Admin" : "Usuário"}</p>
-                <p className="card-text"><strong>Times:</strong></p>
-                <ul>
-                  {user.teamRoles.length > 0 ? (
-                    user.teamRoles.map((teamRole, index) => (
-                      <li key={index}>
-                        {teamRole.team} ({teamRole.role})
-                      </li>
-                    ))
-                  ) : (
-                    <li>Não participa de nenhum time no momento</li>
+      {filteredUsers.length <= 1 ? (
+        <div style={{ padding: "50px", border: "1px solid #ddd", borderRadius: "10px", textAlign: "center", backgroundColor: "#f9f9f9" }}>
+          <p style={{ fontSize: "20px", fontWeight: "bold" }}>Sem funcionários cadastrados no momento</p>
+          <p style={{ fontSize: "16px" }}>Os funcionários cadastrados aparecerão aqui.</p>
+        </div>
+      ) : (
+        <div className="employee-list">
+          {filteredUsers
+            .filter(user => user.name !== loggedInUserName)
+            .map(user => (
+              <div key={user.id} className="employee-card card mb-3">
+                <div className="card-body">
+                  <h3 className="card-title">{user.name}</h3>
+                  <p className="card-text"><strong>Email:</strong> {user.email}</p>
+                  <p className="card-text"><strong>Função:</strong> {user.isAdmin ? "Admin" : "Usuário"}</p>
+                  <p className="card-text"><strong>Times:</strong></p>
+                  <ul>
+                    {user.teamRoles.length > 0 ? (
+                      user.teamRoles.map((teamRole, index) => (
+                        <li key={index}>
+                          {teamRole.team} ({teamRole.role})
+                        </li>
+                      ))
+                    ) : (
+                      <li>Não participa de nenhum time no momento</li>
+                    )}
+                  </ul>
+                  <button
+                    className="btn btn-danger"
+                    onClick={() => setConfirmDelete(user.id)}
+                  >
+                    Excluir usuário
+                  </button>
+                  {confirmDelete === user.id && (
+                    <div className="alert alert-warning mt-2">
+                      Tem certeza?
+                      <button
+                        className="btn btn-primary ms-2"
+                        onClick={() => handleDeleteUser(user.id)}
+                      >
+                        Sim
+                      </button>
+                      <button
+                        className="btn btn-secondary ms-2"
+                        onClick={() => setConfirmDelete(null)}
+                      >
+                        Não
+                      </button>
+                    </div>
                   )}
-                </ul>
-                <button
-                  className="btn btn-danger"
-                  onClick={() => setConfirmDelete(user.id)}
-                >
-                  Excluir usuário
-                </button>
-                {confirmDelete === user.id && (
-                  <div className="alert alert-warning mt-2">
-                    Tem certeza?
-                    <button
-                      className="btn btn-primary ms-2"
-                      onClick={() => handleDeleteUser(user.id)}
-                    >
-                      Sim
-                    </button>
-                    <button
-                      className="btn btn-secondary ms-2"
-                      onClick={() => setConfirmDelete(null)}
-                    >
-                      Não
-                    </button>
-                  </div>
-                )}
+                </div>
               </div>
-            </div>
-          ))}
-      </div>
+            ))}
+        </div>
+      )}
     </div>
   );
 }

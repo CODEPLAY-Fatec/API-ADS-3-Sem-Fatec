@@ -36,12 +36,10 @@ export default function Page() {
         const decoded = jwtDecode<DecodedToken>(token);
         setUserData(decoded);
 
-        // Fazendo a requisição para pegar os times e funções do usuário
         axios.get("http://localhost:3001/api/users")
           .then(response => {
             const allUsers: UserData[] = response.data;
 
-            // Filtrando o usuário logado com base no id
             const currentUser = allUsers.find(user => user.id === decoded.id);
             if (currentUser) {
               setUserTeams(currentUser.teamRoles);
@@ -103,7 +101,7 @@ export default function Page() {
               <strong>Telefone:</strong> +5512999999999 {/* No futuro é so coletar o numero no login e colocar aqui nao tem numero no banco de dados ainda e nao sei se vai ter */}
             </p>
             <p className="text-lg">
-              <strong>Função:</strong> {userData.isAdmin ? "Admin" : "Membro"}
+              <strong>Nivel de acesso:</strong> {userData.isAdmin ? "Admin" : "Membro"}
             </p>
             <p className="text-lg">
               <strong>Times:</strong> 

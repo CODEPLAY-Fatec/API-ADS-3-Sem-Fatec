@@ -1,4 +1,4 @@
-// controllers/userController.ts
+
 import { Request, Response } from 'express';
 import { getAllUsersWithDetails, createUser,updateUser,deleteUser, getLeaders } from '../services/userService'; 
 
@@ -22,10 +22,13 @@ export const createUserController = async (req: Request, res: Response) => {
     const newUser = await createUser(name, email, password, isAdmin);
     res.status(201).json(newUser);
   } catch (error: any) {
-    res.status(500).json({ error: error.message });
+    if (error.message === 'Este email já está em uso.') {
+      res.status(400).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: 'Erro ao criar usuário.' });
+    }
   }
 };
-
 export const updateUserController = async (req: Request, res: Response) => {
   const { id } = req.params;
   const user = req.body;

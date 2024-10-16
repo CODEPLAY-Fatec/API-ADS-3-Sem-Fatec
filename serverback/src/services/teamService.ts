@@ -60,9 +60,20 @@ export const removeTeam = async (teamId: number): Promise<void> => {
 };
 
 export const removeUserFromTeam = async (teamId: number, userId: number): Promise<void> => {
-    // Tenta remover da tabela de líderes e membros
     await db.query('DELETE FROM team_leader WHERE team_id = ? AND user_id = ?', [teamId, userId]);
     await db.query('DELETE FROM team_member WHERE team_id = ? AND user_id = ?', [teamId, userId]);
 };
 
+// Função para pegar times do usuário logado
+export const getTeamsByUserId = async (userId: number) => {
+    const query = `
+      SELECT DISTINCT t.id, t.name
+      FROM team t
+      LEFT JOIN team_leader tl ON t.id = tl.team_id
+      LEFT JOIN team_member tm ON t.id = tm.team_id
+      WHERE tl.user_id = ? OR tm.user_id = ?`;
+    
+    const [rows] = await db.query(query, [userId, userId]);
+    return rows;
+};
 

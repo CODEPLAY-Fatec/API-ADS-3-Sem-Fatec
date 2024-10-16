@@ -48,13 +48,23 @@ export const getAllUsersWithDetails = async (): Promise<User[]> => {
 
 
 
+
+
+
 // Cria um novo usuário
 export const createUser = async (name: string, email: string, password: string, isAdmin: boolean) => {
+  const checkEmailQuery = 'SELECT * FROM users WHERE email = ?';
+  const [existingUser]: any = await db.query(checkEmailQuery, [email]);
+
+  if (existingUser.length > 0) {
+    throw new Error('Este email já está em uso.');
+  }
+
   const saltRounds = 10;
   const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-  const query = 'INSERT INTO users (name, email, password, isAdmin) VALUES (?, ?, ?, ?)';
-  await db.query(query, [name, email, hashedPassword, isAdmin]);
+  const insertQuery = 'INSERT INTO users (name, email, password, isAdmin) VALUES (?, ?, ?, ?)';
+  await db.query(insertQuery, [name, email, hashedPassword, isAdmin]);
 
   return { name, email, isAdmin };
 };

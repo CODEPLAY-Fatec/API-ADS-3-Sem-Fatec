@@ -4,7 +4,6 @@ import axios from 'axios';
 import { Collapse } from 'react-bootstrap';
 import './teamregistration.css';
 
-
 interface Team {
     id: number;
     name: string;
@@ -192,92 +191,99 @@ const TeamRegistration = () => {
             </div>
 
             <h2>Times Cadastrados</h2>
-            <div className="row">
-                {teams.map((team) => (
-                    <div key={`team-${team.id}`} className="col-md-4 mb-4">
-                        <div className="card">
-                            <div className="card-body">
-                                <div className="d-flex justify-content-between align-items-center">
-                                    <h5
-                                        className="card-title team-title"
-                                        onClick={() => setOpen({ ...open, [team.id]: !open[team.id] })}
-                                    >
-                                        {team.name}
-                                    </h5>
-                                    <button className="btn btn-danger" onClick={() => handleRemoveTeam(team.id)}>
-                                        Remover Time
-                                    </button>
-                                </div>
-                                <Collapse in={open[team.id]}>
-                                    <div>
-                                        <h6 className="card-subtitle mb-2 text-muted">Líderes:</h6>
-                                        <ul className="list-group mb-3">
-                                            {teamLeaders[team.id]?.map(leader => (
-                                                <li key={`leader-${team.id}-${leader.id}`} className="list-group-item d-flex justify-content-between align-items-center">
-                                                    {leader.name}
-                                                    <button
-                                                        className="btn btn-sm btn-danger"
-                                                        onClick={() => handleRemoveUser(team.id, leader.id, 'leader')}
-                                                    >
-                                                        Remover
-                                                    </button>
-                                                </li>
-                                            ))}
-                                        </ul>
-
-                                        <div className="mb-3">
-                                            <select
-                                                className="form-select"
-                                                value={leaderIds[team.id] || ''}
-                                                onChange={(e) => setLeaderIds({ ...leaderIds, [team.id]: e.target.value })}
-                                            >
-                                                <option value="">Selecionar Líder</option>
-                                                {getAvailableUsersForLeaders(team.id).map(user => (
-                                                    <option key={`available-leader-${team.id}-${user.id}`} value={user.id}>
-                                                        {user.name}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                            <button className="btn btn-success mt-2" onClick={() => handleAddLeader(team.id)}>Adicionar Líder</button>
-                                        </div>
-
-                                        <h6 className="card-subtitle mb-2 text-muted">Membros:</h6>
-                                        <ul className="list-group">
-                                            {teamMembers[team.id]?.map(member => (
-                                                <li key={`member-${team.id}-${member.id}`} className="list-group-item d-flex justify-content-between align-items-center">
-                                                    {member.name}
-                                                    <button
-                                                        className="btn btn-sm btn-danger"
-                                                        onClick={() => handleRemoveUser(team.id, member.id, 'member')}
-                                                    >
-                                                        Remover
-                                                    </button>
-                                                </li>
-                                            ))}
-                                        </ul>
-
-                                        <div className="mb-3">
-                                            <select
-                                                className="form-select"
-                                                value={memberIds[team.id] || ''}
-                                                onChange={(e) => setMemberIds({ ...memberIds, [team.id]: e.target.value })}
-                                            >
-                                                <option value="">Selecionar Membro</option>
-                                                {getAvailableUsersForMembers(team.id).map(user => (
-                                                    <option key={`available-member-${team.id}-${user.id}`} value={user.id}>
-                                                        {user.name}
-                                                    </option>
-                                                ))}
-                                            </select>
-                                            <button className="btn btn-success mt-2" onClick={() => handleAddMember(team.id)}>Adicionar Membro</button>
-                                        </div>
+            {teams.length === 0 ? (
+                <div style={{ padding: "50px", border: "1px solid #ddd", borderRadius: "10px", textAlign: "center", backgroundColor: "#f9f9f9" }}>
+                    <p style={{ fontSize: "20px", fontWeight: "bold" }}>Sem times cadastrados até o momento</p>
+                    <p style={{ fontSize: "16px" }}>Os times cadastrados aparecerão aqui.</p>
+                </div>
+            ) : (
+                <div className="row">
+                    {teams.map((team) => (
+                        <div key={`team-${team.id}`} className="col-md-4 mb-4">
+                            <div className="card">
+                                <div className="card-body">
+                                    <div className="d-flex justify-content-between align-items-center">
+                                        <h5
+                                            className="card-title team-title"
+                                            onClick={() => setOpen({ ...open, [team.id]: !open[team.id] })}
+                                        >
+                                            {team.name}
+                                        </h5>
+                                        <button className="btn btn-danger" onClick={() => handleRemoveTeam(team.id)}>
+                                            Remover Time
+                                        </button>
                                     </div>
-                                </Collapse>
+                                    <Collapse in={open[team.id]}>
+                                        <div>
+                                            <h6 className="card-subtitle mb-2 text-muted">Líderes:</h6>
+                                            <ul className="list-group mb-3">
+                                                {teamLeaders[team.id]?.map(leader => (
+                                                    <li key={`leader-${team.id}-${leader.id}`} className="list-group-item d-flex justify-content-between align-items-center">
+                                                        {leader.name}
+                                                        <button
+                                                            className="btn btn-sm btn-danger"
+                                                            onClick={() => handleRemoveUser(team.id, leader.id, 'leader')}
+                                                        >
+                                                            Remover
+                                                        </button>
+                                                    </li>
+                                                ))}
+                                            </ul>
+
+                                            <div className="mb-3">
+                                                <select
+                                                    className="form-select"
+                                                    value={leaderIds[team.id] || ''}
+                                                    onChange={(e) => setLeaderIds({ ...leaderIds, [team.id]: e.target.value })}
+                                                >
+                                                    <option value="">Selecionar Líder</option>
+                                                    {getAvailableUsersForLeaders(team.id).map(user => (
+                                                        <option key={`available-leader-${team.id}-${user.id}`} value={user.id}>
+                                                            {user.name}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                                <button className="btn btn-success mt-2" onClick={() => handleAddLeader(team.id)}>Adicionar Líder</button>
+                                            </div>
+
+                                            <h6 className="card-subtitle mb-2 text-muted">Membros:</h6>
+                                            <ul className="list-group">
+                                                {teamMembers[team.id]?.map(member => (
+                                                    <li key={`member-${team.id}-${member.id}`} className="list-group-item d-flex justify-content-between align-items-center">
+                                                        {member.name}
+                                                        <button
+                                                            className="btn btn-sm btn-danger"
+                                                            onClick={() => handleRemoveUser(team.id, member.id, 'member')}
+                                                        >
+                                                            Remover
+                                                        </button>
+                                                    </li>
+                                                ))}
+                                            </ul>
+
+                                            <div className="mb-3">
+                                                <select
+                                                    className="form-select"
+                                                    value={memberIds[team.id] || ''}
+                                                    onChange={(e) => setMemberIds({ ...memberIds, [team.id]: e.target.value })}
+                                                >
+                                                    <option value="">Selecionar Membro</option>
+                                                    {getAvailableUsersForMembers(team.id).map(user => (
+                                                        <option key={`available-member-${team.id}-${user.id}`} value={user.id}>
+                                                            {user.name}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                                <button className="btn btn-success mt-2" onClick={() => handleAddMember(team.id)}>Adicionar Membro</button>
+                                            </div>
+                                        </div>
+                                    </Collapse>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                ))}
-            </div>
+                    ))}
+                </div>
+            )}
         </div>
     );
 };

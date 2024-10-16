@@ -1,0 +1,10 @@
+.team-title {
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.team-title:hover {
+    color: #007bff; 
+    background-color: rgba(173, 216, 230, 0.7);
+    border-radius: 5px; 
+}

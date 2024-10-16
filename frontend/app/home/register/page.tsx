@@ -22,12 +22,22 @@ const Page: React.FC = () => {
             });
 
             if (!response.ok) {
-                throw new Error('Erro ao criar usuário');
+                const errorData = await response.json();
+                
+                if (response.status === 400 && errorData.error) {
+                    throw new Error(errorData.error); 
+                } else {
+                    throw new Error('Erro ao criar usuário'); 
+                }
             }
 
             const newUser = await response.json();
             setSuccess(`Usuário ${newUser.name} criado com sucesso!`);
             setError('');
+            setEmail('')
+            setIsAdmin(false)
+            setName('')
+            setPassword('')
         } catch (error: unknown) {
             if (error instanceof Error) {
                 setError(error.message);
@@ -50,6 +60,7 @@ const Page: React.FC = () => {
                         type="text" 
                         id="name" 
                         className="form-control" 
+                        placeholder="Insira seu nome aqui"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         required
@@ -64,6 +75,7 @@ const Page: React.FC = () => {
                         type="email" 
                         id="email" 
                         className="form-control" 
+                        placeholder="Insira seu email aqui, Ex:seuemail@gmail.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         required
@@ -77,6 +89,7 @@ const Page: React.FC = () => {
                     <input 
                         type="password" 
                         id="password" 
+                        placeholder="Insira sua senha aqui"
                         className="form-control" 
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
@@ -109,5 +122,3 @@ const Page: React.FC = () => {
 };
 
 export default Page;
-
-

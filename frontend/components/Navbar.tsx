@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import Cookie from "js-cookie";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import "./Navbar.css";
 
 const Navbar: React.FC = () => {
@@ -63,7 +63,7 @@ const Navbar: React.FC = () => {
             </li>
           )}
 
-          {(isAdmin || isTeamLeader) && (
+          {(isAdmin) && (
             <li className="nav-item">
               <Link href="/home/funcionarios" className="nav-link text-white">
                 <div className="link-content">
@@ -106,6 +106,14 @@ const Navbar: React.FC = () => {
               </li>
             </>
           )}
+
+          <li className="nav-item">
+            <Link href="/home/Myteams" className="nav-link text-white">
+              <div className="link-content">
+                <i className="bi bi-journal-text me-2"></i> Meus Times
+              </div>
+            </Link>
+          </li>
 
           <li className="nav-item">
             <Link href="/home/changepasswordin" className="nav-link text-white">

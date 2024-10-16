@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { addTeamController, assignLeaderController, assignMemberController,getTeamsController,getUsersController,getLeadersController,getMembersController,removeTeamController,removeUserFromTeamController} from  '../controllers/teamController';
+import { addTeamController, assignLeaderController, assignMemberController,getTeamsController,getUsersController,getLeadersController,getMembersController,removeTeamController,removeUserFromTeamController, getUserTeamsController} from  '../controllers/teamController';
 
 const router = Router();
 
@@ -12,7 +12,7 @@ router.get('/team/:teamId/leaders', getLeadersController); // Rota para buscar l
 router.get('/team/:teamId/members', getMembersController); // Rota para pegar os membros e mostrar la no dropwown
 router.delete('/team/:teamId', removeTeamController); // Rota para remover um time
 router.delete('/team/:teamId/user/:userId', removeUserFromTeamController); // Rota para remover um usuário do time
-
+router.get('/user/:userId/teams', getUserTeamsController); 
 
 
 export default router;

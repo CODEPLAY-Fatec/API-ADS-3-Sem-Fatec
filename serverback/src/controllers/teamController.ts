@@ -1,5 +1,6 @@
 const { addTeam, assignLeader, assignMember,getAllTeams,getAllUsers,getLeadersByTeamId,getMembersByTeamId,removeTeam,removeUserFromTeam } = require('../services/teamService');
 import { Request, Response } from 'express';
+import { getTeamsByUserId } from '../services/teamService';
 
 
 // Controlador para adicionar um time
@@ -94,5 +95,20 @@ export const removeUserFromTeamController = async (req: Request, res: Response) 
       res.status(200).json({ message: 'Usuário removido do time com sucesso!' });
   } catch (error: any) {
       res.status(500).json({ error: error.message });
+  }
+};
+
+export const getUserTeamsController = async (req: Request, res: Response) => {
+  try {
+    const { userId} = req.params;
+
+    if (!userId) {
+      return res.status(400).json({ error: 'userId não fornecido' });
+    }
+    const teams = await getTeamsByUserId(parseInt(userId));
+
+    res.status(200).json(teams);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
   }
 };

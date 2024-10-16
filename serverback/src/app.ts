@@ -5,6 +5,7 @@ import userRoutes from './routes/userRoutes'; // Rotas de usuários
 import authRoutes from './routes/authRoutes'; //rotas para login
 import teamRoutes from './routes/teamRoutes'; //rotas para os times
 import surveyRoutes from './routes/surveyRoutes'; //rotas para as pesquisas
+import categoryRoutes from './routes/categoryRoutes';
 const app = express();
 const PORT = process.env.PORT || 3001;
 
@@ -16,6 +17,7 @@ app.use('/api',teamRoutes) //rota para os times
 app.use('/api', userRoutes); // Rotas de usuários
 app.use('/api', authRoutes); // Rotas para login
 app.use('/api', surveyRoutes); // Rotas para pesquisas
+app.use('/api', categoryRoutes);
 
 app.listen(PORT, () => {
   console.log(`Servidor rodando na porta ${PORT}`);

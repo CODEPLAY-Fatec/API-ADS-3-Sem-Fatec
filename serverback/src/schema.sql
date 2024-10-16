@@ -7,7 +7,6 @@ CREATE TABLE `users` (
   `name` VARCHAR(255) NOT NULL,
   `email` VARCHAR(255) NOT NULL,
   `isAdmin` BOOLEAN DEFAULT false,
-  `isLeader` BOOLEAN DEFAULT false,
   `password` VARCHAR(255) NOT NULL
 );
 
@@ -30,7 +29,8 @@ CREATE TABLE `survey` (
   `id` INT PRIMARY KEY AUTO_INCREMENT,
   `team_id` INT NOT NULL,
   `data` JSON NOT NULL COMMENT 'Title: string,
-Description: string
+Description: string,
+Category: string
 ',
   `questions` JSON NOT NULL COMMENT 'Question[]: {
   Type: ''Multiple'' | ''Single'' | ''Text'', 
@@ -45,6 +45,11 @@ CREATE TABLE `survey_answer` (
   `user_id` INT NOT NULL,
   `survey_id` INT NOT NULL,
   `data` JSON NOT NULL
+);
+
+CREATE TABLE `answer_category` (
+  `id` INT PRIMARY KEY AUTO_INCREMENT,
+  `name` VARCHAR(255) NOT NULL
 );
 
 ALTER TABLE `team_leader` ADD FOREIGN KEY (`team_id`) REFERENCES `team` (`id`) ON DELETE CASCADE;

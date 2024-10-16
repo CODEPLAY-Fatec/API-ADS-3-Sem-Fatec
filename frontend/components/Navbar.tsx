@@ -1,16 +1,16 @@
 "use client";
+
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import Cookie from "js-cookie";
-import { jwtDecode } from "jwt-decode";
+import {jwtDecode} from "jwt-decode";
 import "./Navbar.css";
 
 const Navbar: React.FC = () => {
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [isTeamLeader, setIsTeamLeader] = useState<boolean>(false);
 
-
-  //defindo se é admin ou nao e se é lider ou nao para restringir os links
+  // Definindo se é admin ou líder para restringir links
   useEffect(() => {
     const token = Cookie.get("authToken") || Cookie.get("userToken");
     if (token) {
@@ -24,7 +24,7 @@ const Navbar: React.FC = () => {
     }
   }, []);
 
-  //funçao para sair ai ja remove o token
+  // Função para logout
   const handleLogout = () => {
     Cookie.remove("authToken");
     Cookie.remove("userToken");
@@ -32,7 +32,10 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <div className="d-flex flex-column vh-100 text-white position-fixed" style={{ width: "250px", backgroundColor: "#152259" }}>
+    <div 
+      className="d-flex flex-column vh-100 text-white position-fixed overflow-auto" 
+      style={{ maxHeight: "100vh", width: "250px", backgroundColor: "#152259" }}>
+      
       <div className="text-center my-3">
         <img src="/images/logo.png" alt="Logo" className="img-fluid mx-auto d-block" style={{ maxHeight: "100px" }} />
         <h4 className="mt-2 mb-0 text-center">
@@ -43,7 +46,7 @@ const Navbar: React.FC = () => {
 
       <hr style={{ border: "1px solid white", width: "100%" }} />
 
-      <nav className="flex-grow-1">
+      <nav className="flex-grow-1 overflow-auto navbar-scroll">
         <ul className="nav flex-column">
           <li className="nav-item">
             <Link href="/home/profile" className="nav-link text-white">
@@ -81,14 +84,14 @@ const Navbar: React.FC = () => {
             </Link>
           </li>
 
-          {isTeamLeader &&(
-          <li className="nav-item">
-            <Link href="/home/funcionarioslider" className="nav-link text-white">
-              <div className="link-content">
-                <i className="bi bi-journal-text me-2"></i> Membros da minha equipe
-              </div>
-            </Link>
-          </li>
+          {isTeamLeader && (
+            <li className="nav-item">
+              <Link href="/home/funcionarioslider" className="nav-link text-white">
+                <div className="link-content">
+                  <i className="bi bi-journal-text me-2"></i> Membros da minha equipe
+                </div>
+              </Link>
+            </li>
           )}
 
           {isAdmin && (

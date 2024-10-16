@@ -18,7 +18,7 @@ const NovaSenha: React.FC = (): JSX.Element => {
 
   return (
     <div style={styles.container}>
-      <div style={styles.formBox}>
+      <div>
         <h2 style={styles.title}>Defina sua nova senha</h2>
         <p style={styles.text}>Digite sua nova senha abaixo.</p>
         <form onSubmit={handleSubmit}>
@@ -62,7 +62,7 @@ const styles = {
     padding: '40px',
     borderRadius: '10px',
     boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-    textAlign: 'center' as 'center',
+    textAlign: 'center',
   },
   title: {
     marginBottom: '15px',

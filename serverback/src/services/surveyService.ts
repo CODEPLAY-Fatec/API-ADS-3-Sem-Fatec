@@ -1,7 +1,9 @@
-import Survey from "../classes/Survey";
+import { Survey } from "../types/Survey";
 import { db } from "../config/database2";
 
 export const createSurvey = async (survey: Survey) => {
+    console.log(survey);
+    
     const query = `INSERT INTO survey (team_id, data, questions) VALUES (?, ?, ?)`;
     const surveyData = JSON.stringify(survey.data);
     const questions = JSON.stringify(survey.questions);

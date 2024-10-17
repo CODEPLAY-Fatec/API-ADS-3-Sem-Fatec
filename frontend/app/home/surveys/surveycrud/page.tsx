@@ -1,152 +1,168 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { useEffect, useState } from "react";
+// import "./survey.css";
 
-export default function Page() {
-    const [inputValue, setInputValue] = useState<string>(""); 
-    const [questions, setQuestions] = useState<string[]>([]); 
+interface Category {
+    id: number;
+    name: string;
+}
 
+interface Question {
+    type: "Multiple" | "Text";
+    title: string;
+    options?: string[]; // Para perguntas de múltipla escolha
+}
+
+const SurveyCreation = () => {
+    const [title, setTitle] = useState("");
+    const [description, setDescription] = useState("");
+    const [categoryId, setCategoryId] = useState("");
+    const [categories, setCategories] = useState<Category[]>([]);
+    const [questions, setQuestions] = useState<Question[]>([]);
+    const [newQuestion, setNewQuestion] = useState<Question>({ type: "Text", title: "", options: [] });
+    const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
+
+    // Buscar as categorias existentes
     useEffect(() => {
-        const storedQuestions = JSON.parse(localStorage.getItem("questions") || "[]");
-        setQuestions(storedQuestions);
+        const fetchCategories = async () => {
+            try {
+                const response = await axios.get("http://localhost:3001/api/category");
+                setCategories(response.data);
+            } catch (error) {
+                console.error("Erro ao buscar categorias:", error);
+            }
+        };
+
+        fetchCategories();
     }, []);
 
-    const handleAddQuestion = () => {
-        if (inputValue) {
-            // Obter perguntas salvas anteriormente
-            const existingQuestions = JSON.parse(localStorage.getItem("questions") || "[]");
-
-            // Adicionar a nova pergunta
-            const updatedQuestions = [...existingQuestions, inputValue];
-
-            // Salvar de volta no localStorage
-            localStorage.setItem("questions", JSON.stringify(updatedQuestions));
-
-            // Atualizar o estado para refletir as novas perguntas
-            setQuestions(updatedQuestions);
-
-            // Limpar o campo de texto após adicionar
-            setInputValue("");
+    const handleCreateCategory = async (categoryName: string) => {
+        try {
+            const response = await axios.post("http://localhost:3001/api/category", { name: categoryName });
+            setCategories((prevCategories) => [...prevCategories, response.data]);
+            setFeedbackMessage("Categoria criada com sucesso!");
+        } catch (error) {
+            console.error("Erro ao criar categoria:", error);
+            setFeedbackMessage("Erro ao criar categoria. Tente novamente.");
         }
     };
 
-    // Função para excluir uma pergunta
-    const handleDeleteQuestion = (index: number) => {
-        const updatedQuestions = questions.filter((_, i) => i !== index);
+    const handleRemoveCategory = async (categoryId: number) => {
+        try {
+            await axios.delete(`http://localhost:3001/api/category/${categoryId}`);
+            setCategories(categories.filter((category) => category.id !== categoryId));
+            setFeedbackMessage("Categoria removida com sucesso!");
+        } catch (error) {
+            console.error("Erro ao remover categoria:", error);
+            setFeedbackMessage("Erro ao remover categoria. Tente novamente.");
+        }
+    };
 
-        localStorage.setItem("questions", JSON.stringify(updatedQuestions));
+    const handleAddQuestion = () => {
+        setQuestions([...questions, newQuestion]);
+        setNewQuestion({ type: "Text", title: "", options: [] });
+    };
 
-        setQuestions(updatedQuestions);
+    const handleCreateSurvey = async () => {
+        if (!title || !description || !categoryId) {
+            setFeedbackMessage("Preencha todos os campos!");
+            return;
+        }
+
+        try {
+            const response = await axios.post("http://localhost:3001/api/survey", {
+                title,
+                description,
+                categoryId,
+                questions,
+            });
+            setFeedbackMessage("Pesquisa criada com sucesso!");
+            setTitle("");
+            setDescription("");
+            setCategoryId("");
+            setQuestions([]);
+        } catch (error) {
+            console.error("Erro ao criar pesquisa:", error);
+            setFeedbackMessage("Erro ao criar pesquisa. Tente novamente.");
+        }
     };
 
     return (
-        <div style={{ display: "flex", flexDirection: "row", height: "100vh" }}>
-            {/* Conteúdo Principal */}
-            <div style={{ width: "80%", padding: "20px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <h2>Avaliação</h2>
-                    <div style={{ display: "flex", alignItems: "center" }}>
-                        {/* Ícone de Notificação */}
-                        <button style={{ background: "none", border: "none", marginRight: "20px" }}>
-                            <img src="/images/sinos.png" alt="Notificações" style={{ width: "24px", height: "24px" }} />
-                        </button>
-                        {/* Botão de Sair */}
-                        <button
-                            onClick={() => alert("Logout")}
-                            style={{
-                                background: "none",
-                                color: "black", 
-                                border: "none",
-                                textDecoration: "underline",
-                                cursor: "pointer",
-                                padding: "0",
-                                fontSize: "16px" 
-                            }}
-                        >
-                            Sair
-                        </button>
-                    </div>
-                </div>
-
-                {/* Botão Adicionar acima da Caixa de Texto */}
-                <div style={{ marginTop: "20px", display: "flex", justifyContent: "flex-end" }}>
-                    <button
-                        onClick={handleAddQuestion} 
-                        style={{ backgroundColor: "#00aaff", color: "white", padding: "10px 20px", border: "none", borderRadius: "5px", marginBottom: "10px" }}
-                    >
-                        Adicionar
-                    </button>
-                </div>
-
-                {/* Caixa de texto Inserir Pergunta */}
-                <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
-                    <input
-                        type="text"
-                        value={inputValue}
-                        onChange={(e) => setInputValue(e.target.value)}
-                        placeholder="Inserir pergunta"
-                        style={{ width: "100%", padding: "10px", borderRadius: "5px", border: "1px solid #ddd", marginRight: "10px" }}
-                    />
-                </div>
-
-                {/* Lista de Perguntas Adicionadas */}
-                <div style={{ marginTop: "20px" }}>
-                    {questions.length > 0 ? (
-                        <ul>
-                            {questions.map((question: string, index: number) => (
-                                <li
-                                    key={index}
-                                    style={{
-                                        display: "flex",
-                                        justifyContent: "space-between",
-                                        alignItems: "center",
-                                        padding: "15px 10px",
-                                        border: "1px solid #ddd",
-                                        borderRadius: "10px",
-                                        backgroundColor: "#f5f5f5",
-                                        marginBottom: "10px",
-                                    }}
-                                >
-                                    {/* Radio button e Pergunta */}
-                                    <div style={{ display: "flex", alignItems: "center" }}>
-                                        <input
-                                            type="radio"
-                                            name={`question-${index}`}
-                                            style={{ marginRight: "10px" }}
-                                        />
-                                        {question}
-                                    </div>
-
-                                    {/* Botão Excluir */}
-                                    <button
-                                        onClick={() => handleDeleteQuestion(index)}
-                                        style={{
-                                            backgroundColor: "darkred",
-                                            color: "white",
-                                            border: "none",
-                                            padding: "5px 10px",  
-                                            fontSize: "12px",     
-                                            borderRadius: "3px",  
-                                            cursor: "pointer",
-                                            height: "30px",      
-                                            width: "60px",        
-                                            display: "flex",
-                                            justifyContent: "center",
-                                            alignItems: "center"
-                                        }}
-                                    >
-                                        Excluir
-                                    </button>
-                                </li>
-                            ))}
-                        </ul>
-                    ) : (
-                        <div style={{ padding: "50px", border: "1px solid #ddd", borderRadius: "10px", textAlign: "center", backgroundColor: "#f9f9f9" }}>
-                            <p style={{ fontSize: "20px", fontWeight: "bold" }}>Nenhuma pergunta até o momento</p>
-                            <p style={{ fontSize: "16px" }}>As perguntas cadastradas aqui irão aparecer na avaliação.</p>
-                        </div>
-                    )}
-                </div>
+        <div className="container mt-4">
+            <h1 className="text-center font-bold mb-4">Criação de Pesquisa</h1>
+            {feedbackMessage && <div className="alert alert-info">{feedbackMessage}</div>}
+            <button className="btn btn-secondary mb-3" onClick={() => (window.location.href = "/home/surveys/surveycategories")}>
+                Gerenciar Categorias
+            </button>
+            <div className="mb-3">
+                <label>Título da Pesquisa</label>
+                <input type="text" className="form-control" value={title} onChange={(e) => setTitle(e.target.value)} />
             </div>
+
+            <div className="mb-3">
+                <label>Descrição</label>
+                <textarea className="form-control" value={description} onChange={(e) => setDescription(e.target.value)} />
+            </div>
+
+            <div className="mb-3">
+                <label>Categoria</label>
+                <select className="form-select" value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
+                    <option value="">Selecione uma categoria</option>
+                    {categories.map((category) => (
+                        <option key={category.id} value={category.id}>
+                            {category.name}
+                        </option>
+                    ))}
+                </select>
+            </div>
+
+            <div className="mb-3">
+                <h4>Adicionar Pergunta</h4>
+                <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Título da pergunta"
+                    value={newQuestion.title}
+                    onChange={(e) => setNewQuestion({ ...newQuestion, title: e.target.value })}
+                />
+
+                <select
+                    className="form-select mt-2"
+                    value={newQuestion.type}
+                    onChange={(e) => setNewQuestion({ ...newQuestion, type: e.target.value as "Multiple" | "Text" })}
+                >
+                    <option value="Text">Pergunta Aberta</option>
+                    <option value="Multiple">Múltipla Escolha</option>
+                </select>
+
+                {newQuestion.type === "Multiple" && (
+                    <div className="mt-2">
+                        <input
+                            type="text"
+                            className="form-control mb-2"
+                            placeholder="Opção 1"
+                            onChange={(e) => setNewQuestion({ ...newQuestion, options: [e.target.value] })}
+                        />
+                        <input
+                            type="text"
+                            className="form-control mb-2"
+                            placeholder="Opção 2"
+                            onChange={(e) => setNewQuestion({ ...newQuestion, options: [...newQuestion.options!, e.target.value] })}
+                        />
+                    </div>
+                )}
+
+                <button className="btn btn-success mt-2" onClick={handleAddQuestion}>
+                    Adicionar Pergunta
+                </button>
+            </div>
+
+            <button className="btn btn-primary" onClick={handleCreateSurvey}>
+                Criar Pesquisa
+            </button>
         </div>
     );
-}
+};
+
+export default SurveyCreation;

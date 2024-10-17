@@ -1,0 +1,20 @@
+/* Apenas ajustes mínimos para a página de recuperação */
+.container {
+    text-align: center;
+  }
+  
+  .card {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+  }
+  
+  .btn-primary {
+    background-color: #357edd;
+    border-color: #357edd;
+  }
+  
+  .btn-primary:hover {
+    background-color: #2868cc;
+    border-color: #2868cc;
+  }
+  

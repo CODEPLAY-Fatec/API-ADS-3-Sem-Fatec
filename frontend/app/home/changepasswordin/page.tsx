@@ -4,7 +4,7 @@ export default class Page extends React.Component {
     //logica da página
     render() {
         return (
-            <div className="bg-gray-100 h-screen flex justify-center items-center">
+            <div className=" h-screen flex justify-center items-center">
                 <div className="bg-white p-6 rounded-lg shadow-md max-w-md mx-auto my-auto">
                     <h2 className="text-2xl font-bold text-center mb-6">Alterar Senha</h2>
                     <form action="/change_password" method="POST">

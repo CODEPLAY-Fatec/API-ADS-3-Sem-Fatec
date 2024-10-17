@@ -141,7 +141,7 @@ const Navbar: React.FC = () => {
       <div className="text-center mb-3">
         <button onClick={handleLogout} className="btn btn-danger">
           Sair
-        </button>
+        </button>   
       </div>
     </div>
   );

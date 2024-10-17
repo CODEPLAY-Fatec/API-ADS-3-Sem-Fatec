@@ -11,17 +11,12 @@
 
 /* Para esconder a barra de rolagem */
 .navbar-scroll {
-    scrollbar-width: none; /* Para Firefox */
+    scrollbar-width: none; 
   }
   
   .navbar-scroll::-webkit-scrollbar {
     display: none; /* Para Chrome, Safari e Edge */
-  }
-
-  .navbar-container {
-    position: relative;
-    width: 250px; /* Largura da navbar */
-  }
+  } 
   
   .scroll-arrow {
     position: absolute;

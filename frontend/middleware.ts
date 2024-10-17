@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 //aqui sao as rotas q estao privadas, no caso se for criar mais paginas adicionar elas aqui
-const protectedRoutes = ['/home', '/admin/dashboard','/home/funcionarios','/home/profile','/home/register','/home/surveys/availablesurveys','/home/surveys/surveycrud','/home/teamregistration'];
+const protectedRoutes = ['/home', '/admin/dashboard','/home/funcionarios','/home/profile','/home/register','/home/surveys/availablesurveys','/home/surveys/surveycrud','/home/teamregistration','/home/changepasswordin','/home/funcionarioslider'];
 
 export function middleware(request: NextRequest) {
   const authToken = request.cookies.get('authToken')?.value;

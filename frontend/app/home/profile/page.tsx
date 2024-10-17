@@ -59,23 +59,26 @@ export default function Page() {
   }
 
   return (
-    <div className="p-6">
+    <div className="p-4">
       <h1 className="text-4xl font-bold mb-12">Perfil pessoal</h1>
       <div className="flex flex-col lg:flex-row justify-between items-stretch mx-6 space-y-6 lg:space-y-0 lg:space-x-6">
+        {/* Seção com as caixas */}
         <div className="w-full lg:w-1/2 flex flex-col">
           <div className="flex flex-col space-y-6 h-full">
-            <div className="h-1/2 bg-[#F7F7F7] rounded-lg flex items-center justify-center">
+            {/* Caixa grande no topo */}
+            <div className="h-1/2 bg-white rounded-lg flex items-center justify-center shadow-lg border border-gray-300">
               <p className="text-gray-500">
                 O usuário não possui dashboards no momento
               </p>
             </div>
+            {/* Duas caixas lado a lado */}
             <div className="flex space-x-6 h-1/2">
-              <div className="w-1/2 h-full bg-[#F7F7F7] rounded-lg flex items-center justify-center">
+              <div className="w-1/2 h-full bg-white rounded-lg flex items-center justify-center shadow-lg border border-gray-300">
                 <p className="text-gray-500">
                   O usuário não possui dashboards no momento
                 </p>
               </div>
-              <div className="w-1/2 h-full bg-[#F7F7F7] rounded-lg flex items-center justify-center">
+              <div className="w-1/2 h-full bg-white rounded-lg flex items-center justify-center shadow-lg border border-gray-300">
                 <p className="text-gray-500">
                   O usuário não possui dashboards no momento
                 </p>
@@ -84,7 +87,8 @@ export default function Page() {
           </div>
         </div>
 
-        <div className="w-full lg:w-1/2 bg-[#F7F7F7] rounded-lg p-6 flex flex-col">
+        {/* Seção do perfil */}
+        <div className="w-full lg:w-1/2 bg-white rounded-lg p-6 flex flex-col shadow-lg border border-gray-300">
           <div className="flex flex-col items-center mt-8 lg:mt-16">
             <div className="w-32 h-32 lg:w-56 lg:h-56 bg-gray-300 rounded-full mb-4 lg:mb-6"></div>
             <h2 className="font-bold text-xl">{userData.name}</h2> 
@@ -97,11 +101,9 @@ export default function Page() {
             <p className="text-lg">
               <strong>Email:</strong> {userData.email}
             </p>
+
             <p className="text-lg">
-              <strong>Telefone:</strong> +5512999999999 {/* No futuro é so coletar o numero no login e colocar aqui nao tem numero no banco de dados ainda e nao sei se vai ter */}
-            </p>
-            <p className="text-lg">
-              <strong>Nivel de acesso:</strong> {userData.isAdmin ? "Admin" : "Membro"}
+              <strong>Nível de acesso:</strong> {userData.isAdmin ? "Admin" : "Membro"}
             </p>
             <p className="text-lg">
               <strong>Times:</strong> 

@@ -37,11 +37,6 @@ export default function DashboardPage() {
     }
   }, []);
 
-  const handleLogout = () => {
-    Cookie.remove("authToken"); 
-    Cookie.remove("userToken"); 
-    router.push("/");
-  };
 
   const handleEvaluationClick = () => {
     router.push("/home/surveys/surveycrud"); 
@@ -58,7 +53,7 @@ export default function DashboardPage() {
   return (
     <div className="h-screen p-6">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Dashboards</h1>
+        <h1 className="text-4xl font-bold">Dashboards</h1>
 
         <div className="flex items-center">
           {userData.isAdmin && ( // Botão de Avaliação visível apenas para admins
@@ -71,19 +66,6 @@ export default function DashboardPage() {
             </button>
           )}
 
-          <img src="/images/bell logo.png" alt="Sino" className="w-8 h-8 mx-4" /> 
-          
-          <button
-            onClick={handleLogout} // Função de logout no botão
-            className="text-black bg-transparent hover:bg-gray-100"
-            style={{
-              width: "160px",
-              height: "50px",
-              fontSize: "16px",
-            }}
-          >
-            Sair
-          </button>
         </div>
       </div>
 

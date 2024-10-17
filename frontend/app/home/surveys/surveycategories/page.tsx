@@ -15,28 +15,28 @@ const CategoryRegistration = () => {
     const [editingCategoryName, setEditingCategoryName] = useState("");
 
     // Função para buscar as categorias da API
-    useEffect(() => {
-        const fetchCategories = async () => {
-            try {
-                const response = await axios.get("http://localhost:3001/api/category");
-                setCategories(response.data);
-            } catch (error) {
-                console.error("Erro ao buscar categorias:", error);
-            }
-        };
+    const fetchCategories = async () => {
+        try {
+            const response = await axios.get("http://localhost:3001/api/category");
+            setCategories(response.data);
+        } catch (error) {
+            console.error("Erro ao buscar categorias:", error);
+        }
+    };
 
+    // useEffect para buscar as categorias na montagem
+    useEffect(() => {
         fetchCategories();
-    }, []); // Apenas na montagem do componente
+    }, []);
 
     // Função para adicionar nova categoria
     const handleAddCategory = async () => {
         if (categoryName.trim() === "") return;
 
         try {
-            const response = await axios.post("http://localhost:3001/api/category", { name: categoryName });
-            const newCategory = response.data;
-            setCategories((prevCategories) => [...prevCategories, newCategory]); // Atualiza o estado com a nova categoria
+            await axios.post("http://localhost:3001/api/category", { name: categoryName });
             setCategoryName(""); // Limpar o campo de texto
+            fetchCategories(); // Atualiza a lista de categorias
         } catch (error) {
             console.error("Erro ao adicionar categoria:", error);
         }
@@ -46,7 +46,7 @@ const CategoryRegistration = () => {
     const handleDeleteCategory = async (id: number) => {
         try {
             await axios.delete(`http://localhost:3001/api/category/${id}`);
-            setCategories((prevCategories) => prevCategories.filter((category) => category.id !== id));
+            fetchCategories(); // Atualiza a lista de categorias
         } catch (error) {
             console.error("Erro ao deletar categoria:", error);
         }
@@ -57,10 +57,10 @@ const CategoryRegistration = () => {
         if (editingCategoryName.trim() === "") return;
 
         try {
-            const response = await axios.put(`http://localhost:3001/api/category/${id}`, { name: editingCategoryName });
-            setCategories((prevCategories) => prevCategories.map((category) => (category.id === id ? { ...category, name: editingCategoryName } : category)));
+            await axios.put(`http://localhost:3001/api/category/${id}`, { name: editingCategoryName });
             setEditingCategoryId(null);
             setEditingCategoryName("");
+            fetchCategories(); // Atualiza a lista de categorias
         } catch (error) {
             console.error("Erro ao editar categoria:", error);
         }

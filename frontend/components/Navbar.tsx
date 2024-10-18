@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import Cookie from "js-cookie";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import "./Navbar.css";
 
 const Navbar: React.FC = () => {
@@ -32,10 +32,10 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <div 
-      className="d-flex flex-column vh-100 text-white position-fixed overflow-auto" 
+    <div
+      className="d-flex flex-column vh-100 text-white position-fixed overflow-auto"
       style={{ maxHeight: "100vh", width: "250px", backgroundColor: "#152259" }}>
-      
+
       <div className="text-center my-3">
         <img src="/images/logo.png" alt="Logo" className="img-fluid mx-auto d-block" style={{ maxHeight: "100px" }} />
         <h4 className="mt-2 mb-0 text-center">
@@ -75,6 +75,15 @@ const Navbar: React.FC = () => {
               </Link>
             </li>
           )}
+
+
+          <li className="nav-item">
+            <Link href="/home/Myteams" className="nav-link text-white">
+              <div className="link-content">
+                <i className="bi bi-journal-text me-2"></i> Meus Times
+              </div>
+            </Link>
+          </li>
 
           <li className="nav-item">
             <Link href="/home/surveys/availablesurveys" className="nav-link text-white">
@@ -121,17 +130,9 @@ const Navbar: React.FC = () => {
           )}
 
           <li className="nav-item">
-            <Link href="/home/Myteams" className="nav-link text-white">
-              <div className="link-content">
-                <i className="bi bi-journal-text me-2"></i> Meus Times
-              </div>
-            </Link>
-          </li>
-
-          <li className="nav-item">
             <Link href="/home/changepasswordin" className="nav-link text-white">
               <div className="link-content">
-                <i className="bi bi-journal-text me-2"></i> Alterar informações
+                <i className="bi bi-journal-text me-2"></i> Alterar senha
               </div>
             </Link>
           </li>
@@ -141,7 +142,7 @@ const Navbar: React.FC = () => {
       <div className="text-center mb-3">
         <button onClick={handleLogout} className="btn btn-danger">
           Sair
-        </button>   
+        </button>
       </div>
     </div>
   );

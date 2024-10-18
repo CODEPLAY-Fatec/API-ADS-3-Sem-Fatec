@@ -68,8 +68,8 @@ const CategoryRegistration = () => {
 
     return (
         <div className="container mt-4">
-            <h1>Cadastro de Categorias</h1>
-            <button className="btn btn-secondary mb-3" onClick={() => (window.location.href = "/home/surveys/surveycrud")}>
+            <h1 className="text-center font-bold mb-2">Cadastro de Categorias</h1>
+            <button className="btn btn-secondary mb-2" onClick={() => (window.location.href = "/home/surveys/surveycrud")}>
                 Voltar
             </button>
             <Form className="mb-3">

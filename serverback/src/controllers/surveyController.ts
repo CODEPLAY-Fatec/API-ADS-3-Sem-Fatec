@@ -3,13 +3,13 @@ import { Request, Response } from "express";
 import { createSurvey, getSurvey, getSurveys, updateSurvey, deleteSurvey } from "../services/surveyService";
 
 export const createSurveyController = async (req: Request, res: Response) => {
-    const { teamId, data, questions } = req.body;
+    const { team_id, data, questions } = req.body;
     try {
-        const newSurvey = await createSurvey({ team_id: teamId, data, questions });
+        const newSurvey = await createSurvey({ team_id, data, questions });
         res.status(201).json({ survey: newSurvey, message: 'Survey created successfully' });
     } catch (error: any) {
         res.status(500).json({ error: error.message });
-        console.log(req.body);
+        
         console.error(error);
     }
 };

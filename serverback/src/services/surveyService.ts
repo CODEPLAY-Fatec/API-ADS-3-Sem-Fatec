@@ -8,6 +8,7 @@ export const createSurvey = async (survey: Survey) => {
     const surveyData = JSON.stringify(survey.data);
     const questions = JSON.stringify(survey.questions);
     const values = [survey.team_id, surveyData, questions];
+    console.log(survey.team_id)
     return db.query(query, values);
 }
 

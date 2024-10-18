@@ -3,13 +3,13 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 // import "./survey.css";
 import Question from "@/types/Question";
-import {Survey, SurveyData} from "@/types/Survey";
+import { Survey, SurveyData } from "@/types/Survey";
 import Team from "@/types/Team";
 
 type QuestionCategory = {
-    id: number
-    name: string
-}
+    id: number;
+    name: string;
+};
 
 const SurveyCreation = () => {
     const [title, setTitle] = useState("");
@@ -22,11 +22,13 @@ const SurveyCreation = () => {
     const [questions, setQuestions] = useState<Question[]>([]);
     const [newQuestion, setNewQuestion] = useState<Question>({ type: "Text", question: "", options: [] });
     const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
+
     const surveyCategories: SurveyData["type"][] = [
         "Autoavaliação",
         "Avaliação de líder",
-        "Avaliação de liderado"
-    ]
+        "Avaliação de liderado",
+    ];
+
     // Buscar as categorias existentes
     useEffect(() => {
         const fetchCategories = async () => {
@@ -93,7 +95,7 @@ const SurveyCreation = () => {
                 team_id,
                 data: { title, description, type: surveyType },
                 questions: questions,
-            }
+            };
             const response = await axios.post("http://localhost:3001/api/survey", newSurvey);
             setFeedbackMessage("Pesquisa criada com sucesso!");
             setTitle("");
@@ -194,7 +196,28 @@ const SurveyCreation = () => {
                 </button>
             </div>
 
-            <button className="btn btn-primary" onClick={handleCreateSurvey}>
+                {questions.length > 0 && (
+                    <div className="mt-4">
+                        <h4>Perguntas Adicionadas</h4>
+                        <ul className="list-group">
+                            {questions.map((question, index) => (
+                                <li key={index} className="list-group-item mb-3">
+                                    <strong>{index + 1}. {question.question}</strong>
+                                    {question.type === "Multiple" && question.options?.length > 0 && (
+                                        <ul>
+                                            {question.options.map((option, optionIndex) => (
+                                                <li key={optionIndex}>{option}</li>
+                                            ))}
+                                        </ul>
+                                    )}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
+
+
+            <button className="btn btn-primary mt-4" onClick={handleCreateSurvey}>
                 Criar Pesquisa
             </button>
         </div>
@@ -202,3 +225,4 @@ const SurveyCreation = () => {
 };
 
 export default SurveyCreation;
+

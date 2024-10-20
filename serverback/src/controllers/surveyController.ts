@@ -1,6 +1,5 @@
-import { Survey } from "../types/Survey";
 import { Request, Response } from "express";
-import { createSurvey, getSurvey, getSurveys, updateSurvey, deleteSurvey } from "../services/surveyService";
+import { createSurvey, deleteSurvey, getSurvey, getSurveys, getSurveysByTeam, submitSurveyResponse, updateSurvey } from "../services/surveyService";
 
 export const createSurveyController = async (req: Request, res: Response) => {
     const { team_id, data, questions } = req.body;
@@ -54,3 +53,23 @@ export const deleteSurveyController = async (req: Request, res: Response) => {
         res.status(500).json({ error: error.message });
     }
 }
+
+export const getSurveysByTeamController = async (req: Request, res: Response) => {
+    const { teamId } = req.params;
+    try {
+        const surveys = await getSurveysByTeam(teamId);
+        res.status(200).json(surveys);
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+export const submitSurveyResponseController = async (req: Request, res: Response) => {
+    const { userId, surveyId, responses } = req.body;
+    try {
+        await submitSurveyResponse(userId, surveyId, responses);
+        res.status(201).json({ message: 'Response submitted successfully' });
+    } catch (error: any) {
+        res.status(500).json({ error: error.message });
+    }
+};

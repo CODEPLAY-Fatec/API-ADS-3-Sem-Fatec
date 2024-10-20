@@ -56,11 +56,22 @@ export const deleteSurveyController = async (req: Request, res: Response) => {
 
 export const getSurveysByTeamController = async (req: Request, res: Response) => {
     const { teamId } = req.params;
+
+    // Validação simples para garantir que o teamId esteja presente
+    if (!teamId) {
+        return res.status(400).json({ error: "Team ID is required" });
+    }
+
     try {
         const surveys = await getSurveysByTeam(teamId);
-        res.status(200).json(surveys);
+        return res.status(200).json(surveys);
     } catch (error: any) {
-        res.status(500).json({ error: error.message });
+        console.error("Error fetching surveys by team:", error);
+
+        // Garante que a mensagem de erro seja uma string válida
+        const errorMessage = typeof error.message === 'string' ? error.message : JSON.stringify(error);
+
+        return res.status(500).json({ error: errorMessage });
     }
 };
 

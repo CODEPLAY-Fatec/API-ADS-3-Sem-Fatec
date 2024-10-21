@@ -88,7 +88,7 @@ const Navbar: React.FC = () => {
           <li className="nav-item">
             <Link href="/home/surveys/availablesurveys" className="nav-link text-white">
               <div className="link-content">
-                <i className="bi bi-journal-text me-2"></i> Surveys Disponíveis
+                <i className="bi bi-journal-text me-2"></i> Pesquisas disponiveis
               </div>
             </Link>
           </li>
@@ -108,7 +108,7 @@ const Navbar: React.FC = () => {
               <li className="nav-item">
                 <Link href="/home/surveys/surveycrud" className="nav-link text-white">
                   <div className="link-content">
-                    <i className="bi bi-journal-text me-2"></i> Criação de Surveys
+                    <i className="bi bi-journal-text me-2"></i> Criação de Pesquisa
                   </div>
                 </Link>
               </li>

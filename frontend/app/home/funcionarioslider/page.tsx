@@ -1,9 +1,11 @@
 "use client";
+
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import Cookie from "js-cookie";
 import './funcionarioslider.css';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 interface TeamRole {
   team: string;
@@ -47,9 +49,9 @@ export default function Page() {
             }));
             setUsers(usersWithDetails);
 
-            const loggedUserTeams = usersWithDetails.find((u: { id: number; }) => u.id === parseInt(decoded.id))?.teamRoles
-              .filter((role: { role: string; }) => role.role === "Líder")
-              .map((role: { team: string; }) => role.team) || [];
+            const loggedUserTeams = usersWithDetails.find((u: { id: number }) => u.id === parseInt(decoded.id))?.teamRoles
+              .filter((role: { role: string }) => role.role === "Líder")
+              .map((role: { team: string }) => role.team) || [];
             setLoggedInUserTeams(loggedUserTeams);
           } catch (error: unknown) {
             if (error instanceof Error) {
@@ -71,23 +73,34 @@ export default function Page() {
     return <div>Erro ao carregar dados: {error}</div>;
   }
 
-  const filteredUsers = users.filter(user =>
-    user.teamRoles.some((role: TeamRole) =>
-      loggedInUserTeams.includes(role.team) && role.role === "Membro"
-    )
-  ).filter(user =>
-    user.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredUsers = users
+    .filter(user => {
+      const searchTermLower = searchTerm.toLowerCase();
+
+      const matchesName = user.name.toLowerCase().includes(searchTermLower);
+      const matchesRole = (user.isAdmin ? "admin" : "usuário").toLowerCase().includes(searchTermLower);
+      const matchesTeam = user.teamRoles.some(teamRole => 
+        teamRole.team.toLowerCase().includes(searchTermLower) || 
+        teamRole.role.toLowerCase().includes(searchTermLower)
+      );
+
+      return matchesName || matchesRole || matchesTeam;
+    })
+    .filter(user => 
+      user.teamRoles.some((role: TeamRole) => 
+        loggedInUserTeams.includes(role.team) && role.role === "Membro"
+      )
+    );
 
   return (
     <div className="container mt-4">
-      <h1 className="text-center font-bold mb-4">Lista de membros das suas equipes</h1>
+      <h1 className="text-center font-bold mb-4">Lista de Líderados</h1>
 
       <div className="mb-3">
         <input
           type="text"
           className="form-control"
-          placeholder="Pesquisar seus liderados..."
+          placeholder="Pesquisar por nome, função ou time..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
@@ -99,26 +112,41 @@ export default function Page() {
           <p style={{ fontSize: "16px" }}>Os funcionários cadastrados aparecerão aqui.</p>
         </div>
       ) : (
-        <div className="employee-list">
-          {filteredUsers.map(user => (
-            <div key={user.id} className="employee-card card mb-3">
-              <div className="card-body">
-                <h3 className="card-title">{user.name}</h3>
-                <p className="card-text"><strong>Email:</strong> {user.email}</p>
-                <p className="card-text"><strong>Times:</strong></p>
-                <ul>
-                  {user.teamRoles
-                    .filter((teamRole) => loggedInUserTeams.includes(teamRole.team))
-                    .map((teamRole, index) => (
-                      <li key={index}>
-                        {teamRole.team}
-                      </li>
-                    ))}
-                </ul>
-              </div>
-            </div>
-          ))}
-        </div>
+        <table className="table table-striped">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Email</th>
+              <th>Função</th>
+              <th>Times</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredUsers.map(user => (
+              <tr key={user.id}>
+                <td>{user.name}</td>
+                <td>{user.email}</td>
+                <td>{user.isAdmin ? "Admin" : "Usuário"}</td>
+                <td>
+                  {user.teamRoles.length > 0 ? (
+                    <ul style={{ listStyleType: "none", paddingLeft: 0 }}>
+                      {user.teamRoles
+                        .filter(teamRole => loggedInUserTeams.includes(teamRole.team))
+                        .map((teamRole, index) => (
+                          <li key={index}>
+                            {teamRole.team} ({teamRole.role})
+                          </li>
+                        ))
+                      }
+                    </ul>
+                  ) : (
+                    "Não participa de nenhum time"
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       )}
     </div>
   );

@@ -13,10 +13,12 @@ const RecuperacaoSenha: React.FC = () => {
   const [confirmarSenha, setConfirmarSenha] = useState('');
   const [userId, setUserId] = useState<number | null>(null); 
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false); 
   const router = useRouter();
 
   // Função para enviar a solicitação de recuperação de senha
   const handlePasswordRecovery = async (email: string) => {
+    setLoading(true); 
     try {
       const response = await axios.post('http://localhost:3001/api/recover-password', { email });
       console.log(response.data.message);
@@ -25,6 +27,8 @@ const RecuperacaoSenha: React.FC = () => {
     } catch (error) {
       console.error('Erro ao enviar solicitação de recuperação de senha:', error);
       alert('Email não existe');
+    } finally {
+      setLoading(false); 
     }
   };
 
@@ -88,8 +92,8 @@ const RecuperacaoSenha: React.FC = () => {
               <button type="button" className="btn btn-secondary" style={{ width: "48%" }} onClick={() => router.push("/home/profile")}>
                 Voltar
               </button>
-              <button type="submit" className="btn btn-primary" style={{ backgroundColor: "#357edd", width: "48%" }}>
-                Enviar
+              <button type="submit" className="btn btn-primary" style={{ backgroundColor: "#357edd", width: "48%" }} disabled={loading}>
+                {loading ? 'Aguarde...' : 'Enviar'}
               </button>
             </div>
           </form>

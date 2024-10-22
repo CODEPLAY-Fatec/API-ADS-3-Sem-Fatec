@@ -1,9 +1,11 @@
 "use client";
+
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 import Cookie from "js-cookie";
 import './funcionarios.css';
+import 'bootstrap/dist/css/bootstrap.min.css'; 
 
 interface TeamRole {
   team: string;
@@ -31,6 +33,7 @@ export default function Page() {
   const [loggedInUserName, setLoggedInUserName] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
+  const [showModal, setShowModal] = useState<boolean>(false);
 
   useEffect(() => {
     const token = Cookie.get("authToken") || Cookie.get("userToken");
@@ -75,14 +78,36 @@ export default function Page() {
     }
   };
 
+  const handleShowModal = (userId: number) => {
+    setConfirmDelete(userId);
+    setShowModal(true);
+  };
+
+  const handleCloseModal = () => {
+    setConfirmDelete(null);
+    setShowModal(false);
+  };
+
   if (error) {
     return <div>Erro ao carregar dados: {error}</div>;
   }
 
-  // Filtrar usuários antes de excluir o usuário logado
+  // Lógica de filtragem por nome, função e times
   const filteredUsers = users
-    .filter(user => user.name.toLowerCase().includes(searchTerm.toLowerCase())) // Filtro de busca por nome
-    .filter(user => user.name !== loggedInUserName); // Excluir o usuário logado
+    .filter(user => {
+      const searchTermLower = searchTerm.toLowerCase();
+      
+      //filtro de pesquisa
+      const matchesName = user.name.toLowerCase().includes(searchTermLower);
+      const matchesRole = (user.isAdmin ? "admin" : "usuário").toLowerCase().includes(searchTermLower);
+      const matchesTeam = user.teamRoles.some(teamRole => 
+        teamRole.team.toLowerCase().includes(searchTermLower) || 
+        teamRole.role.toLowerCase().includes(searchTermLower)
+      );
+      
+      return matchesName || matchesRole || matchesTeam;
+    })
+    .filter(user => user.name !== loggedInUserName);
 
   return (
     <div className="container mt-4">
@@ -92,7 +117,7 @@ export default function Page() {
         <input
           type="text"
           className="form-control"
-          placeholder="Pesquisar funcionários..."
+          placeholder="Pesquisar por nome, função ou time..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
@@ -104,51 +129,73 @@ export default function Page() {
           <p style={{ fontSize: "16px" }}>Os funcionários cadastrados aparecerão aqui.</p>
         </div>
       ) : (
-        <div className="employee-list">
-          {filteredUsers.map(user => (
-            <div key={user.id} className="employee-card card mb-3">
-              <div className="card-body">
-                <h3 className="card-title">{user.name}</h3>
-                <p className="card-text"><strong>Email:</strong> {user.email}</p>
-                <p className="card-text"><strong>Função:</strong> {user.isAdmin ? "Admin" : "Usuário"}</p>
-                <p className="card-text"><strong>Times:</strong></p>
-                <ul>
+        <table className="table table-striped">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Email</th>
+              <th>Função</th>
+              <th>Times</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredUsers.map(user => (
+              <tr key={user.id}>
+                <td>{user.name}</td>
+                <td>{user.email}</td>
+                <td>{user.isAdmin ? "Admin" : "Usuário"}</td>
+                <td>
                   {user.teamRoles.length > 0 ? (
-                    user.teamRoles.map((teamRole, index) => (
-                      <li key={index}>
-                        {teamRole.team} ({teamRole.role})
-                      </li>
-                    ))
+                    <ul style={{ listStyleType: "none", paddingLeft: 0 }}>
+                      {user.teamRoles.map((teamRole, index) => (
+                        <li key={index}>
+                          {teamRole.team} ({teamRole.role})
+                        </li>
+                      ))}
+                    </ul>
                   ) : (
-                    <li>Não participa de nenhum time no momento</li>
+                    "Não participa de nenhum time"
                   )}
-                </ul>
-                <button
-                  className="btn btn-danger"
-                  onClick={() => setConfirmDelete(user.id)}
-                >
-                  Excluir usuário
+                </td>
+                <td>
+                  <button
+                    className="btn btn-danger"
+                    onClick={() => handleShowModal(user.id)}
+                  >
+                    Deletar
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+
+      {/* Modal */}
+      {showModal && confirmDelete !== null && (
+        <div className="modal show d-block" tabIndex={-1} role="dialog">
+          <div className="modal-dialog" role="document">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Confirmar Exclusão</h5>
+                <button type="button" className="close" onClick={handleCloseModal}>
+                  <span>&times;</span>
                 </button>
-                {confirmDelete === user.id && (
-                  <div className="alert alert-warning mt-2">
-                    Tem certeza?
-                    <button
-                      className="btn btn-primary ms-2"
-                      onClick={() => handleDeleteUser(user.id)}
-                    >
-                      Sim
-                    </button>
-                    <button
-                      className="btn btn-secondary ms-2"
-                      onClick={() => setConfirmDelete(null)}
-                    >
-                      Não
-                    </button>
-                  </div>
-                )}
+              </div>
+              <div className="modal-body">
+                <p>Tem certeza que deseja excluir este usuário?</p>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-primary" onClick={() => handleDeleteUser(confirmDelete)}>
+                  Sim
+                </button>
+                <button type="button" className="btn btn-secondary" onClick={handleCloseModal}>
+                  Não
+                </button>
               </div>
             </div>
-          ))}
+          </div>
         </div>
       )}
     </div>

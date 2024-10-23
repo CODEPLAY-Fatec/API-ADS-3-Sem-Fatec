@@ -4,6 +4,14 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import Cookie from "js-cookie";
 import { jwtDecode } from "jwt-decode";
+import { KeyRound, 
+        User,
+        LogOut,
+        LayoutDashboard,
+        Handshake, 
+        Users, 
+        UsersRound,Notebook,NotebookPen,UserPlus } from "lucide-react"; 
+import GroupsIcon from '@mui/icons-material/Groups'; //provavelmente depois alterar todos para mui
 import "./Navbar.css";
 
 const Navbar: React.FC = () => {
@@ -50,17 +58,21 @@ const Navbar: React.FC = () => {
         <ul className="nav flex-column">
           <li className="nav-item">
             <Link href="/home/profile" className="nav-link text-white">
-              <div className="link-content">
-                <i className="bi bi-house-door-fill me-2"></i> Perfil
+              <div className="link-content d-flex align-items-center">
+                <User className="me-1" />
+                Perfil
               </div>
             </Link>
           </li>
 
           {(isAdmin || isTeamLeader) && (
+            
+
             <li className="nav-item">
               <Link href="/home/dashboards" className="nav-link text-white">
-                <div className="link-content">
-                  <i className="bi bi-bar-chart-fill me-2"></i> Dashboards
+              <div className="link-content d-flex align-items-center">
+                  <LayoutDashboard className="me-1"/>
+                  Dashboards
                 </div>
               </Link>
             </li>
@@ -69,26 +81,28 @@ const Navbar: React.FC = () => {
           {isAdmin && (
             <li className="nav-item">
               <Link href="/home/funcionarios" className="nav-link text-white">
-                <div className="link-content">
-                  <i className="bi bi-bar-chart-fill me-2"></i> Lista de Funcionários
+                <div className="link-content d-flex align-items-center">
+                  <Users className="me-1"/>
+                   Lista de Funcionários
                 </div>
               </Link>
             </li>
           )}
 
-
           <li className="nav-item">
             <Link href="/home/Myteams" className="nav-link text-white">
-              <div className="link-content">
-                <i className="bi bi-journal-text me-2"></i> Meus Times
+              <div className="link-content d-flex align-items-center">
+                <Handshake className="me-1"/>
+                Meus Times
               </div>
             </Link>
           </li>
 
           <li className="nav-item">
             <Link href="/home/surveys/availablesurveys" className="nav-link text-white">
-              <div className="link-content">
-                <i className="bi bi-journal-text me-2"></i> Pesquisas disponiveis
+              <div className="link-content d-flex align-items-center">
+                <Notebook className="me-1"/>
+                Pesquisas disponíveis
               </div>
             </Link>
           </li>
@@ -96,8 +110,9 @@ const Navbar: React.FC = () => {
           {isTeamLeader && (
             <li className="nav-item">
               <Link href="/home/funcionarioslider" className="nav-link text-white">
-                <div className="link-content">
-                  <i className="bi bi-journal-text me-2"></i> Membros da minha equipe
+                <div className="link-content d-flex align-items-center">
+                  <UsersRound className="me-1"/>
+                Lista de Líderados
                 </div>
               </Link>
             </li>
@@ -107,43 +122,43 @@ const Navbar: React.FC = () => {
             <>
               <li className="nav-item">
                 <Link href="/home/surveys/surveycrud" className="nav-link text-white">
-                  <div className="link-content">
-                    <i className="bi bi-journal-text me-2"></i> Criação de Pesquisa
+                  <div className="link-content d-flex align-items-center">
+                    <NotebookPen className="me-1"/>
+                    Criação de Pesquisa
                   </div>
                 </Link>
               </li>
               <li className="nav-item">
                 <Link href="/home/teamregistration" className="nav-link text-white">
-                  <div className="link-content">
-                    <i className="bi bi-journal-text me-2"></i> Cadastro de Times
+                  <div className="link-content d-flex align-items-center">
+                    <GroupsIcon className="me-1"/>
+                    Cadastro de Times
                   </div>
                 </Link>
               </li>
               <li className="nav-item">
                 <Link href="/home/register" className="nav-link text-white">
-                  <div className="link-content">
-                    <i className="bi bi-journal-text me-2"></i> Cadastro de Usuários
+                  <div className="link-content d-flex align-items-center">
+                    <UserPlus className="me-1"/>
+                    Cadastro de Usuários
                   </div>
                 </Link>
               </li>
             </>
           )}
 
-          <li className="nav-item">
-            <Link href="/home/changepasswordin" className="nav-link text-white">
-              <div className="link-content">
-                <i className="bi bi-journal-text me-2"></i> Alterar senha
-              </div>
-            </Link>
-          </li>
         </ul>
       </nav>
 
-      <div className="text-center mb-3">
-        <button onClick={handleLogout} className="btn btn-danger">
-          Sair
-        </button>
-      </div>
+      <div className="text-center d-flex justify-content-center mb-3"> 
+  <Link href="/home/changepasswordin" className="btn btn-warning me-2">
+    <KeyRound className="me-1" /> 
+  </Link>
+  <button onClick={handleLogout} className="btn btn-danger d-flex align-items-center">
+    Sair
+    <LogOut className="ms-2" /> 
+  </button>
+</div>
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import "./globals.css"; // Importação do arquivo de estilos
 
+
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
     return (
         <html lang="en">

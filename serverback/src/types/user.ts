@@ -4,6 +4,7 @@ export interface User {
   email: string;
   password: string;
   isAdmin: boolean;
+  phoneNumber : string;
   leaders?: string[]; // Relacionamento opcional
   subordinates?: string[]; // Relacionamento opcional
   isTeamLeader?: boolean;  //funçao opcional 

@@ -1,15 +1,14 @@
 import Question from "./Question";
 
-type SurveyData = {
-  title: string
-  description: string
-  type: "Autoavaliação" | "Avaliação de líder" | "Avaliação de liderado"
-}
-
 type Survey = {
-    team_id: number;
-    questions: Question[];
-    data: SurveyData; 
-}
+  team_id: number;
+  uid: string; 
+  title: string; 
+  description: string; 
+  category: "Autoavaliação" | "Avaliação de líder" | "Avaliação de liderado"; // Enum 
+  created: Date; // Data de criação do survey
+  questions: Question[]; 
+};
 
-export type { SurveyData, Survey };
+export type { Survey };
+

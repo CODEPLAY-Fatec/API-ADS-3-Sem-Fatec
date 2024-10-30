@@ -1,6 +1,5 @@
-
 import { Request, Response } from 'express';
-import { getAllUsersWithDetails, createUser,updateUser,deleteUser, getLeaders } from '../services/userService'; 
+import { getAllUsersWithDetails, createUser, updateUser, deleteUser, getLeaders } from '../services/userService';
 
 export const getUsersController = async (req: Request, res: Response) => {
   try {
@@ -11,15 +10,10 @@ export const getUsersController = async (req: Request, res: Response) => {
   }
 };
 
-
-
-
-// Adicione outras funções conforme necessário
 export const createUserController = async (req: Request, res: Response) => {
-  const { name, email, password, isAdmin } = req.body;
-
+  const { name, email, password, isAdmin, phoneNumber } = req.body;
   try {
-    const newUser = await createUser(name, email, password, isAdmin);
+    const newUser = await createUser(name, email, password, isAdmin, phoneNumber);
     res.status(201).json(newUser);
   } catch (error: any) {
     if (error.message === 'Este email já está em uso.') {
@@ -29,6 +23,7 @@ export const createUserController = async (req: Request, res: Response) => {
     }
   }
 };
+
 export const updateUserController = async (req: Request, res: Response) => {
   const { id } = req.params;
   const user = req.body;
@@ -38,7 +33,7 @@ export const updateUserController = async (req: Request, res: Response) => {
   } catch (error: any) {
     res.status(400).json({ error: error.message });
   }
-};  
+};
 
 export const deleteUserController = async (req: Request, res: Response) => {
   const { id } = req.params;

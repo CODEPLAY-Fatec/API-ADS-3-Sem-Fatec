@@ -25,7 +25,8 @@
     "nookies": "^2.5.2",
     "react": "^18",
     "react-bootstrap": "^2.10.5",
-    "react-dom": "^18"
+    "react-dom": "^18",
+    "recharts": "^2.13.1"
   },
   "devDependencies": {
     "@types/js-cookie": "^3.0.6",

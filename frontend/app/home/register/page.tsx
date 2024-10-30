@@ -5,6 +5,7 @@ const Page: React.FC = () => {
     const [name, setName] = useState<string>('');
     const [email, setEmail] = useState<string>('');
     const [password, setPassword] = useState<string>('');
+    const [phoneNumber, setPhoneNumber] = useState<string>(''); 
     const [isAdmin, setIsAdmin] = useState<boolean>(false);
     const [error, setError] = useState<string>('');
     const [success, setSuccess] = useState<string>('');
@@ -18,7 +19,7 @@ const Page: React.FC = () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ name, email, password, isAdmin }),
+                body: JSON.stringify({ name, email, password, phoneNumber, isAdmin }),
             });
 
             if (!response.ok) {
@@ -34,10 +35,11 @@ const Page: React.FC = () => {
             const newUser = await response.json();
             setSuccess(`Usuário ${newUser.name} criado com sucesso!`);
             setError('');
-            setEmail('')
-            setIsAdmin(false)
-            setName('')
-            setPassword('')
+            setName('');
+            setEmail('');
+            setPassword('');
+            setPhoneNumber('');
+            setIsAdmin(false);
         } catch (error: unknown) {
             if (error instanceof Error) {
                 setError(error.message);
@@ -78,6 +80,21 @@ const Page: React.FC = () => {
                         placeholder="Insira seu email aqui, Ex:seuemail@gmail.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
+                        required
+                    />
+                </div>
+
+                <div className="mb-3">
+                    <label htmlFor="phoneNumber" className="form-label">
+                        Telefone
+                    </label>
+                    <input 
+                        type="tel" 
+                        id="phoneNumber" 
+                        className="form-control" 
+                        placeholder="Insira seu número de telefone"
+                        value={phoneNumber}
+                        onChange={(e) => setPhoneNumber(e.target.value)}
                         required
                     />
                 </div>

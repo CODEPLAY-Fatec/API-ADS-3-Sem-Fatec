@@ -2,7 +2,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import Question from "@/types/Question";
-import { Survey, SurveyData } from "@/types/Survey";
+import { Survey } from "@/types/Survey";
 import Team from "@/types/Team";
 
 type QuestionCategory = {
@@ -13,21 +13,17 @@ type QuestionCategory = {
 const SurveyCreation = () => {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
-    const [surveyType, setSurveyType] = useState<SurveyData["type"] | null>(null);
+    const [category, setCategory] = useState<Survey["category"] | null>(null);
     const [team_id, setTeamId] = useState<number>(0);
     const [categoryId, setCategoryId] = useState("");
     const [categories, setCategories] = useState<QuestionCategory[]>([]);
     const [teams, setTeams] = useState<Team[]>([]);
     const [questions, setQuestions] = useState<Question[]>([]);
-    const [newQuestion, setNewQuestion] = useState<Question>({ type: "Text", question: "", options: [] });
+    const [newQuestion, setNewQuestion] = useState<Question>({ type: "Text", question: "", options: [], category: "" });
     const [newOption, setNewOption] = useState<string>("");
-    const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
 
-    const surveyCategories: SurveyData["type"][] = [
-        "Autoavaliação",
-        "Avaliação de líder",
-        "Avaliação de liderado",
-    ];
+    const surveyCategories: Survey["category"][] = ["Autoavaliação", "Avaliação de líder", "Avaliação de liderado"];
+    const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchCategories = async () => {
@@ -57,7 +53,7 @@ const SurveyCreation = () => {
 
     const handleAddQuestion = () => {
         setQuestions([...questions, newQuestion]);
-        setNewQuestion({ type: "Text", question: "", options: [] });
+        setNewQuestion({ type: "Text", question: "", options: [], category: "" });
     };
 
     const handleAddOption = () => {
@@ -71,7 +67,7 @@ const SurveyCreation = () => {
     };
 
     const handleRemoveOption = (index: number) => {
-        const updatedOptions = newQuestion.options.filter((_, i) => i !== index);
+        const updatedOptions = newQuestion.options?.filter((_, i) => i !== index) || [];
         setNewQuestion({ ...newQuestion, options: updatedOptions });
     };
 
@@ -80,7 +76,7 @@ const SurveyCreation = () => {
     };
 
     const handleCreateSurvey = async () => {
-        if (!title || !description || !surveyType || !team_id) {
+        if (!title || !description || !category || !team_id) {
             setFeedbackMessage("Preencha todos os campos!");
             return;
         }
@@ -88,14 +84,18 @@ const SurveyCreation = () => {
         try {
             const newSurvey: Survey = {
                 team_id,
-                data: { title, description, type: surveyType },
-                questions: questions,
+                uid: "", // Será gerado automaticamente
+                title,
+                description,
+                category,
+                created: new Date(),
+                questions,
             };
             await axios.post("http://localhost:3001/api/survey", newSurvey);
             setFeedbackMessage("Pesquisa criada com sucesso!");
             setTitle("");
             setDescription("");
-            setSurveyType(null);
+            setCategory(null);
             setQuestions([]);
         } catch (error) {
             console.error("Erro ao criar pesquisa:", error);
@@ -109,7 +109,7 @@ const SurveyCreation = () => {
             {feedbackMessage && <div className="alert alert-info">{feedbackMessage}</div>}
 
             <div className="mb-4">
-                <div className="card shadow-sm"> {/* Adicionando sombra ao cartão */}
+                <div className="card shadow-sm">
                     <div className="card-body">
                         <h5 className="card-title">Informações da Pesquisa</h5>
                         <div className="mb-3">
@@ -121,12 +121,12 @@ const SurveyCreation = () => {
                             <textarea className="form-control" value={description} onChange={(e) => setDescription(e.target.value)} />
                         </div>
                         <div className="mb-3">
-                            <label>Tipo de Pesquisa</label>
-                            <select className="form-select" value={surveyType ?? ""} onChange={(e) => setSurveyType(e.target.value as Survey["data"]["type"])}>
+                            <label>Categoria</label>
+                            <select className="form-select" value={category ?? ""} onChange={(e) => setCategory(e.target.value as Survey["category"])}>
                                 <option value="">Selecione uma categoria</option>
-                                {surveyCategories.map((category, index) => (
-                                    <option key={index} value={category}>
-                                        {category}
+                                {surveyCategories.map((cat, index) => (
+                                    <option key={index} value={cat}>
+                                        {cat}
                                     </option>
                                 ))}
                             </select>
@@ -147,7 +147,7 @@ const SurveyCreation = () => {
             </div>
 
             <div className="mb-4">
-                <div className="card shadow-sm"> {/* Adicionando sombra ao cartão */}
+                <div className="card shadow-sm">
                     <div className="card-body">
                         <h5 className="card-title">Adicionar Pergunta</h5>
                         <input
@@ -166,20 +166,18 @@ const SurveyCreation = () => {
                                     </option>
                                 ))}
                             </select>
-                            <button className="btn btn-secondary ms-2" onClick={() => (window.location.href = "/home/surveys/surveycategories")}>
-                                Gerenciar Categorias
-                            </button>
                         </div>
                         <select
                             className="form-select mb-3"
                             value={newQuestion.type}
-                            onChange={(e) => setNewQuestion({ ...newQuestion, type: e.target.value as "Multiple" | "Text" })}
+                            onChange={(e) => setNewQuestion({ ...newQuestion, type: e.target.value as "Multiple" | "Text" | "Single" })}
                         >
                             <option value="Text">Pergunta Aberta</option>
                             <option value="Multiple">Múltipla Escolha</option>
+                            <option value="Single">Escolha Única</option>
                         </select>
 
-                        {newQuestion.type === "Multiple" && (
+                        {newQuestion.type !== "Text" && (
                             <div>
                                 <input
                                     type="text"
@@ -219,7 +217,7 @@ const SurveyCreation = () => {
 
             {questions.length > 0 && (
                 <div className="mb-4">
-                    <div className="card shadow-sm"> {/* Adicionando sombra ao cartão */}
+                    <div className="card shadow-sm">
                         <div className="card-body">
                             <h5 className="card-title">Perguntas Adicionadas</h5>
                             <ul className="list-group">
@@ -227,9 +225,10 @@ const SurveyCreation = () => {
                                     <li key={index} className="list-group-item mb-3 d-flex justify-content-between align-items-center">
                                         <div>
                                             <strong>{index + 1}. {question.question}</strong>
-                                            {question.type === "Multiple" && question.options?.length > 0 && (
+                                            {/* Verificando se 'question.options' está definido */}
+                                            {question.type !== "Text" && (question.options?.length || 0) > 0 && (
                                                 <ul className="list-group mt-2">
-                                                    {question.options.map((option, optionIndex) => (
+                                                    {(question.options || []).map((option, optionIndex) => (
                                                         <li key={optionIndex} className="list-group-item">{option}</li>
                                                     ))}
                                                 </ul>

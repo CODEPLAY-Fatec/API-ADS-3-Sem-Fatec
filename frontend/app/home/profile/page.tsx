@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import Cookie from "js-cookie";
 import axios from "axios";
+import { Pie, PieChart } from "recharts"; //import para graficos estou testando
 
 interface DecodedToken {
   id: string;
@@ -23,6 +24,59 @@ interface UserData {
   isAdmin: boolean;
   teamRoles: TeamRole[];
 }
+
+const data01 = [
+  {
+    "name": "Group A",
+    "value": 400
+  },
+  {
+    "name": "Group B",
+    "value": 300
+  },
+  {
+    "name": "Group C",
+    "value": 300
+  },
+  {
+    "name": "Group D",
+    "value": 200
+  },
+  {
+    "name": "Group E",
+    "value": 278
+  },
+  {
+    "name": "Group F",
+    "value": 189
+  }
+];
+const data02 = [
+  {
+    "name": "Group A",
+    "value": 2400
+  },
+  {
+    "name": "Group B",
+    "value": 4567
+  },
+  {
+    "name": "Group C",
+    "value": 1398
+  },
+  {
+    "name": "Group D",
+    "value": 9800
+  },
+  {
+    "name": "Group E",
+    "value": 3908
+  },
+  {
+    "name": "Group F",
+    "value": 4800
+  }
+];
 
 export default function Page() {
   const [userData, setUserData] = useState<DecodedToken | null>(null);
@@ -67,9 +121,10 @@ export default function Page() {
           <div className="flex flex-col space-y-6 h-full">
             {/* Caixa grande no topo */}
             <div className="h-1/2 bg-white rounded-lg flex items-center justify-center shadow-lg border border-gray-300">
-              <p className="text-gray-500">
-                O usuário não possui dashboards no momento
-              </p>
+              <PieChart width={730} height={250}>
+                <Pie data={data01} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={50} fill="#8884d8" />
+                <Pie data={data02} dataKey="value" nameKey="name" cx="50%" cy="50%"  outerRadius={80} fill="#82ca9d" label />
+              </PieChart>
             </div>
             {/* Duas caixas lado a lado */}
             <div className="flex space-x-6 h-1/2">
@@ -91,7 +146,7 @@ export default function Page() {
         <div className="w-full lg:w-1/2 bg-white rounded-lg p-6 flex flex-col shadow-lg border border-gray-300">
           <div className="flex flex-col items-center mt-8 lg:mt-16">
             <div className="w-32 h-32 lg:w-56 lg:h-56 bg-gray-300 rounded-full mb-4 lg:mb-6"></div>
-            <h2 className="font-bold text-xl">{userData.name}</h2> 
+            <h2 className="font-bold text-xl">{userData.name}</h2>
           </div>
 
           <div className="text-left space-y-4 mt-4 pl-4 lg:pl-8">
@@ -106,7 +161,7 @@ export default function Page() {
               <strong>Nível de acesso:</strong> {userData.isAdmin ? "Admin" : "Membro"}
             </p>
             <p className="text-lg">
-              <strong>Times:</strong> 
+              <strong>Times:</strong>
               {userTeams.length > 0 ? (
                 userTeams.map((teamRole, index) => (
                   <span key={index}>{teamRole.team} ({teamRole.role}){index < userTeams.length - 1 ? ", " : ""}</span>

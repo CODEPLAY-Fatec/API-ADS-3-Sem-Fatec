@@ -1,18 +1,32 @@
 import { Request, Response } from "express";
 import { createSurvey, deleteSurvey, getSurvey, getSurveys, getSurveysByTeam, submitSurveyResponse, updateSurvey } from "../services/surveyService";
+import { Survey } from "../types/Survey";
 
+// Criação de uma nova pesquisa
 export const createSurveyController = async (req: Request, res: Response) => {
-    const { team_id, data, questions } = req.body;
+    const { team_id, title, description, category, questions } = req.body;
+
+    const newSurvey: Survey = {
+        team_id,
+        uid: Date.now().toString(), // date.now gera um numero aleatorio com base em no tempo desde 1970, mas da pra alterar o tipo de geraçao
+        title,
+        description,
+        category,
+        created: new Date(),
+        questions
+    };
+
     try {
-        const newSurvey = await createSurvey({ team_id, data, questions });
-        res.status(201).json({ survey: newSurvey, message: 'Survey created successfully' });
+        const survey = await createSurvey(newSurvey);
+        res.status(201).json({ survey, message: 'Survey created successfully' });
     } catch (error: any) {
-        res.status(500).json({ error: error.message });
-        
         console.error(error);
+        res.status(500).json({ error: error.message });
     }
 };
 
+
+// Obter uma pesquisa específica
 export const getSurveyController = async (req: Request, res: Response) => {
     const { survey_id } = req.params;
     try {
@@ -21,8 +35,9 @@ export const getSurveyController = async (req: Request, res: Response) => {
     } catch (error: any) {
         res.status(500).json({ error: error.message });
     }
-}
+};
 
+// Obter todas as pesquisas de um time específico
 export const getSurveysController = async (req: Request, res: Response) => {
     const { team_id } = req.params;
     try {
@@ -31,19 +46,32 @@ export const getSurveysController = async (req: Request, res: Response) => {
     } catch (error: any) {
         res.status(500).json({ error: error.message });
     }
-}
+};
 
+// Atualizar uma pesquisa
 export const updateSurveyController = async (req: Request, res: Response) => {
     const { id } = req.params;
-    const { data, questions } = req.body;
+    const { uid, title, description, category, questions } = req.body;
+
+    const updatedSurvey: Survey = {
+        team_id: 0, // Placeholder;
+        uid,
+        title,
+        description,
+        category,
+        created: new Date(), 
+        questions
+    };
+
     try {
-        const updatedSurvey = await updateSurvey(Number(id), {team_id: 0, data, questions})
-        res.status(200).json({ survey: updatedSurvey, message: 'Survey updated successfully' });
+        const survey = await updateSurvey(Number(id), updatedSurvey);
+        res.status(200).json({ survey, message: 'Survey updated successfully' });
     } catch (error: any) {
         res.status(500).json({ error: error.message });
     }
-}
+};
 
+// Deletar uma pesquisa
 export const deleteSurveyController = async (req: Request, res: Response) => {
     const { id } = req.params;
     try {
@@ -52,8 +80,9 @@ export const deleteSurveyController = async (req: Request, res: Response) => {
     } catch (error: any) {
         res.status(500).json({ error: error.message });
     }
-}
+};
 
+// Obter pesquisas de um time específico
 export const getSurveysByTeamController = async (req: Request, res: Response) => {
     const { teamId } = req.params;
 
@@ -75,8 +104,11 @@ export const getSurveysByTeamController = async (req: Request, res: Response) =>
     }
 };
 
+
+// Submeter uma resposta de pesquisa
 export const submitSurveyResponseController = async (req: Request, res: Response) => {
     const { userId, surveyId, responses } = req.body;
+
     try {
         await submitSurveyResponse(userId, surveyId, responses);
         res.status(201).json({ message: 'Response submitted successfully' });

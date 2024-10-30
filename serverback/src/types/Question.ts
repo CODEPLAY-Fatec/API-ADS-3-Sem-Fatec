@@ -1,7 +1,9 @@
 type Question = {
-    question: string;
-    type: string;
-    options: string[];
-}
-
-export default Question
+    question: string; // titulo
+    type: "Multiple" | "Single" | "Text"; 
+    options?: string[]; // Opções 
+    category: string; // Categoria da pergunta
+  };
+  
+  export default Question;
+  

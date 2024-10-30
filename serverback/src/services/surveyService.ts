@@ -2,50 +2,62 @@ import { db } from "../config/database2";
 import { Survey } from "../types/Survey";
 
 export const createSurvey = async (survey: Survey) => {
-    console.log(survey);
-    
-    const query = `INSERT INTO survey (team_id, data, questions) VALUES (?, ?, ?)`;
-    const surveyData = JSON.stringify(survey.data);
+    const query = `INSERT INTO survey (team_id, uid, title, description, category, created, questions) VALUES (?, ?, ?, ?, ?, ?, ?)`;
     const questions = JSON.stringify(survey.questions);
-    const values = [survey.team_id, surveyData, questions];
-    console.log(survey.team_id);
+    const values = [
+        survey.team_id,
+        survey.uid,
+        survey.title,
+        survey.description,
+        survey.category,
+        new Date(), // Data de criação atual
+        questions,
+    ];
     return db.query(query, values);
 };
 
+
 export const getSurveys = async (team_id: number) => {
     const query = `SELECT * FROM survey WHERE team_id = ?`;
-    const values = [team_id];
-    return db.query(query, values);
+    return db.query(query, [team_id]);
 };
 
 export const getSurvey = async (id: number) => {
     const query = `SELECT * FROM survey WHERE id = ?`;
-    const values = [id];
-    return db.query(query, values);
+    return db.query(query, [id]);
 };
 
 export const updateSurvey = async (id: number, survey: Survey) => {
-    const query = `UPDATE survey SET data = ?, questions = ? WHERE id = ?`;
-    const surveyData = JSON.stringify(survey.data);
+    const query = `UPDATE survey SET uid = ?, title = ?, description = ?, category = ?, questions = ? WHERE id = ?`;
     const questions = JSON.stringify(survey.questions);
-    const values = [surveyData, questions, id];
+    const values = [
+        survey.uid,
+        survey.title,
+        survey.description,
+        survey.category,
+        questions,
+        id,
+    ];
     return db.query(query, values);
 };
 
 export const deleteSurvey = async (id: number) => {
     const query = `DELETE FROM survey WHERE id = ?`;
-    const values = [id];
-    return db.query(query, values);
+    return db.query(query, [id]);
 };
 
 export const getSurveysByTeam = async (teamId: string) => {
-    const query = `SELECT id, team_id, 
-                          JSON_UNQUOTE(JSON_EXTRACT(data, '$.title')) AS title, 
-                          JSON_UNQUOTE(JSON_EXTRACT(data, '$.description')) AS description, 
-                          JSON_UNQUOTE(JSON_EXTRACT(data, '$.type')) AS category, 
-                          questions 
-                   FROM survey 
-                   WHERE team_id = ?`;
+    const query = `
+        SELECT 
+            id, 
+            team_id, 
+            title, 
+            description, 
+            category, 
+            questions 
+        FROM survey 
+        WHERE team_id = ?;
+    `;
     const values = [teamId];
 
     try {
@@ -57,7 +69,6 @@ export const getSurveysByTeam = async (teamId: string) => {
 
         const surveys = rows.map((row: any) => {
             let questions = [];
-            //console.log('Row questions:', row.questions);  //console para verificar o retorno 
 
             if (typeof row.questions === 'string') {
                 try {
@@ -75,7 +86,7 @@ export const getSurveysByTeam = async (teamId: string) => {
                 title: row.title,
                 description: row.description,
                 category: row.category,
-                questions
+                questions,
             };
         });
 
@@ -87,12 +98,9 @@ export const getSurveysByTeam = async (teamId: string) => {
 };
 
 
-
-
-
 export const submitSurveyResponse = async (userId: string, surveyId: string, responses: any) => {
-    const query = `INSERT INTO survey_answer (user_id, survey_id, data) VALUES (?, ?, ?)`;
+    const query = `INSERT INTO survey_answer (user_id, survey_id, created, data) VALUES (?, ?, ?, ?)`;
     const responseData = JSON.stringify(responses);
-    const values = [userId, surveyId, responseData];
+    const values = [userId, surveyId, new Date(), responseData];
     return db.query(query, values);
 };

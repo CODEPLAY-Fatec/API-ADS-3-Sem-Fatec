@@ -53,6 +53,7 @@ CREATE TABLE `survey_answer` (
   `survey_id` INT NOT NULL,
   `created` date NOT NULL,
   `data` JSON NOT NULL
+  `target_id` INT,
 );
 
 CREATE TABLE `answer_category` (
@@ -76,3 +77,16 @@ ALTER TABLE `survey_answer` ADD FOREIGN KEY (`user_id`) REFERENCES `users` (`id`
 -- insere usuário padrão (daniel@gmail.com, 123456)
 --INSERT INTO users (name, email, password, phoneNumber, isAdmin) VALUES ('daniel', 'daniel@gmail.com','$2b$10$t2USd40dO76L.tsQSOo3WO75faZlQFC.CGDJISS.LJgufLd7ru/Hm', '12912345678', 1 ) 
 
+-- Autoavaliação:
+-- Checa se em survey_answers há uma resposta com o mesmo survey_id e user_id
+-- Caso não, pode ser respondido.
+
+-- Avaliação de líder:
+-- Checa se em survey_answers há uma resposta com o mesmo survey_id, user_id e data.target_id
+-- Caso não, pode ser respondido.
+
+-- Avaliação de liderado
+-- Checa se em survey_answers há uma resposta com o mesmo survey_id, user_id e data.target_id
+-- Caso não, pode ser respondido.
+
+-- Título: "Avaliação de liderado $target_id$" -- TODO

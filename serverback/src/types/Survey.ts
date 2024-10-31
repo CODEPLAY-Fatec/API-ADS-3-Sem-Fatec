@@ -8,6 +8,7 @@ type Survey = {
   category: "Autoavaliação" | "Avaliação de líder" | "Avaliação de liderado"; // Enum
   created: Date; // Data de criação do survey
   questions: Question[]; 
+  target_id?: number; // ID do usuário alvo da avaliação
 };
 
 export type { Survey };

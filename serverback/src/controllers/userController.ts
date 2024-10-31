@@ -1,5 +1,17 @@
 import { Request, Response } from 'express';
 import { getAllUsersWithDetails, createUser, updateUser, deleteUser, getLeaders } from '../services/userService';
+import getUserSurveys from '../services/queryService';
+
+export const getUserSurveysController = async (req: Request, res: Response) => {
+  // TODO: autenticação para que um usuário só possa ver suas próprias pesquisas
+  const { id } = req.params;
+  try {
+    const surveys = await getUserSurveys(Number(id));
+    res.status(200).json(surveys);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+}
 
 export const getUsersController = async (req: Request, res: Response) => {
   try {

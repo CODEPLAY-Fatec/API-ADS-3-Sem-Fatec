@@ -1,15 +1,30 @@
 import Question from "./Question";
 
-type Survey = {
+type BaseSurvey = {
+  uid: number; // Identificador único do surve
   team_id: number; 
-  uid: string; // Identificador único do surve
   title: string; // Título do survey
   description: string; 
   category: "Autoavaliação" | "Avaliação de líder" | "Avaliação de liderado"; // Enum
-  created: Date; // Data de criação do survey
   questions: Question[]; 
   target_id?: number; // ID do usuário alvo da avaliação
 };
 
-export type { Survey };
+type SurveyInstance = {
+  id: number;
+  uid: number;
+  created: Date;
+  open: boolean;
+}
+
+type UsableSurvey = {
+  survey_id: number;
+  title: string;
+  description: string;
+  category: "Autoavaliação" | "Avaliação de líder" | "Avaliação de liderado";
+  questions: Question[];
+  target_id?: number;
+}
+
+export type { BaseSurvey, SurveyInstance, UsableSurvey };
 

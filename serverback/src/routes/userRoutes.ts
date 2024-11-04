@@ -5,7 +5,6 @@ import {
     updateUserController,
     deleteUserController,
     getLeadersController,
-    getUserSurveysController
 } from '../controllers/userController';
 
 const router = Router();
@@ -15,7 +14,6 @@ router.get('/users', getUsersController);
 router.post('/users', createUserController);
 router.put('/users/:id', updateUserController);
 router.delete('/users/:id', deleteUserController);
-router.get('/users/surveys/:id', getUserSurveysController)
 // Rota para obter líderes
 router.get('/leaders', getLeadersController);
 

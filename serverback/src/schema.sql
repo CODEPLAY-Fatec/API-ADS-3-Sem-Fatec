@@ -11,7 +11,7 @@ CREATE TABLE `users` (
   `password` VARCHAR(255) NOT NULL
 );
 
-CREATE TABLE `userpictures` (
+CREATE TABLE `user_pictures` (
   `user_id` INT NOT NULL,
   `image` MEDIUMBLOB
 );
@@ -31,14 +31,12 @@ CREATE TABLE `team_member` (
   `user_id` INT NOT NULL
 );
 
-CREATE TABLE `survey` (
-  `id` INT PRIMARY KEY AUTO_INCREMENT,
+CREATE TABLE `base_survey` (
+  `uid` INT PRIMARY KEY AUTO_INCREMENT,
   `team_id` INT NOT NULL,
-  `uid` VARCHAR(255) NOT NULL,
   `title` VARCHAR(255) NOT NULL,
   `description` TEXT(65535) NOT NULL,
   `category` ENUM ('Autoavaliação', 'Avaliação de líder', 'Avaliação de liderado') NOT NULL,
-  `created` date NOT NULL,
   `questions` JSON NOT NULL COMMENT 'Question[]: {
   Type: ''Multiple'' | ''Single'' | ''Text'', 
   Title: string,
@@ -47,13 +45,21 @@ CREATE TABLE `survey` (
 '
 );
 
+CREATE TABLE `survey_instance` (
+  `id` INT PRIMARY KEY AUTO_INCREMENT,
+  `uid` INT NOT NULL,
+  `created` DATE NOT NULL,
+  `open` BOOLEAN NOT NULL
+);
+
 CREATE TABLE `survey_answer` (
   `answer_id` INT PRIMARY KEY AUTO_INCREMENT,
   `user_id` INT NOT NULL,
   `survey_id` INT NOT NULL,
+  `survey_uid` INT NOT NULL,
   `created` date NOT NULL,
-  `data` JSON NOT NULL
-  `target_id` INT,
+  `data` JSON NOT NULL,
+  `target_id` INT
 );
 
 CREATE TABLE `answer_category` (
@@ -65,15 +71,20 @@ ALTER TABLE `team_leader` ADD FOREIGN KEY (`team_id`) REFERENCES `team` (`id`) O
 
 ALTER TABLE `team_leader` ADD FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
-ALTER TABLE `userpictures` ADD FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+ALTER TABLE `user_pictures` ADD FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 ALTER TABLE `team_member` ADD FOREIGN KEY (`team_id`) REFERENCES `team` (`id`) ON DELETE CASCADE;
 
 ALTER TABLE `team_member` ADD FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
-ALTER TABLE `survey_answer` ADD FOREIGN KEY (`survey_id`) REFERENCES `survey` (`id`) ON DELETE CASCADE;
+ALTER TABLE `survey_instance` ADD FOREIGN KEY (`uid`) REFERENCES `base_survey` (`uid`) ON DELETE CASCADE;
+
+ALTER TABLE `survey_answer` ADD FOREIGN KEY (`survey_id`) REFERENCES `survey_instance` (`id`) ON DELETE CASCADE;
+
+ALTER TABLE `survey_answer` ADD FOREIGN KEY (`survey_uid`) REFERENCES `survey_instance` (`uid`) ON DELETE CASCADE;
 
 ALTER TABLE `survey_answer` ADD FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
 -- insere usuário padrão (daniel@gmail.com, 123456)
 --INSERT INTO users (name, email, password, phoneNumber, isAdmin) VALUES ('daniel', 'daniel@gmail.com','$2b$10$t2USd40dO76L.tsQSOo3WO75faZlQFC.CGDJISS.LJgufLd7ru/Hm', '12912345678', 1 ) 
 

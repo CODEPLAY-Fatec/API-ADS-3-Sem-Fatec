@@ -1,106 +1,156 @@
+import { QueryResult } from "mysql2";
 import { db } from "../config/database2";
-import { Survey } from "../types/Survey";
+import Question from "../types/Question";
+import { BaseSurvey, SurveyInstance, UsableSurvey } from "../types/Survey";
 
-export const createSurvey = async (survey: Survey) => {
-    const query = `INSERT INTO survey (team_id, uid, title, description, category, created, questions) VALUES (?, ?, ?, ?, ?, ?, ?)`;
+export const createBaseSurvey = async (survey: BaseSurvey) => {
+    const query = `INSERT INTO base_survey (team_id, title, description, category, questions) VALUES (?, ?, ?, ?, ?)`;
     const questions = JSON.stringify(survey.questions);
     const values = [
         survey.team_id,
-        survey.uid,
         survey.title,
         survey.description,
         survey.category,
-        new Date(), // Data de criação atual
         questions,
     ];
     return db.query(query, values);
 };
 
+export const getBaseSurveys = async () => {
+    const query = `SELECT * FROM base_survey`;
+    return db.query(query);
+}
 
-export const getSurveys = async (team_id: number) => {
-    const query = `SELECT * FROM survey WHERE team_id = ?`;
-    return db.query(query, [team_id]);
-};
+export const getBaseSurveyByUID = async (uid: number) => {
+    const query = `SELECT * FROM base_survey WHERE uid = ?`;
+    return db.query(query, [uid]);
+}
 
-export const getSurvey = async (id: number) => {
-    const query = `SELECT * FROM survey WHERE id = ?`;
-    return db.query(query, [id]);
-};
-
-export const updateSurvey = async (id: number, survey: Survey) => {
-    const query = `UPDATE survey SET uid = ?, title = ?, description = ?, category = ?, questions = ? WHERE id = ?`;
+export const updateBaseSurvey = async (survey: BaseSurvey) => {
+    const query = `UPDATE base_survey SET team_id = ?, title = ?, description = ?, category = ?, questions = ? WHERE uid = ?`;
     const questions = JSON.stringify(survey.questions);
     const values = [
-        survey.uid,
+        survey.team_id,
         survey.title,
         survey.description,
         survey.category,
         questions,
-        id,
+        survey.uid,
     ];
     return db.query(query, values);
-};
+}
 
-export const deleteSurvey = async (id: number) => {
-    const query = `DELETE FROM survey WHERE id = ?`;
-    return db.query(query, [id]);
-};
+export const deleteBaseSurvey = async (uid: number) => {
+    const query = `DELETE FROM base_survey WHERE uid = ?`;
+    return db.query(query, [uid]);
+}
 
-export const getSurveysByTeam = async (teamId: string) => {
-    const query = `
-        SELECT 
-            id, 
-            team_id, 
-            title, 
-            description, 
-            category, 
-            questions 
-        FROM survey 
-        WHERE team_id = ?;
-    `;
-    const values = [teamId];
+export const getSurveyInstancesByUID = async (uid: number) => {
+    const query = `SELECT * FROM survey_instance WHERE uid = ?`;
+    return db.query(query, [uid]);
+}
 
-    try {
-        const [rows]: any[] = await db.query(query, values);
+export const createSurveyInstance = async (survey_uid: number) => {
+    const insertQuery = `INSERT INTO survey_instance (uid, created, open) VALUES (?, ?, 1)`;
+    const baseSurvey: BaseSurvey = await getBaseSurveyByUID(survey_uid).then((result: any) => result[0][0]);
+    return db.query(insertQuery, [baseSurvey.uid, new Date()]);
+}
 
-        if (!Array.isArray(rows) || rows.length === 0) {
-            return [];
-        }
+export const deleteSurveyInstance = async (survey_id: number) => {
+    const query = `DELETE FROM survey_instance WHERE id = ?`;
+    return db.query(query, [survey_id]);
+}
 
-        const surveys = rows.map((row: any) => {
-            let questions = [];
+export const setSurveyInstanceOpen = async (survey_id: number, state: number) => {
+    const query = `UPDATE survey_instance SET open = ? WHERE id = ?`;
+    return db.query(query, [state, survey_id]);
+}
 
-            if (typeof row.questions === 'string') {
-                try {
-                    questions = JSON.parse(row.questions); 
-                } catch (error) {
-                    console.error('Erro ao fazer parse das questions:', error);
-                }
-            } else {
-                questions = row.questions;
-            }
+export const getSurveyInstances = async () => {
+    const query = `SELECT * FROM survey_instance`;
+    return db.query(query);
+}
 
-            return {
-                id: row.id,
-                teamId: row.team_id,
-                title: row.title,
-                description: row.description,
-                category: row.category,
-                questions,
-            };
-        });
+export const getSurveyInstancesByTeam = async (teamId: number) => {
+    const query = `SELECT * FROM survey_instance WHERE team_id = ?`;
+    return db.query(query, [teamId]);
+}
 
-        return surveys;
-    } catch (error: any) {
-        console.error('Erro ao buscar pesquisas por time:', error);
-        throw new Error('Erro ao buscar pesquisas por time');
-    }
-};
-
-
-export const submitSurveyResponse = async (userId: string, surveyId: string, responses: any) => {
-    const query = `INSERT INTO survey_answer (user_id, survey_id, created, data) VALUES (?, ?, ?, ?)`;
-    const responseData = JSON.stringify(responses);
-    const values = [userId, surveyId, new Date(), responseData];
+export const submitSurveyResponse = async (user_id: number, survey_id: number, survey_uid: number, data: Question[], target_id?: number) => {
+    const query = `INSERT INTO survey_response (user_id, survey_id, survey_uid, data, target_id) VALUES (?, ?, ?, ?, ?)`;
+    const values = [
+        user_id,
+        survey_id,
+        survey_uid,
+        JSON.stringify(data),
+        target_id,
+    ];
     return db.query(query, values);
-};
+}
+// pegar as pesquisas disponíveis de um usuário
+export async function getUserSurveys(user_id: number): Promise<UsableSurvey[]> {
+    const userLedTeams = await db.query(`SELECT * FROM team_member WHERE user_id = ${user_id}`) // times onde o usuário é liderado
+    const userLeadsTeams = await db.query(`SELECT * FROM team_leader WHERE user_id = ${user_id}`) // times onde o usuário é líder
+
+    let Surveys: UsableSurvey[] = []
+    const BaseSurveys: { [key: string]: BaseSurvey } = {};
+    
+    async function AddSurveys(Scope: QueryResult, Category: "Avaliação de líder" | "Avaliação de liderado"): Promise<void> {
+        
+        for (let team of Scope as {team_id: number, user_id: number}[]) {
+            const surveys = await db.query(`
+                SELECT si.* 
+                FROM survey_instance si
+                JOIN base_survey bs ON si.uid = bs.uid
+                WHERE bs.team_id = ${team.team_id} 
+                  AND (bs.category = 'Autoavaliação' OR bs.category = '${Category}')
+              `);
+                          // isso aqui é macumba.
+            for (let survey of surveys[0] as SurveyInstance[]) {
+                let BaseSurvey = BaseSurveys[survey.uid]
+                if (!BaseSurvey) {
+                    const baseSurveyResult = await getBaseSurveyByUID(survey.uid);
+                    BaseSurvey = (baseSurveyResult as unknown as [BaseSurvey[]])[0][0];
+                    BaseSurveys[survey.uid] = BaseSurvey;
+                    //                      meu deus.
+                }
+                
+                let UsableSurvey: UsableSurvey
+                if (!BaseSurvey) continue;
+                
+                if (BaseSurvey.category == "Autoavaliação") {
+                    UsableSurvey = {
+                        survey_id: survey.id,
+                        title: BaseSurvey.title,
+                        description: BaseSurvey.description,
+                        category: BaseSurvey.category,
+                        questions: BaseSurvey.questions
+                    }
+                    Surveys.push(UsableSurvey)
+                    
+                } else if (BaseSurvey.category == Category) {
+                    // pegar todos os líderes do time
+                    const teamLeaders = await db.query(`SELECT * FROM team_leader WHERE team_id = ${team.team_id}`)
+                    for (let teamLeader of teamLeaders[0] as { user_id: number, team_id: number}[]) {
+                        // clonar pesquisa com target_id = teamLeader.user_id
+                        UsableSurvey = {
+                            survey_id: survey.id,
+                            title: BaseSurvey.title,
+                            description: BaseSurvey.description,
+                            category: BaseSurvey.category,
+                            questions: BaseSurvey.questions,
+                            target_id: teamLeader.user_id
+                        }
+                        Surveys.push(UsableSurvey)
+                    }
+                }
+            }
+        }
+    }
+    await AddSurveys(userLedTeams[0], "Avaliação de líder")
+    await AddSurveys(userLeadsTeams[0], "Avaliação de liderado")
+    // eu odeio esse código
+    
+    
+    return Surveys
+}

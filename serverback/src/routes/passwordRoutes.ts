@@ -3,6 +3,6 @@ import { alterarSenhaController } from '../controllers/passwordController';
 
 const router = express.Router();
 
-router.post('/change_password', alterarSenhaController);
+router.put('/change_password', alterarSenhaController);
 
-export default router;
+export default router; 

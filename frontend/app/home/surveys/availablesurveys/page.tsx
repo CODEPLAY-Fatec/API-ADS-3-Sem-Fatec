@@ -85,7 +85,7 @@ export default function RespondSurveysPage() {
 
                 setTeamName(currentTeam.name);
 
-                const teamId = currentTeam.id;
+                //const teamId = currentTeam.id;
 
                 const surveysResponse = await fetch(`http://localhost:3001/api/users/surveys/${userId}`);
                 if (!surveysResponse.ok) {

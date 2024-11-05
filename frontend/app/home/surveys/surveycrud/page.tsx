@@ -21,9 +21,10 @@ const SurveyCreation = () => {
     const [questions, setQuestions] = useState<Question[]>([]);
     const [newQuestion, setNewQuestion] = useState<Question>({ type: "Text", question: "", options: [], category: "" });
     const [newOption, setNewOption] = useState<string>("");
+    const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
 
     const surveyCategories: Survey["category"][] = ["Autoavaliação", "Avaliação de líder", "Avaliação de liderado"];
-    const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
+    const MAX_QUESTIONS = 20; // Definindo o limite de perguntas
 
     useEffect(() => {
         const fetchCategories = async () => {
@@ -52,8 +53,14 @@ const SurveyCreation = () => {
     }, []);
 
     const handleAddQuestion = () => {
+        // Verificando se o número de perguntas já atingiu o máximo
+        if (questions.length >= MAX_QUESTIONS) {
+            setFeedbackMessage("Limite de 20 perguntas atingido."); // Mensagem de limite
+            return; // Impede a adição de mais perguntas
+        }
         setQuestions([...questions, newQuestion]);
         setNewQuestion({ type: "Text", question: "", options: [], category: "" });
+        setFeedbackMessage(null); // Limpa a mensagem de feedback
     };
 
     const handleAddOption = () => {
@@ -170,8 +177,7 @@ const SurveyCreation = () => {
                         <select
                             className="form-select mb-3"
                             value={newQuestion.type}
-                            onChange={(e) => setNewQuestion({ ...newQuestion, type: e.target.value as "Multiple" | "Text" | "Single" })}
-                        >
+                            onChange={(e) => setNewQuestion({ ...newQuestion, type: e.target.value as "Multiple" | "Text" | "Single" })}>
                             <option value="Text">Pergunta Aberta</option>
                             <option value="Multiple">Múltipla Escolha</option>
                             <option value="Single">Escolha Única</option>
@@ -222,20 +228,10 @@ const SurveyCreation = () => {
                             <h5 className="card-title">Perguntas Adicionadas</h5>
                             <ul className="list-group">
                                 {questions.map((question, index) => (
-                                    <li key={index} className="list-group-item mb-3 d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <strong>{index + 1}. {question.question}</strong>
-                                            {/* Verificando se 'question.options' está definido */}
-                                            {question.type !== "Text" && (question.options?.length || 0) > 0 && (
-                                                <ul className="list-group mt-2">
-                                                    {(question.options || []).map((option, optionIndex) => (
-                                                        <li key={optionIndex} className="list-group-item">{option}</li>
-                                                    ))}
-                                                </ul>
-                                            )}
-                                        </div>
+                                    <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
+                                        {question.question}
                                         <button className="btn btn-danger" onClick={() => handleDeleteQuestion(index)}>
-                                            Deletar Pergunta
+                                            Remover
                                         </button>
                                     </li>
                                 ))}
@@ -245,7 +241,7 @@ const SurveyCreation = () => {
                 </div>
             )}
 
-            <button className="btn btn-primary mt-3" onClick={handleCreateSurvey}>
+            <button className="btn btn-primary mt-4" onClick={handleCreateSurvey}>
                 Criar Pesquisa
             </button>
         </div>

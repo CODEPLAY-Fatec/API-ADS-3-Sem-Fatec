@@ -123,7 +123,7 @@ export default function Page() {
             <div className="h-1/2 bg-white rounded-lg flex items-center justify-center shadow-lg border border-gray-300">
               <PieChart width={730} height={250}>
                 <Pie data={data01} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={50} fill="#8884d8" />
-                <Pie data={data02} dataKey="value" nameKey="name" cx="50%" cy="50%"  outerRadius={80} fill="#82ca9d" label />
+                <Pie data={data02} dataKey="value" nameKey="name" cx="50%" cy="50%"  outerRadius={80} fill="#82ca9d"       label={({ name, value }) => `${name}: ${value}`} />
               </PieChart>
             </div>
             {/* Duas caixas lado a lado */}

@@ -2,7 +2,7 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import Question from "@/types/Question";
-import { Survey } from "@/types/Survey";
+import { BaseSurvey } from "@/types/Survey";
 import Team from "@/types/Team";
 
 type QuestionCategory = {
@@ -13,7 +13,7 @@ type QuestionCategory = {
 const SurveyCreation = () => {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
-    const [category, setCategory] = useState<Survey["category"] | null>(null);
+    const [category, setCategory] = useState<BaseSurvey["category"] | null>(null);
     const [team_id, setTeamId] = useState<number>(0);
     const [categoryId, setCategoryId] = useState("");
     const [categories, setCategories] = useState<QuestionCategory[]>([]);
@@ -24,7 +24,7 @@ const SurveyCreation = () => {
     const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
     const [showPopup, setShowPopup] = useState(false); // Estado para controlar a exibição do popup
 
-    const surveyCategories: Survey["category"][] = ["Autoavaliação", "Avaliação de líder", "Avaliação de liderado"];
+    const surveyCategories: BaseSurvey["category"][] = ["Autoavaliação", "Avaliação de líder", "Avaliação de liderado"];
     const MAX_QUESTIONS = 20; // Definindo o limite de perguntas
 
     useEffect(() => {
@@ -90,16 +90,17 @@ const SurveyCreation = () => {
         }
 
         try {
-            const newSurvey: Survey = {
+            const newSurvey: BaseSurvey = {
                 team_id,
-                uid: "", // Será gerado automaticamente
                 title,
                 description,
                 category,
-                created: new Date(),
                 questions,
             };
-            await axios.post("http://localhost:3001/api/survey", newSurvey);
+            await axios.post("http://localhost:3001/api/survey/base", {
+                survey: newSurvey,
+                open: true
+            });
             setFeedbackMessage("Pesquisa criada com sucesso!");
             setTitle("");
             setDescription("");
@@ -154,7 +155,7 @@ const SurveyCreation = () => {
                         </div>
                         <div className="mb-3">
                             <label>Categoria</label>
-                            <select className="form-select" value={category ?? ""} onChange={(e) => setCategory(e.target.value as Survey["category"])}>
+                            <select className="form-select" value={category ?? ""} onChange={(e) => setCategory(e.target.value as BaseSurvey["category"])}>
                                 <option value="">Selecione uma categoria</option>
                                 {surveyCategories.map((cat, index) => (
                                     <option key={index} value={cat}>

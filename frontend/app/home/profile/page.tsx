@@ -3,7 +3,8 @@ import React, { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import Cookie from "js-cookie";
 import axios from "axios";
-import { Pie, PieChart } from "recharts"; //import para graficos estou testando
+import { PieChart, Pie, BarChart, Bar, Rectangle, XAxis, YAxis, CartesianGrid, Tooltip, Legend, } from "recharts";
+
 
 interface DecodedToken {
   id: string;
@@ -24,6 +25,33 @@ interface UserData {
   isAdmin: boolean;
   teamRoles: TeamRole[];
 }
+
+const data = [
+  {
+    name: 'Page A',
+    uv: 4000,
+    pv: 2400,
+    amt: 2400,
+  },
+  {
+    name: 'Page B',
+    uv: 3000,
+    pv: 1398,
+    amt: 2210,
+  },
+  {
+    name: 'Page C',
+    uv: 2000,
+    pv: 9800,
+    amt: 2290,
+  },
+  {
+    name: 'Page D',
+    uv: 2780,
+    pv: 3908,
+    amt: 2000,
+  },
+];
 
 const data01 = [
   {
@@ -51,6 +79,7 @@ const data01 = [
     "value": 189
   }
 ];
+
 const data02 = [
   {
     "name": "Group A",
@@ -121,23 +150,53 @@ export default function Page() {
           <div className="flex flex-col space-y-6 h-full">
             {/* Caixa grande no topo */}
             <div className="h-1/2 bg-white rounded-lg flex items-center justify-center shadow-lg border border-gray-300">
-              <PieChart width={730} height={250}>
-                <Pie data={data01} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={50} fill="#8884d8" />
-                <Pie data={data02} dataKey="value" nameKey="name" cx="50%" cy="50%"  outerRadius={80} fill="#82ca9d"       label={({ name, value }) => `${name}: ${value}`} />
-              </PieChart>
+              <div className="w-full flex justify-center m-1.5"> {/* Adicionando margem ao redor do contêiner */}
+              <BarChart
+          width={500}
+          height={300}
+          data={data}
+          margin={{
+            top: 5,
+            right: 30,
+            left: 20,
+            bottom: 5,
+          }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="name" />
+          <YAxis />
+          <Tooltip />
+          <Legend />
+          <Bar dataKey="pv" fill="#32ADE6" activeBar={<Rectangle fill="pink" stroke="blue" />} />
+          <Bar dataKey="uv" fill="#82ca9d" activeBar={<Rectangle fill="gold" stroke="purple" />} />
+        </BarChart>
+              </div>
             </div>
             {/* Duas caixas lado a lado */}
             <div className="flex space-x-6 h-1/2">
-              <div className="w-1/2 h-full bg-white rounded-lg flex items-center justify-center shadow-lg border border-gray-300">
-                <p className="text-gray-500">
-                  O usuário não possui dashboards no momento
-                </p>
+            <div className="w-1/2 h-full bg-white rounded-lg flex items-center justify-center shadow-lg border border-gray-300">
+              <PieChart width={400} height={400}>
+          <Pie
+            dataKey="value"
+            isAnimationActive={false}
+            data={data01}
+            cx="50%"
+            cy="50%"
+            outerRadius={80}
+            fill="#32ADE6"
+            label
+          />
+          <Pie dataKey="value" data={data02} cx={500} cy={200} innerRadius={60} outerRadius={100} fill="#82ca9d" />
+          <Tooltip />
+        </PieChart>
               </div>
-              <div className="w-1/2 h-full bg-white rounded-lg flex items-center justify-center shadow-lg border border-gray-300">
-                <p className="text-gray-500">
-                  O usuário não possui dashboards no momento
-                </p>
-              </div>
+
+          <div className="w-1/2 h-full bg-white rounded-lg flex items-center justify-center shadow-lg border border-gray-300 p-4">
+            <p className="text-gray-500">
+              As explicações/categorias/coisas extras dos dashboards podem ficar aqui
+            </p>
+          </div>
+
             </div>
           </div>
         </div>

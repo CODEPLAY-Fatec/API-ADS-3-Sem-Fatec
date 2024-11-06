@@ -23,6 +23,8 @@ const SurveyCreation = () => {
     const [newOption, setNewOption] = useState<string>("");
     const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
     const [showPopup, setShowPopup] = useState(false); // Estado para controlar a exibição do popup
+    const [editingIndex, setEditingIndex] = useState<number | null>(null);
+    const [editingText, setEditingText] = useState<string>("");
 
     const surveyCategories: BaseSurvey["category"][] = ["Autoavaliação", "Avaliação de líder", "Avaliação de liderado"];
     const MAX_QUESTIONS = 20; // Definindo o limite de perguntas
@@ -81,6 +83,19 @@ const SurveyCreation = () => {
 
     const handleDeleteQuestion = (index: number) => {
         setQuestions(questions.filter((_, i) => i !== index));
+    };
+
+    const handleEditQuestion = (index: number, text: string) => {
+        setEditingIndex(index);
+        setEditingText(text);
+    }
+
+    const handleSaveQuestion = (index: number) => {
+        const updatedQuestions = [...questions];
+        updatedQuestions[index].question = editingText;
+        setQuestions(updatedQuestions);
+        setEditingIndex(null); // Exit editing mode
+        setEditingText(""); // Clear editing text
     };
 
     const handleCreateSurvey = async () => {
@@ -253,11 +268,39 @@ const SurveyCreation = () => {
                         <h5 className="card-title">Perguntas Adicionadas</h5>
                         <ul className="list-group">
                             {questions.map((question, index) => (
-                                <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
-                                    {question.question}
-                                    <button className="btn btn-sm btn-danger" onClick={() => handleDeleteQuestion(index)}>
-                                        Remover
-                                    </button>
+                                <li key={index} className="list-group-item d-flex justify-between align-items-center">
+                                    {editingIndex === index ? (
+                                        <>
+                                            <input
+                                                type="text"
+                                                value={editingText}
+                                                onChange={(e) => setEditingText(e.target.value)}
+                                                className="form-control mr-2"
+                                            />
+                                            <button
+                                                onClick={() => handleSaveQuestion(index)}
+                                                className="btn btn-sm btn-success"
+                                            >
+                                                Salvar
+                                            </button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span>{question.question}</span>
+                                            <button
+                                                onClick={() => handleEditQuestion(index, question.question)}
+                                                className="btn btn-sm btn-primary ml-auto "
+                                            >
+                                                Editar
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteQuestion(index)}
+                                                className="btn btn-sm btn-danger ml-2"
+                                            >
+                                                Remover
+                                            </button>
+                                        </>
+                                    )}
                                 </li>
                             ))}
                         </ul>

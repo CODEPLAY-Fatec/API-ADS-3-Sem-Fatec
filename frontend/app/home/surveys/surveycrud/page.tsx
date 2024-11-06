@@ -22,6 +22,7 @@ const SurveyCreation = () => {
     const [newQuestion, setNewQuestion] = useState<Question>({ type: "Text", question: "", options: [], category: "" });
     const [newOption, setNewOption] = useState<string>("");
     const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
+    const [showPopup, setShowPopup] = useState(false); // Estado para controlar a exibição do popup
 
     const surveyCategories: Survey["category"][] = ["Autoavaliação", "Avaliação de líder", "Avaliação de liderado"];
     const MAX_QUESTIONS = 20; // Definindo o limite de perguntas
@@ -53,10 +54,10 @@ const SurveyCreation = () => {
     }, []);
 
     const handleAddQuestion = () => {
-        // Verificando se o número de perguntas já atingiu o máximo
         if (questions.length >= MAX_QUESTIONS) {
             setFeedbackMessage("Limite de 20 perguntas atingido."); // Mensagem de limite
-            return; // Impede a adição de mais perguntas
+            setShowPopup(true); // Exibe o popup
+            return;
         }
         setQuestions([...questions, newQuestion]);
         setNewQuestion({ type: "Text", question: "", options: [], category: "" });
@@ -110,10 +111,34 @@ const SurveyCreation = () => {
         }
     };
 
+    const closePopup = () => {
+        setShowPopup(false);
+    };
+
     return (
         <div className="container mt-4">
             <h1 className="text-center font-bold mb-4">Criação de Pesquisa</h1>
-            {feedbackMessage && <div className="alert alert-info">{feedbackMessage}</div>}
+
+            {showPopup && (
+                <div className="modal fade show d-block" tabIndex={-1} style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}>
+                    <div className="modal-dialog">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">Limite de Perguntas Atingido</h5>
+                                <button type="button" className="btn-close" onClick={closePopup}></button>
+                            </div>
+                            <div className="modal-body">
+                                <p>Você atingiu o limite máximo de 20 perguntas para esta pesquisa.</p>
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary" onClick={closePopup}>
+                                    Fechar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <div className="mb-4">
                 <div className="card shadow-sm">
@@ -203,7 +228,7 @@ const SurveyCreation = () => {
                                             {newQuestion.options.map((option, optionIndex) => (
                                                 <li key={optionIndex} className="list-group-item d-flex justify-content-between align-items-center">
                                                     {option}
-                                                    <button className="btn btn-danger btn-sm" onClick={() => handleRemoveOption(optionIndex)}>
+                                                    <button className="btn btn-sm btn-danger" onClick={() => handleRemoveOption(optionIndex)}>
                                                         Remover
                                                     </button>
                                                 </li>
@@ -214,36 +239,36 @@ const SurveyCreation = () => {
                             </div>
                         )}
 
-                        <button className="btn btn-success mt-2" onClick={handleAddQuestion}>
+                        <button className="btn btn-primary" onClick={handleAddQuestion}>
                             Adicionar Pergunta
                         </button>
                     </div>
                 </div>
             </div>
 
-            {questions.length > 0 && (
-                <div className="mb-4">
-                    <div className="card shadow-sm">
-                        <div className="card-body">
-                            <h5 className="card-title">Perguntas Adicionadas</h5>
-                            <ul className="list-group">
-                                {questions.map((question, index) => (
-                                    <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
-                                        {question.question}
-                                        <button className="btn btn-danger" onClick={() => handleDeleteQuestion(index)}>
-                                            Remover
-                                        </button>
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
+            <div className="mb-4">
+                <div className="card shadow-sm">
+                    <div className="card-body">
+                        <h5 className="card-title">Perguntas Adicionadas</h5>
+                        <ul className="list-group">
+                            {questions.map((question, index) => (
+                                <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
+                                    {question.question}
+                                    <button className="btn btn-sm btn-danger" onClick={() => handleDeleteQuestion(index)}>
+                                        Remover
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
                     </div>
                 </div>
-            )}
+            </div>
 
-            <button className="btn btn-primary mt-4" onClick={handleCreateSurvey}>
+            <button className="btn btn-success" onClick={handleCreateSurvey}>
                 Criar Pesquisa
             </button>
+
+            {feedbackMessage && <p className="text-danger mt-3">{feedbackMessage}</p>}
         </div>
     );
 };

@@ -1,9 +1,9 @@
-import { QueryResult } from "mysql2";
+import { QueryResult, ResultSetHeader } from "mysql2";
 import { db } from "../config/database2";
 import Question from "../types/Question";
 import { BaseSurvey, SurveyInstance, UsableSurvey } from "../types/Survey";
 
-export const createBaseSurvey = async (survey: BaseSurvey) => {
+export const createBaseSurvey = async (survey: BaseSurvey, open: boolean) => {
     const query = `INSERT INTO base_survey (team_id, title, description, category, questions) VALUES (?, ?, ?, ?, ?)`;
     const questions = JSON.stringify(survey.questions);
     const values = [
@@ -13,7 +13,11 @@ export const createBaseSurvey = async (survey: BaseSurvey) => {
         survey.category,
         questions,
     ];
-    return db.query(query, values);
+    const result = await db.query(query, values);
+    const uid: ResultSetHeader = result[0] as unknown as ResultSetHeader;
+    if (open) {
+      await createSurveyInstance(uid.insertId);
+    }
 };
 
 export const getBaseSurveys = async () => {

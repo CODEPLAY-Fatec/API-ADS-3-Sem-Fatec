@@ -3,12 +3,14 @@ import { createBaseSurvey, createSurveyInstance, deleteBaseSurvey, deleteSurveyI
 import { BaseSurvey } from "../types/Survey";
 
 export const createBaseSurveyController = async (req: Request, res: Response) => {
-    const survey: BaseSurvey = req.body;
+    const survey: BaseSurvey = req.body.survey;
+    const open: boolean = req.body.open;
     try {
-        await createBaseSurvey(survey);
+        await createBaseSurvey(survey, open);
         res.status(201).json({ message: 'Survey created successfully' });
     } catch (error: any) {
         res.status(500).json({ error: error.message });
+        throw error;
     }
 }
 

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createBaseSurveyController, createSurveyInstanceController, deleteBaseSurveyController, deleteSurveyInstanceController, getBaseSurveyByUIDController, getBaseSurveysController, getSurveyInstancesByUIDController, getSurveyInstancesController, getUserSurveysController, setSurveyInstanceOpenController, updateBaseSurveyController } from "../controllers/surveyController";
+import { answerSurveyController, createBaseSurveyController, createSurveyInstanceController, deleteBaseSurveyController, deleteSurveyInstanceController, getBaseSurveyByUIDController, getBaseSurveysController, getSurveyInstancesByUIDController, getSurveyInstancesController, getSurveyResponsesByBaseSurveyController, getSurveyResponsesBySurveyInstanceController, getSurveyResponsesByTargetController, getSurveyResponsesByUserController, getUserSurveysController, removeSurveyResponseController, setSurveyInstanceOpenController, updateBaseSurveyController } from "../controllers/surveyController";
 const router = Router();
 
 router.post('/survey/base', createBaseSurveyController); // cria pesquisa base
@@ -15,5 +15,12 @@ router.delete('/survey/instance/:survey_id', deleteSurveyInstanceController); //
 router.put('/survey/instance/:survey_id/:state', setSurveyInstanceOpenController); // abre ou fecha instância de pesquisa
 
 router.get('/survey/available/:user_id', getUserSurveysController); // abre ou fecha instância de pesquisa
+
+router.post('/survey/answers/', answerSurveyController); // envia respostas de pesquisa
+router.delete('/survey/answers/:survey_id', removeSurveyResponseController); // deleta respostas de pesquisa
+router.get('/survey/answers/user/:user_id', getSurveyResponsesByUserController); // pega respostas de pesquisa
+router.get('/survey/answers/base/:survey_uid', getSurveyResponsesByBaseSurveyController); // pega respostas de pesquisa
+router.get('/survey/answers/instance/:survey_id', getSurveyResponsesBySurveyInstanceController); // pega respostas de pesquisa
+router.get('/survey/answers/target/:target_id', getSurveyResponsesByTargetController); // pega respostas de pesquisa
 
 export default router;

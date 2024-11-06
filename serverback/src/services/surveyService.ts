@@ -160,3 +160,45 @@ export async function getUserSurveys(user_id: number): Promise<UsableSurvey[]> {
     
     return Surveys
 }
+
+export const answerSurvey = async (user_id: number, survey: UsableSurvey, answers: Question[]) => {
+    // TODO: check if user can answer survey
+    const survey_uid = db.query(`SELECT uid FROM survey_instance WHERE id = ${survey.survey_id}`).then((result: any) => result[0][0].uid);
+
+    const query = `INSERT INTO survey_answer (user_id, survey_id, survey_uid, created, data, target_id) VALUES (?, ?, ?, ?, ?, ?)`;
+    const values = [
+        user_id,
+        survey.survey_id,
+        survey_uid,
+        new Date(),
+        JSON.stringify(answers),
+        survey.target_id,
+    ];
+
+    return db.query(query, values);
+}
+
+export const removeSurveyResponse = async (response_id: number) => {
+    const query = `DELETE FROM survey_answer WHERE id = ?`;
+    return db.query(query, [response_id]);
+}
+
+export const getSurveyResponsesByUser = async (user_id: number) => {
+    const query = `SELECT * FROM survey_answer WHERE user_id = ?`;
+    return db.query(query, [user_id]);
+}
+
+export const getSurveyResponsesBySurveyInstance = async (survey_id: number) => {
+    const query = `SELECT * FROM survey_answer WHERE survey_id = ?`;
+    return db.query(query, [survey_id]);
+}
+
+export const getSurveyResponsesByBaseSurvey = async (survey_uid: number) => {
+    const query = `SELECT * FROM survey_answer WHERE survey_uid = ?`;
+    return db.query(query, [survey_uid]);
+}
+
+export const getSurveyResponsesByTarget = async (target_id: number) => {
+    const query = `SELECT * FROM survey_answer WHERE target_id = ?`;
+    return db.query(query, [target_id]);
+}

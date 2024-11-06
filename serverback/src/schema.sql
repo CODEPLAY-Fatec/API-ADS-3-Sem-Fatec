@@ -33,7 +33,6 @@ CREATE TABLE `team_member` (
 
 CREATE TABLE `base_survey` (
   `uid` INT PRIMARY KEY AUTO_INCREMENT,
-  `team_id` INT NOT NULL,
   `title` VARCHAR(255) NOT NULL,
   `description` TEXT(65535) NOT NULL,
   `category` ENUM ('Autoavaliação', 'Avaliação de líder', 'Avaliação de liderado') NOT NULL,
@@ -48,6 +47,7 @@ CREATE TABLE `base_survey` (
 CREATE TABLE `survey_instance` (
   `id` INT PRIMARY KEY AUTO_INCREMENT,
   `uid` INT NOT NULL,
+  `team_id` INT NOT NULL,
   `created` DATE NOT NULL,
   `open` BOOLEAN NOT NULL
 );
@@ -82,6 +82,8 @@ ALTER TABLE `survey_instance` ADD FOREIGN KEY (`uid`) REFERENCES `base_survey` (
 ALTER TABLE `survey_answer` ADD FOREIGN KEY (`survey_id`) REFERENCES `survey_instance` (`id`) ON DELETE CASCADE;
 
 ALTER TABLE `survey_answer` ADD FOREIGN KEY (`survey_uid`) REFERENCES `survey_instance` (`uid`) ON DELETE CASCADE;
+
+ALTER TABLE `survey_instance` ADD FOREIGN KEY (`team_id`) REFERENCES `team` (`id`) ON DELETE CASCADE;
 
 ALTER TABLE `survey_answer` ADD FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 

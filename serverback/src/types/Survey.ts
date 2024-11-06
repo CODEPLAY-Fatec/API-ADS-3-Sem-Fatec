@@ -2,7 +2,6 @@ import Question from "./Question";
 
 type BaseSurvey = {
   uid: number; // Identificador único do surve
-  team_id: number; 
   title: string; // Título do survey
   description: string; 
   category: "Autoavaliação" | "Avaliação de líder" | "Avaliação de liderado"; // Enum
@@ -13,6 +12,7 @@ type BaseSurvey = {
 type SurveyInstance = {
   id: number;
   uid: number;
+  team_id: number; 
   created: Date;
   open: boolean;
 }
@@ -24,6 +24,7 @@ type UsableSurvey = {
   category: "Autoavaliação" | "Avaliação de líder" | "Avaliação de liderado";
   questions: Question[];
   target_id?: number;
+  team_id: number;
 }
 
 export type { BaseSurvey, SurveyInstance, UsableSurvey };

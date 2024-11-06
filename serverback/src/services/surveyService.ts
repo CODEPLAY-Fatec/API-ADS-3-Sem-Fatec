@@ -3,11 +3,10 @@ import { db } from "../config/database2";
 import Question from "../types/Question";
 import { BaseSurvey, SurveyInstance, UsableSurvey } from "../types/Survey";
 
-export const createBaseSurvey = async (survey: BaseSurvey, open: boolean) => {
+export const createBaseSurvey = async (survey: BaseSurvey, open: boolean, teams?: number[]) => {
     const query = `INSERT INTO base_survey (team_id, title, description, category, questions) VALUES (?, ?, ?, ?, ?)`;
     const questions = JSON.stringify(survey.questions);
     const values = [
-        survey.team_id,
         survey.title,
         survey.description,
         survey.category,
@@ -15,8 +14,10 @@ export const createBaseSurvey = async (survey: BaseSurvey, open: boolean) => {
     ];
     const result = await db.query(query, values);
     const uid: ResultSetHeader = result[0] as unknown as ResultSetHeader;
-    if (open) {
-      await createSurveyInstance(uid.insertId);
+    if (open && teams) {
+        for (const team of teams) {
+            await createSurveyInstance(uid.insertId, team);
+        }
     }
 };
 
@@ -34,7 +35,6 @@ export const updateBaseSurvey = async (survey: BaseSurvey) => {
     const query = `UPDATE base_survey SET team_id = ?, title = ?, description = ?, category = ?, questions = ? WHERE uid = ?`;
     const questions = JSON.stringify(survey.questions);
     const values = [
-        survey.team_id,
         survey.title,
         survey.description,
         survey.category,
@@ -54,8 +54,8 @@ export const getSurveyInstancesByUID = async (uid: number) => {
     return db.query(query, [uid]);
 }
 
-export const createSurveyInstance = async (survey_uid: number) => {
-    const insertQuery = `INSERT INTO survey_instance (uid, created, open) VALUES (?, ?, 1)`;
+export const createSurveyInstance = async (survey_uid: number, team_id: number) => {
+    const insertQuery = `INSERT INTO survey_instance (uid, created, open, team_id) VALUES (?, ?, 1, ?)`;
     const baseSurvey: BaseSurvey = await getBaseSurveyByUID(survey_uid).then((result: any) => result[0][0]);
     return db.query(insertQuery, [baseSurvey.uid, new Date()]);
 }
@@ -106,7 +106,7 @@ export async function getUserSurveys(user_id: number): Promise<UsableSurvey[]> {
                 SELECT si.* 
                 FROM survey_instance si
                 JOIN base_survey bs ON si.uid = bs.uid
-                WHERE bs.team_id = ${team.team_id} 
+                WHERE si.team_id = ${team.team_id} 
                   AND (bs.category = 'Autoavaliação' OR bs.category = '${Category}')
               `);
                           // isso aqui é macumba.
@@ -128,7 +128,8 @@ export async function getUserSurveys(user_id: number): Promise<UsableSurvey[]> {
                         title: BaseSurvey.title,
                         description: BaseSurvey.description,
                         category: BaseSurvey.category,
-                        questions: BaseSurvey.questions
+                        questions: BaseSurvey.questions,
+                        team_id: survey.team_id
                     }
                     Surveys.push(UsableSurvey)
                     
@@ -143,7 +144,8 @@ export async function getUserSurveys(user_id: number): Promise<UsableSurvey[]> {
                             description: BaseSurvey.description,
                             category: BaseSurvey.category,
                             questions: BaseSurvey.questions,
-                            target_id: teamLeader.user_id
+                            target_id: teamLeader.user_id,
+                            team_id: survey.team_id
                         }
                         Surveys.push(UsableSurvey)
                     }

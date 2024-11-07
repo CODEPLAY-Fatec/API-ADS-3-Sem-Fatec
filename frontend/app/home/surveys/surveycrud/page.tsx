@@ -6,6 +6,8 @@ import Question from "@/types/Question";
 import { BaseSurvey } from "@/types/Survey";
 import Team from "@/types/Team";
 
+//fazer a possibilidade de adicionar mais times, no caso o backend ja esta preparado
+
 type QuestionCategory = {
     id: number;
     name: string;
@@ -113,7 +115,6 @@ const SurveyCreation = () => {
 
         try {
             const newSurvey: BaseSurvey = {
-                team_id,
                 title,
                 description,
                 category,
@@ -121,7 +122,8 @@ const SurveyCreation = () => {
             };
             await axios.post("http://localhost:3001/api/survey/base", {
                 survey: newSurvey,
-                open: true
+                open: true,
+                teams : [team_id]
             });            
             setFeedbackMessage("Pesquisa criada com sucesso!");
             setTitle("");

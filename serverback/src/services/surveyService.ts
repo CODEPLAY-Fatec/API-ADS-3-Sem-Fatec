@@ -57,7 +57,7 @@ export const getSurveyInstancesByUID = async (uid: number) => {
 export const createSurveyInstance = async (survey_uid: number, team_id: number) => {
     const insertQuery = `INSERT INTO survey_instance (uid, created, open, team_id) VALUES (?, ?, 1, ?)`;
     const baseSurvey: BaseSurvey = await getBaseSurveyByUID(survey_uid).then((result: any) => result[0][0]);
-    return db.query(insertQuery, [baseSurvey.uid, new Date()]);
+    return db.query(insertQuery, [baseSurvey.uid, new Date(),team_id]);
 }
 
 export const deleteSurveyInstance = async (survey_id: number) => {

@@ -1,7 +1,6 @@
 import Question from "./Question";
 
 type BaseSurvey = {
-  team_id: number; 
   title: string; // Título do survey
   description: string; 
   category: "Autoavaliação" | "Avaliação de líder" | "Avaliação de liderado"; // Enum

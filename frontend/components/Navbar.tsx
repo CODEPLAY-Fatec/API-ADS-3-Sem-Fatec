@@ -152,11 +152,10 @@ const Navbar: React.FC = () => {
 
       <div className="text-center d-flex justify-content-center mb-3"> 
   <Link href="/home/changepasswordin" className="btn btn-warning me-2">
-    <KeyRound className="me-1" /> 
+    <KeyRound className="me-0" /> 
   </Link>
   <button onClick={handleLogout} className="btn btn-danger d-flex align-items-center">
-    Sair
-    <LogOut className="ms-2" /> 
+    <LogOut className="me-0" /> 
   </button>
 </div>
     </div>

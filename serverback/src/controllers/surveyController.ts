@@ -5,8 +5,9 @@ import { BaseSurvey } from "../types/Survey";
 export const createBaseSurveyController = async (req: Request, res: Response) => {
     const survey: BaseSurvey = req.body.survey;
     const open: boolean = req.body.open;
+    const teams: [] = req.body.teams
     try {
-        await createBaseSurvey(survey, open);
+        await createBaseSurvey(survey, open,teams);
         res.status(201).json({ message: 'Survey created successfully' });
     } catch (error: any) {
         res.status(500).json({ error: error.message });

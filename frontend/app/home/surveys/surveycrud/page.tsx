@@ -1,6 +1,7 @@
 "use client";
+import { useState, useEffect } from "react";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import Link from "next/link";
 import Question from "@/types/Question";
 import { BaseSurvey } from "@/types/Survey";
 import Team from "@/types/Team";
@@ -21,13 +22,12 @@ const SurveyCreation = () => {
     const [questions, setQuestions] = useState<Question[]>([]);
     const [newQuestion, setNewQuestion] = useState<Question>({ type: "Text", question: "", options: [], category: "" });
     const [newOption, setNewOption] = useState<string>("");
-    const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
-    const [showPopup, setShowPopup] = useState(false); // Estado para controlar a exibição do popup
+    const [isEditing, setIsEditing] = useState<boolean>(false);
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
-    const [editingText, setEditingText] = useState<string>("");
+    const [showModal, setShowModal] = useState(false);
 
     const surveyCategories: BaseSurvey["category"][] = ["Autoavaliação", "Avaliação de líder", "Avaliação de liderado"];
-    const MAX_QUESTIONS = 20; // Definindo o limite de perguntas
+    const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchCategories = async () => {
@@ -38,7 +38,6 @@ const SurveyCreation = () => {
                 console.error("Erro ao buscar categorias:", error);
             }
         };
-
         fetchCategories();
     }, []);
 
@@ -51,20 +50,41 @@ const SurveyCreation = () => {
                 console.error("Erro ao buscar times:", error);
             }
         };
-
         fetchTeams();
     }, []);
 
+    const resetModal = () => {
+        setNewQuestion({ type: "Text", question: "", options: [], category: "" });
+        setNewOption("");
+        setIsEditing(false);
+        setEditingIndex(null);
+        setShowModal(false);
+    };
+
     const handleAddQuestion = () => {
-        if (questions.length >= MAX_QUESTIONS) {
-            setFeedbackMessage("Limite de 20 perguntas atingido."); // Mensagem de limite
-            setShowPopup(true); // Exibe o popup
+        if (!newQuestion.question.trim()) {
+            alert("A pergunta não pode ter campos vazios");
             return;
         }
-        setQuestions([...questions, newQuestion]);
-        setNewQuestion({ type: "Text", question: "", options: [], category: "" });
-        setFeedbackMessage(null); // Limpa a mensagem de feedback
+
+        if (isEditing && editingIndex !== null) {
+            const updatedQuestions = [...questions];
+            updatedQuestions[editingIndex] = newQuestion;
+            setQuestions(updatedQuestions);
+        } else {
+            setQuestions([...questions, newQuestion]);
+        }
+
+        resetModal();
     };
+
+    const handleEditQuestion = (index: number) => {
+        setNewQuestion(questions[index]);
+        setIsEditing(true);
+        setEditingIndex(index);
+        setShowModal(true);
+    };
+
 
     const handleAddOption = () => {
         if (newOption.trim()) {
@@ -85,19 +105,6 @@ const SurveyCreation = () => {
         setQuestions(questions.filter((_, i) => i !== index));
     };
 
-    const handleEditQuestion = (index: number, text: string) => {
-        setEditingIndex(index);
-        setEditingText(text);
-    }
-
-    const handleSaveQuestion = (index: number) => {
-        const updatedQuestions = [...questions];
-        updatedQuestions[index].question = editingText;
-        setQuestions(updatedQuestions);
-        setEditingIndex(null); // Exit editing mode
-        setEditingText(""); // Clear editing text
-    };
-
     const handleCreateSurvey = async () => {
         if (!title || !description || !category || !team_id) {
             setFeedbackMessage("Preencha todos os campos!");
@@ -112,10 +119,7 @@ const SurveyCreation = () => {
                 category,
                 questions,
             };
-            await axios.post("http://localhost:3001/api/survey/base", {
-                survey: newSurvey,
-                open: true
-            });
+            await axios.post("http://localhost:3001/api/survey/base", newSurvey);
             setFeedbackMessage("Pesquisa criada com sucesso!");
             setTitle("");
             setDescription("");
@@ -127,34 +131,10 @@ const SurveyCreation = () => {
         }
     };
 
-    const closePopup = () => {
-        setShowPopup(false);
-    };
-
     return (
         <div className="container mt-4">
             <h1 className="text-center font-bold mb-4">Criação de Pesquisa</h1>
-
-            {showPopup && (
-                <div className="modal fade show d-block" tabIndex={-1} style={{ backgroundColor: "rgba(0, 0, 0, 0.5)" }}>
-                    <div className="modal-dialog">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h5 className="modal-title">Limite de Perguntas Atingido</h5>
-                                <button type="button" className="btn-close" onClick={closePopup}></button>
-                            </div>
-                            <div className="modal-body">
-                                <p>Você atingiu o limite máximo de 20 perguntas para esta pesquisa.</p>
-                            </div>
-                            <div className="modal-footer">
-                                <button type="button" className="btn btn-secondary" onClick={closePopup}>
-                                    Fechar
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
+            {feedbackMessage && <div className="alert alert-info">{feedbackMessage}</div>}
 
             <div className="mb-4">
                 <div className="card shadow-sm">
@@ -170,7 +150,7 @@ const SurveyCreation = () => {
                         </div>
                         <div className="mb-3">
                             <label>Categoria</label>
-                            <select className="form-select" value={category ?? ""} onChange={(e) => setCategory(e.target.value as BaseSurvey["category"])}>
+                            <select className="form-select" value={category ?? ""} onChange={(e) => setCategory(e.target.value as BaseSurvey["category"])} >
                                 <option value="">Selecione uma categoria</option>
                                 {surveyCategories.map((cat, index) => (
                                     <option key={index} value={cat}>
@@ -194,125 +174,135 @@ const SurveyCreation = () => {
                 </div>
             </div>
 
-            <div className="mb-4">
-                <div className="card shadow-sm">
-                    <div className="card-body">
-                        <h5 className="card-title">Adicionar Pergunta</h5>
-                        <input
-                            type="text"
-                            className="form-control mb-2"
-                            placeholder="Título da pergunta"
-                            value={newQuestion.question}
-                            onChange={(e) => setNewQuestion({ ...newQuestion, question: e.target.value })}
-                        />
-                        <div className="d-flex align-items-center mb-3">
-                            <select className="form-select" value={categoryId} onChange={(e) => setCategoryId(e.target.value)} style={{ width: "66vw" }}>
-                                <option value="">Selecione uma categoria</option>
-                                {categories.map((category) => (
-                                    <option key={category.id} value={category.id}>
-                                        {category.name}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                        <select
-                            className="form-select mb-3"
-                            value={newQuestion.type}
-                            onChange={(e) => setNewQuestion({ ...newQuestion, type: e.target.value as "Multiple" | "Text" | "Single" })}>
-                            <option value="Text">Pergunta Aberta</option>
-                            <option value="Multiple">Múltipla Escolha</option>
-                            <option value="Single">Escolha Única</option>
-                        </select>
+            <div className="mb-4 text-center">
+                <button className="btn btn-primary" onClick={() => setShowModal(true)}>
+                    Adicionar Pergunta
+                </button>
+                <Link href="/home/surveys/surveycategories">
+                    <button className="btn btn-secondary ms-3">Adicionar Categoria</button>
+                </Link>
+            </div>
 
-                        {newQuestion.type !== "Text" && (
-                            <div>
+            {/* Modal para adicionar pergunta */}
+            {showModal && (
+                <div className="modal show" style={{ display: "block" }} onClick={resetModal}>
+                    <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">Adicionar Pergunta</h5>
+                                <button type="button" className="btn-close" onClick={resetModal}></button>
+                            </div>
+                            <div className="modal-body">
                                 <input
                                     type="text"
                                     className="form-control mb-2"
-                                    placeholder="Digite uma nova opção"
-                                    value={newOption}
-                                    onChange={(e) => setNewOption(e.target.value)}
+                                    placeholder="Título da pergunta"
+                                    value={newQuestion.question}
+                                    onChange={(e) => setNewQuestion({ ...newQuestion, question: e.target.value })}
                                 />
-                                <button className="btn btn-secondary mb-2" onClick={handleAddOption}>
-                                    Adicionar Opção
-                                </button>
+                                <div className="d-flex align-items-center mb-3">
+                                    <select className="form-select" value={categoryId} onChange={(e) => setCategoryId(e.target.value)} style={{ width: "66vw" }}>
+                                        <option value="">Selecione uma categoria</option>
+                                        {categories.map((category) => (
+                                            <option key={category.id} value={category.id}>
+                                                {category.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <select
+                                    className="form-select mb-3"
+                                    value={newQuestion.type}
+                                    onChange={(e) => setNewQuestion({ ...newQuestion, type: e.target.value as "Multiple" | "Text" | "Single" })}
+                                >
+                                    <option value="Text">Pergunta Aberta</option>
+                                    <option value="Multiple">Múltipla Escolha</option>
+                                    <option value="Single">Escolha Única</option>
+                                </select>
 
-                                {newQuestion.options && newQuestion.options.length > 0 && (
-                                    <div className="border rounded p-3 mb-3">
-                                        <h6>Opções Adicionadas:</h6>
-                                        <ul className="list-group">
-                                            {newQuestion.options.map((option, optionIndex) => (
-                                                <li key={optionIndex} className="list-group-item d-flex justify-content-between align-items-center">
-                                                    {option}
-                                                    <button className="btn btn-sm btn-danger" onClick={() => handleRemoveOption(optionIndex)}>
-                                                        Remover
-                                                    </button>
-                                                </li>
-                                            ))}
-                                        </ul>
+                                {newQuestion.type !== "Text" && (
+                                    <div>
+                                        <input
+                                            type="text"
+                                            className="form-control mb-2"
+                                            placeholder="Digite uma nova opção"
+                                            value={newOption}
+                                            onChange={(e) => setNewOption(e.target.value)}
+                                        />
+                                        <button className="btn btn-secondary mb-2" onClick={handleAddOption}>
+                                            Adicionar Opção
+                                        </button>
+
+                                        {newQuestion.options && newQuestion.options.length > 0 && (
+                                            <div className="border rounded p-3 mb-3">
+                                                <h6>Opções Adicionadas:</h6>
+                                                <ul className="list-group">
+                                                    {newQuestion.options.map((option, optionIndex) => (
+                                                        <li key={optionIndex} className="list-group-item d-flex justify-content-between align-items-center">
+                                                            {option}
+                                                            <button className="btn btn-danger btn-sm" onClick={() => handleRemoveOption(optionIndex)}>
+                                                                Remover
+                                                            </button>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>
-                        )}
-
-                        <button className="btn btn-primary" onClick={handleAddQuestion}>
-                            Adicionar Pergunta
-                        </button>
+                            <div className="modal-footer">
+                                <button className="btn btn-secondary" onClick={resetModal}>
+                                    Fechar
+                                </button>
+                                <button className="btn btn-success" onClick={handleAddQuestion}>
+                                    {isEditing ? "Atualizar Pergunta" : "Adicionar Pergunta"}
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
 
-            <div className="mb-4">
-                <div className="card shadow-sm">
-                    <div className="card-body">
-                        <h5 className="card-title">Perguntas Adicionadas</h5>
-                        <ul className="list-group">
-                            {questions.map((question, index) => (
-                                <li key={index} className="list-group-item d-flex justify-between align-items-center">
-                                    {editingIndex === index ? (
-                                        <>
-                                            <input
-                                                type="text"
-                                                value={editingText}
-                                                onChange={(e) => setEditingText(e.target.value)}
-                                                className="form-control mr-2"
-                                            />
-                                            <button
-                                                onClick={() => handleSaveQuestion(index)}
-                                                className="btn btn-sm btn-success"
-                                            >
-                                                Salvar
-                                            </button>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <span>{question.question}</span>
-                                            <button
-                                                onClick={() => handleEditQuestion(index, question.question)}
-                                                className="btn btn-sm btn-primary ml-auto "
-                                            >
+
+            {questions.length > 0 && (
+                <div className="mb-4">
+                    <div className="card shadow-sm">
+                        <div className="card-body">
+                            <h5 className="card-title">Perguntas Adicionadas</h5>
+                            <ul className="list-group">
+                                {questions.map((question, index) => (
+                                    <li key={index} className="list-group-item mb-3 d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <strong>{index + 1}. {question.question}</strong>
+                                            {question.type !== "Text" && (question.options?.length || 0) > 0 && (
+                                                <ul className="list-group mt-2">
+                                                    {(question.options || []).map((option, optionIndex) => (
+                                                        <li key={optionIndex} className="list-group-item">{option}</li>
+                                                    ))}
+                                                </ul>
+                                            )}
+                                        </div>
+                                        <div>
+                                            <button className="btn btn-warning me-2" onClick={() => handleEditQuestion(index)}>
                                                 Editar
                                             </button>
-                                            <button
-                                                onClick={() => handleDeleteQuestion(index)}
-                                                className="btn btn-sm btn-danger ml-2"
-                                            >
-                                                Remover
+                                            <button className="btn btn-danger" onClick={() => handleDeleteQuestion(index)}>
+                                                Deletar
                                             </button>
-                                        </>
-                                    )}
-                                </li>
-                            ))}
-                        </ul>
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <button className="btn btn-success" onClick={handleCreateSurvey}>
+            )}
+
+            <button className="btn btn-primary mt-3" onClick={handleCreateSurvey}>
                 Criar Pesquisa
             </button>
-
-            {feedbackMessage && <p className="text-danger mt-3">{feedbackMessage}</p>}
         </div>
     );
 };

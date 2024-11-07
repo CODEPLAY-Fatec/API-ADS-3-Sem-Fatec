@@ -119,7 +119,10 @@ const SurveyCreation = () => {
                 category,
                 questions,
             };
-            await axios.post("http://localhost:3001/api/survey/base", newSurvey);
+            await axios.post("http://localhost:3001/api/survey/base", {
+                survey: newSurvey,
+                open: true
+            });            
             setFeedbackMessage("Pesquisa criada com sucesso!");
             setTitle("");
             setDescription("");

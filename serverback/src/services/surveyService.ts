@@ -4,7 +4,7 @@ import Question from "../types/Question";
 import { BaseSurvey, SurveyInstance, UsableSurvey } from "../types/Survey";
 
 export const createBaseSurvey = async (survey: BaseSurvey, open: boolean, teams?: number[]) => {
-    const query = `INSERT INTO base_survey (team_id, title, description, category, questions) VALUES (?, ?, ?, ?, ?)`;
+    const query = `INSERT INTO base_survey (title, description, category, questions) VALUES (?, ?, ?, ?)`;
     const questions = JSON.stringify(survey.questions);
     const values = [
         survey.title,

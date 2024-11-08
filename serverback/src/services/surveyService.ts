@@ -93,8 +93,8 @@ export const submitSurveyResponse = async (user_id: number, survey_id: number, s
 }
 // pegar as pesquisas disponíveis de um usuário
 export async function getUserSurveys(user_id: number): Promise<UsableSurvey[]> {
-    const userLedTeams = await db.query(`SELECT * FROM team_member WHERE user_id = ${user_id}`) // times onde o usuário é liderado
-    const userLeadsTeams = await db.query(`SELECT * FROM team_leader WHERE user_id = ${user_id}`) // times onde o usuário é líder
+    const userLedTeams = await db.query(`SELECT * FROM team_member WHERE user_id = ?`, [user_id]); // times onde o usuário é liderado
+    const userLeadsTeams = await db.query(`SELECT * FROM team_leader WHERE user_id = ?`, [user_id]); // times onde o usuário é líder
 
     let Surveys: UsableSurvey[] = []
     const BaseSurveys: { [key: string]: BaseSurvey } = {};
@@ -106,10 +106,12 @@ export async function getUserSurveys(user_id: number): Promise<UsableSurvey[]> {
                 SELECT si.* 
                 FROM survey_instance si
                 JOIN base_survey bs ON si.uid = bs.uid
-                WHERE si.team_id = ${team.team_id} 
-                  AND (bs.category = 'Autoavaliação' OR bs.category = '${Category}')
-              `);
-                          // isso aqui é macumba.
+                LEFT JOIN survey_answer sa ON si.id = sa.survey_id AND sa.user_id = ?
+                WHERE si.team_id = ? 
+                  AND (bs.category = 'Autoavaliação' OR bs.category = ?)
+                  AND (sa.user_id IS NULL OR sa.user_id != ?)
+              `, [user_id, team.team_id, Category, user_id]);
+                        // isso aqui é macumba.
             for (let survey of surveys[0] as SurveyInstance[]) {
                 let BaseSurvey = BaseSurveys[survey.uid]
                 if (!BaseSurvey) {
@@ -134,17 +136,28 @@ export async function getUserSurveys(user_id: number): Promise<UsableSurvey[]> {
                     Surveys.push(UsableSurvey)
                     
                 } else if (BaseSurvey.category == Category) {
-                    // pegar todos os líderes do time
-                    const teamLeaders = await db.query(`SELECT * FROM team_leader WHERE team_id = ${team.team_id}`)
-                    for (let teamLeader of teamLeaders[0] as { user_id: number, team_id: number}[]) {
-                        // clonar pesquisa com target_id = teamLeader.user_id
+                    // pegar todos os membros do time que não tenham respostas associadas à eles
+                    const teamRelations = await db.query(`
+                        SELECT tm.* 
+                        FROM ? tm
+                        LEFT JOIN survey_answer sa ON tm.user_id = sa.target_id AND sa.user_id = ?
+                        WHERE tm.team_id = ? AND (sa.user_id IS NULL OR sa.user_id != ?)
+                        `, [
+                            Category == "Avaliação de liderado" ? "team_member" : "team_leader",
+                            user_id,
+                            team.team_id,
+                            user_id
+                        ])
+                        // ISSO AQUI É MALIGNO MACUMBA MACUMBA MACUMBA MACUMBA MACUMBA MACUMBA MACUMBA 
+                    for (let teamMember of teamRelations[0] as { user_id: number, team_id: number}[]) {
+                        // clonar pesquisa com target_id = teamMember.user_id
                         UsableSurvey = {
                             survey_id: survey.id,
                             title: BaseSurvey.title,
                             description: BaseSurvey.description,
                             category: BaseSurvey.category,
                             questions: BaseSurvey.questions,
-                            target_id: teamLeader.user_id,
+                            target_id: teamMember.user_id,
                             team_id: survey.team_id
                         }
                         Surveys.push(UsableSurvey)
@@ -163,7 +176,7 @@ export async function getUserSurveys(user_id: number): Promise<UsableSurvey[]> {
 
 export const answerSurvey = async (user_id: number, survey: UsableSurvey, answers: Question[]) => {
     // TODO: check if user can answer survey
-    const survey_uid = db.query(`SELECT uid FROM survey_instance WHERE id = ${survey.survey_id}`).then((result: any) => result[0][0].uid);
+    const survey_uid = db.query(`SELECT uid FROM survey_instance WHERE id = ?`, [survey.survey_id]).then((result: any) => result[0][0].uid);
 
     const query = `INSERT INTO survey_answer (user_id, survey_id, survey_uid, created, data, target_id) VALUES (?, ?, ?, ?, ?, ?)`;
     const values = [

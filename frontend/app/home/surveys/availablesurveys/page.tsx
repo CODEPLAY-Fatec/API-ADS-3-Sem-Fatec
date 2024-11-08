@@ -1,24 +1,10 @@
 "use client";
-
 import Cookie from "js-cookie";
 import { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
-import { Collapse } from "react-bootstrap"; 
-import './availablesurveys.css'; 
-
-interface Survey {
-    id: string;
-    title: string;
-    description: string;
-    category: string;
-    questions: Question[];
-}
-
-interface Question {
-    type: "Multiple" | "Text";
-    options?: string[];
-    question: string;
-}
+import { Collapse } from "react-bootstrap";
+import './availablesurveys.css';
+import { BaseSurveyAvailable} from "@/types/Survey";
 
 interface DecodedToken {
     id: string;
@@ -41,11 +27,12 @@ interface Team {
 }
 
 export default function RespondSurveysPage() {
-    const [surveys, setSurveys] = useState<Survey[]>([]);
-    const [teamName, setTeamName] = useState<string>(""); // Armazenar o nome do time
+    const [surveys, setSurveys] = useState<BaseSurveyAvailable[]>([]);
+    const [teamName, setTeamName] = useState<string>("");
     const [responses, setResponses] = useState<{ [key: string]: { [key: string]: string } }>({});
     const [error, setError] = useState<string | null>(null);
-    const [openSurveyId, setOpenSurveyId] = useState<string | null>(null); // para controlar o estado do colapse
+    const [openSurveyId, setOpenSurveyId] = useState<string | null>(null);
+    
 
     useEffect(() => {
         async function loadUserAndSurveys() {
@@ -85,9 +72,7 @@ export default function RespondSurveysPage() {
 
                 setTeamName(currentTeam.name);
 
-                //const teamId = currentTeam.id;
-
-                const surveysResponse = await fetch(`http://localhost:3001/api/users/surveys/${userId}`);
+                const surveysResponse = await fetch(`http://localhost:3001/api/survey/available/${userId}`);
                 if (!surveysResponse.ok) {
                     throw new Error("Failed to fetch surveys");
                 }
@@ -116,25 +101,36 @@ export default function RespondSurveysPage() {
         }));
     };
 
-    const handleSubmit = async (surveyId: string) => {
+    const handleToggleSurvey = (surveyId: string) => {
+        setOpenSurveyId(prevId => (prevId === surveyId ? null : surveyId));
+    };
+
+    const handleSubmit = async (survey: BaseSurveyAvailable) => {
         try {
             const token = Cookie.get("authToken") || Cookie.get("userToken");
             if (!token) {
                 throw new Error("Token not found");
             }
-
             const decoded = jwtDecode<DecodedToken>(token);
-            const userId = decoded.id;
+            const user_id = decoded.id;
 
-            const response = await fetch("http://localhost:3001/api/surveys/response", {
+            const formattedAnswers = survey.questions.map((question, index) => ({
+                question: question.question,
+                type: question.type,
+                options: question.options,
+                category: question.category,
+                answer: responses[survey.id]?.[index.toString()] || ""
+            }));
+
+            const response = await fetch("http://localhost:3001/api/survey/answers/", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    userId,
-                    surveyId,
-                    responses: responses[surveyId],
+                    user_id,
+                    survey,
+                    answers: formattedAnswers,
                 }),
             });
 
@@ -161,8 +157,8 @@ export default function RespondSurveysPage() {
                     <div key={survey.id} className="card mb-4">
                         <div className="card-header">
                             <h2
-                                className="survey-title" // Classe personalizada
-                                onClick={() => setOpenSurveyId(openSurveyId === survey.id ? null : survey.id)} // Toggle Collapse
+                                className="survey-title"
+                                onClick={() => handleToggleSurvey(survey.id)}
                             >
                                 {survey.title} - <strong>{survey.category}</strong> ({teamName})
                             </h2>
@@ -174,7 +170,12 @@ export default function RespondSurveysPage() {
                                     {survey.questions && survey.questions.length > 0 ? (
                                         survey.questions.map((question, questionIndex) => (
                                             <div key={questionIndex} className="mb-3">
-                                                <label className="form-label">{question.question}</label>
+                                                <label className="form-label">
+                                                    {question.question} 
+                                                    <span style={{ fontWeight: "bold", marginLeft: "8px", color: "#888" }}>
+                                                        ({question.category || "Sem categoria"})
+                                                    </span>
+                                                </label>
                                                 {question.type === "Multiple" && question.options ? (
                                                     question.options.map((option, optionIndex) => (
                                                         <div key={optionIndex} className="form-check">
@@ -202,7 +203,7 @@ export default function RespondSurveysPage() {
                                     ) : (
                                         <p className="alert alert-warning">Nenhuma pergunta disponível</p>
                                     )}
-                                    <button className="btn btn-primary" onClick={() => handleSubmit(survey.id)}>
+                                    <button className="btn btn-primary" onClick={() => handleSubmit(survey)}>
                                         Submit
                                     </button>
                                 </div>

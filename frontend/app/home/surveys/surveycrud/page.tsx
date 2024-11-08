@@ -18,7 +18,6 @@ const SurveyCreation = () => {
     const [description, setDescription] = useState("");
     const [category, setCategory] = useState<BaseSurvey["category"] | null>(null);
     const [team_id, setTeamId] = useState<number>(0);
-    const [categoryId, setCategoryId] = useState("");
     const [categories, setCategories] = useState<QuestionCategory[]>([]);
     const [teams, setTeams] = useState<Team[]>([]);
     const [questions, setQuestions] = useState<Question[]>([]);
@@ -123,8 +122,8 @@ const SurveyCreation = () => {
             await axios.post("http://localhost:3001/api/survey/base", {
                 survey: newSurvey,
                 open: true,
-                teams : [team_id]
-            });            
+                teams: [team_id]
+            });
             setFeedbackMessage("Pesquisa criada com sucesso!");
             setTitle("");
             setDescription("");
@@ -206,7 +205,15 @@ const SurveyCreation = () => {
                                     onChange={(e) => setNewQuestion({ ...newQuestion, question: e.target.value })}
                                 />
                                 <div className="d-flex align-items-center mb-3">
-                                    <select className="form-select" value={categoryId} onChange={(e) => setCategoryId(e.target.value)} style={{ width: "66vw" }}>
+                                    <select
+                                        className="form-select"
+                                        value={newQuestion.category}  // Mude para newQuestion.category
+                                        onChange={(e) => {
+                                            const selectedCategory = categories.find(cat => cat.id === Number(e.target.value));
+                                            setNewQuestion({ ...newQuestion, category: selectedCategory ? selectedCategory.name : "" });
+                                        }}
+                                        style={{ width: "66vw" }}
+                                    >
                                         <option value="">Selecione uma categoria</option>
                                         {categories.map((category) => (
                                             <option key={category.id} value={category.id}>

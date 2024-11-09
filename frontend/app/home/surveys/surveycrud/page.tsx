@@ -21,7 +21,7 @@ const SurveyCreation = () => {
     const [categories, setCategories] = useState<QuestionCategory[]>([]);
     const [teams, setTeams] = useState<Team[]>([]);
     const [questions, setQuestions] = useState<Question[]>([]);
-    const [newQuestion, setNewQuestion] = useState<Question>({ type: "Text", question: "", options: [], category: "" });
+    const [newQuestion, setNewQuestion] = useState<Question>({ type: "Text", question: "", options: [], category: "", categoryId: 0 });
     const [newOption, setNewOption] = useState<string>("");
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
@@ -207,12 +207,17 @@ const SurveyCreation = () => {
                                 <div className="d-flex align-items-center mb-3">
                                     <select
                                         className="form-select"
-                                        value={newQuestion.category}  // Mude para newQuestion.category
+                                        value={newQuestion.categoryId ?? ""} // Aqui usamos o id da categoria
                                         onChange={(e) => {
-                                            const selectedCategory = categories.find(cat => cat.id === Number(e.target.value));
-                                            setNewQuestion({ ...newQuestion, category: selectedCategory ? selectedCategory.name : "" });
+                                            const selectedCategoryId = Number(e.target.value);
+                                            const selectedCategory = categories.find((cat) => cat.id === selectedCategoryId);
+
+                                            setNewQuestion({
+                                                ...newQuestion,
+                                                categoryId: selectedCategoryId,
+                                                category: selectedCategory ? selectedCategory.name : "", // Nome da categoria
+                                            });
                                         }}
-                                        style={{ width: "66vw" }}
                                     >
                                         <option value="">Selecione uma categoria</option>
                                         {categories.map((category) => (

@@ -67,7 +67,7 @@ export default function RespondSurveysPage() {
                     .filter(team => team !== undefined)[0];
 
                 if (!currentTeam) {
-                    throw new Error("Team not found");
+                    console.log("Team not found");
                 }
 
                 setTeamName(currentTeam.name);
@@ -81,7 +81,7 @@ export default function RespondSurveysPage() {
                 setSurveys(allSurveys);
             } catch (error: unknown) {
                 if (error instanceof Error) {
-                    setError(error.message);
+                    console.log(error.message);
                 } else {
                     setError("Erro desconhecido");
                 }

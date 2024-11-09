@@ -202,20 +202,25 @@ export const removeSurveyResponse = async (response_id: number) => {
 
 export const getSurveyResponsesByUser = async (user_id: number) => {
     const query = `SELECT * FROM survey_answer WHERE user_id = ?`;
-    return db.query(query, [user_id]);
-}
+    const [rows] = await db.query(query, [user_id]);
+    return rows;
+};
 
 export const getSurveyResponsesBySurveyInstance = async (survey_id: number) => {
     const query = `SELECT * FROM survey_answer WHERE survey_id = ?`;
-    return db.query(query, [survey_id]);
+    const [rows]= await db.query(query, [survey_id]);
+    return rows
 }
 
 export const getSurveyResponsesByBaseSurvey = async (survey_uid: number) => {
     const query = `SELECT * FROM survey_answer WHERE survey_uid = ?`;
-    return db.query(query, [survey_uid]);
+    const [rows] = await db.query(query, [survey_uid]);
+    return rows
 }
 
 export const getSurveyResponsesByTarget = async (target_id: number) => {
     const query = `SELECT * FROM survey_answer WHERE target_id = ?`;
-    return db.query(query, [target_id]);
+    const [rows]= await db.query(query, [target_id]);
+    return rows
+    
 }

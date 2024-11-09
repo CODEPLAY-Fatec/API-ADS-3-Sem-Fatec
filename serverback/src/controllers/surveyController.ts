@@ -164,7 +164,7 @@ export const getSurveyResponsesBySurveyInstanceController = async (req: Request,
     const { survey_id } = req.params;
     try {
         const responses = await getSurveyResponsesBySurveyInstance(Number(survey_id));
-        res.status(200).json({ message: 'Survey responses fetched successfully' });
+        res.status(200).json({ responses });
     }
     catch (error: any) {
         res.status(500).json({ error: error.message });
@@ -176,7 +176,7 @@ export const getSurveyResponsesByBaseSurveyController = async (req: Request, res
     const { survey_uid } = req.params;
     try {
         const responses = await getSurveyResponsesByBaseSurvey(Number(survey_uid));
-        res.status(200).json({ message: 'Survey responses fetched successfully' });
+        res.status(200).json({responses});
     } catch (error: any) {
         res.status(500).json({ error: error.message });
         console.error(error);
@@ -187,7 +187,7 @@ export const getSurveyResponsesByTargetController = async (req: Request, res: Re
     const { target_id } = req.params;
     try {
         const responses = await getSurveyResponsesByTarget(Number(target_id));
-        res.status(200).json({ message: 'Survey responses fetched successfully' });
+        res.status(200).json({ responses });
     } catch (error: any) {
         res.status(500).json({ error: error.message });
         console.error(error);

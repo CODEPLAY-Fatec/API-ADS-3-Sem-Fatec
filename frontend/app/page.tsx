@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import axios from "axios";
-import Cookie from "js-cookie";  // Importa js-cookie
+import Cookie from "js-cookie";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -34,78 +34,74 @@ export default function Login() {
   };
 
   return (
-    <div className="d-flex justify-content-center align-items-center vh-100" style={{ backgroundColor: "#f9f9f9" }}>
-      <div style={{ textAlign: "center", width: "300px" }}>
-        <h2 style={{ color: "#357edd", marginBottom: "50px", marginLeft: "10px", fontSize: "30px" }}>Bem vindo! Acesse sua conta</h2>
+    <div className="h-screen flex justify-center items-center relative overflow-hidden">
+      {/* Vídeo de fundo */}
+      <video
+        autoPlay
+        loop
+        muted
+        className="absolute inset-0 w-full h-full object-cover"
+        style={{ zIndex: -1 }}
+      >
+        <source src="/images/video.mp4" type="video/mp4" />
+        Seu navegador não suporta o vídeo em HTML5.
+      </video>
 
-        <div
-          className="card"
-          style={{
-            padding: "40px",
-            borderRadius: "8px",
-            boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-            backgroundColor: "#fff",
-          }}
-        >
-          <p style={{ marginBottom: "15px", textAlign: "center" }}>É um grande prazer ter você a bordo!</p>
+      {/* Camada de opacidade */}
+      <div className="absolute inset-0 bg-black opacity-40"></div> 
 
-          <form onSubmit={handleLogin}>
-            {error && <p className="alert alert-danger" style={{ color: 'red' }}>{error}</p>}
+      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-[400px] mx-4 md:mx-auto my-auto relative z-10">
+        <h2 className="text-xl font-semibold text-center mb-6 text-[#357edd]">
+          Bem vindo! Acesse sua conta
+        </h2>
 
-            <div className="mb-3">
-              <input
-                type="email"
-                id="email"
-                className="form-control"
-                placeholder="Digite seu e-mail"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                style={{
-                  padding: "12px",
-                  borderRadius: "4px",
-                  borderColor: "#ccc",
-                  marginBottom: "2px",
-                }}
-                required
-              />
-            </div>
+        <form onSubmit={handleLogin} aria-live="assertive">
+          {error && (
+            <p className="text-center text-red-500 mb-3 text-sm">
+              {error}
+            </p>
+          )}
 
-            <div className="mb-3">
-              <input
-                type="password"
-                id="senha"
-                className="form-control"
-                placeholder="Digite sua senha"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                style={{
-                  padding: "12px",
-                  borderRadius: "4px",
-                  borderColor: "#ccc",
-                  marginBottom: "20px",
-                }}
-                required
-              />
-            </div>
+          <div className="mb-4">
+            <input
+              type="email"
+              id="email"
+              className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#357edd] focus:border-[#357edd] text-sm"
+              placeholder="Digite seu e-mail"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
 
-            <button
-              type="submit"
-              className="btn"
-              style={{
-                backgroundColor: "#357edd",
-                color: "#fff",
-                width: "100%",
-                padding: "12px",
-                borderRadius: "4px",
-              }}
-            >
-              Login
-            </button>
-          </form>
-          <p style={{ marginTop: "20px" }}>
-            <a href="/codeforpassword" style={{ color: "#357edd" }}>Esqueceu sua senha?</a>
-          </p>
-        </div>
+          <div className="mb-4">
+            <input
+              type="password"
+              id="senha"
+              className="w-full px-3 py-2 bg-gray-50 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#357edd] focus:border-[#357edd] text-sm"
+              placeholder="Digite sua senha"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="w-full text-white py-2 px-4 rounded-md text-sm font-medium"
+            style={{ backgroundColor: "#357edd" }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#2d6dc2")}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#357edd")}
+          >
+            Login
+          </button>
+        </form>
+
+        <p className="text-center mt-4">
+          <a href="/codeforpassword" className="text-[#357edd]">
+            Esqueceu sua senha?
+          </a>
+        </p>
       </div>
     </div>
   );

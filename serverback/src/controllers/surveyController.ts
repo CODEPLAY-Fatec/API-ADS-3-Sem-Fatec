@@ -128,6 +128,7 @@ export const setSurveyInstanceOpenController = async (req: Request, res: Respons
 
 export const answerSurveyController = async (req: Request, res: Response) => {
     const { user_id, survey, answers } = req.body;
+    console.log(survey)
     try {
         await answerSurvey(user_id, survey, answers);
         res.status(200).json({ message: 'Survey response submitted successfully' });
@@ -152,7 +153,7 @@ export const getSurveyResponsesByUserController = async (req: Request, res: Resp
     const { user_id } = req.params;
     try {
         const responses = await getSurveyResponsesByUser(Number(user_id));
-        res.status(200).json({ message: 'Survey responses fetched successfully' });
+        res.status(200).json({responses});
     } catch (error: any) {
         res.status(500).json({ error: error.message });
         console.error(error);

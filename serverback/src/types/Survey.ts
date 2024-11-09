@@ -18,6 +18,7 @@ type SurveyInstance = {
 }
 
 type UsableSurvey = {
+  uid?:number,
   survey_id: number;
   title: string;
   description: string;

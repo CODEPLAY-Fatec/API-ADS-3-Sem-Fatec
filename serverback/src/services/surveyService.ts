@@ -131,7 +131,8 @@ export async function getUserSurveys(user_id: number): Promise<UsableSurvey[]> {
                         description: BaseSurvey.description,
                         category: BaseSurvey.category,
                         questions: BaseSurvey.questions,
-                        team_id: survey.team_id
+                        team_id: survey.team_id,
+                        uid : BaseSurvey.uid
                     }
                     Surveys.push(UsableSurvey)
                     
@@ -158,7 +159,8 @@ export async function getUserSurveys(user_id: number): Promise<UsableSurvey[]> {
                             category: BaseSurvey.category,
                             questions: BaseSurvey.questions,
                             target_id: teamMember.user_id,
-                            team_id: survey.team_id
+                            team_id: survey.team_id,
+                            uid : BaseSurvey.uid
                         }
                         Surveys.push(UsableSurvey)
                     }
@@ -182,11 +184,13 @@ export const answerSurvey = async (user_id: number, survey: UsableSurvey, answer
     const values = [
         user_id,
         survey.survey_id,
-        survey_uid,
+        survey.uid,
         new Date(),
         JSON.stringify(answers),
-        survey.target_id,
+        //survey.target_id, //temporario
+        user_id,
     ];
+    console.log(values)
 
     return db.query(query, values);
 }

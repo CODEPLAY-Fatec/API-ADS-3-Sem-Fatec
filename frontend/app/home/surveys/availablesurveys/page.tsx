@@ -119,8 +119,9 @@ export default function RespondSurveysPage() {
                 type: question.type,
                 options: question.options,
                 category: question.category,
-                answer: responses[survey.id]?.[index.toString()] || ""
+                answer: responses[survey.survey_id]?.[index.toString()] || ""
             }));
+            console.log(survey)
 
             const response = await fetch("http://localhost:3001/api/survey/answers/", {
                 method: "POST",
@@ -135,10 +136,11 @@ export default function RespondSurveysPage() {
             });
 
             if (!response.ok) {
-                throw new Error("Failed to submit response");
+                throw new Error("Falha em responde formulario");
             }
 
-            alert("Response submitted successfully");
+            alert("Formulario respondido com sucesso");
+            window.location.reload(); // Recarrega a página após o envio
         } catch (error: unknown) {
             if (error instanceof Error) {
                 setError(error.message);
@@ -154,19 +156,22 @@ export default function RespondSurveysPage() {
             {error && <p className="alert alert-danger">{error}</p>}
             {surveys.length > 0 ? (
                 surveys.map(survey => (
-                    <div key={survey.id} className="card mb-4">
+                    <div key={survey.survey_id} className="card mb-4">
                         <div className="card-header">
                             <h2
                                 className="survey-title"
-                                onClick={() => handleToggleSurvey(survey.id)}
+                                onClick={() => handleToggleSurvey(survey.survey_id)}
                             >
                                 {survey.title} - <strong>{survey.category}</strong> ({teamName})
                             </h2>
                         </div>
-                        <Collapse in={openSurveyId === survey.id}>
+                        <Collapse in={openSurveyId === survey.survey_id}>
                             <div>
                                 <div className="card-body">
+                                <span><strong>Descriçao:</strong></span>
                                     <p className="card-text">{survey.description}</p>
+                                    <span><strong>Questões:</strong></span>
+
                                     {survey.questions && survey.questions.length > 0 ? (
                                         survey.questions.map((question, questionIndex) => (
                                             <div key={questionIndex} className="mb-3">
@@ -182,10 +187,10 @@ export default function RespondSurveysPage() {
                                                             <input
                                                                 type="radio"
                                                                 className="form-check-input"
-                                                                name={`survey_${survey.id}_question_${questionIndex}`}
+                                                                name={`survey_${survey.survey_id}_question_${questionIndex}`}
                                                                 value={option}
-                                                                checked={responses[survey.id]?.[questionIndex] === option}
-                                                                onChange={() => handleResponseChange(survey.id, questionIndex.toString(), option)}
+                                                                checked={responses[survey.survey_id]?.[questionIndex] === option}
+                                                                onChange={() => handleResponseChange(survey.survey_id, questionIndex.toString(), option)}
                                                             />
                                                             <label className="form-check-label">{option}</label>
                                                         </div>
@@ -194,8 +199,8 @@ export default function RespondSurveysPage() {
                                                     <input
                                                         type="text"
                                                         className="form-control"
-                                                        value={responses[survey.id]?.[questionIndex] || ""}
-                                                        onChange={e => handleResponseChange(survey.id, questionIndex.toString(), e.target.value)}
+                                                        value={responses[survey.survey_id]?.[questionIndex] || ""}
+                                                        onChange={e => handleResponseChange(survey.survey_id, questionIndex.toString(), e.target.value)}
                                                     />
                                                 )}
                                             </div>

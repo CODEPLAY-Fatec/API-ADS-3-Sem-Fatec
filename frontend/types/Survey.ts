@@ -11,7 +11,7 @@ type BaseSurvey = {
 };
 
 type BaseSurveyAvailable = {
-  id:string //no caso para paginas q precisa do id da survey
+  survey_id:string //no caso para paginas q precisa do id da survey
   title: string; // Título do survey
   description: string; 
   category: "Autoavaliação" | "Avaliação de líder" | "Avaliação de liderado"; // Enum

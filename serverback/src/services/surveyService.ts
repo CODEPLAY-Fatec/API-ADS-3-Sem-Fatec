@@ -140,11 +140,10 @@ export async function getUserSurveys(user_id: number): Promise<UsableSurvey[]> {
                     // pegar todos os membros do time que não tenham respostas associadas à eles
                     const teamRelations = await db.query(`
                         SELECT tm.* 
-                        FROM ? tm
+                        FROM ${Category == "Avaliação de liderado" ? "team_leader" : "team_member"} tm
                         LEFT JOIN survey_answer sa ON tm.user_id = sa.target_id AND sa.user_id = ?
                         WHERE tm.team_id = ? AND (sa.user_id IS NULL OR sa.user_id != ?)
                         `, [
-                            Category == "Avaliação de liderado" ? "team_member" : "team_leader",
                             user_id,
                             team.team_id,
                             user_id

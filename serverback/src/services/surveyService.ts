@@ -139,17 +139,15 @@ export async function getUserSurveys(user_id: number): Promise<UsableSurvey[]> {
                 } else if (BaseSurvey.category == Category) {
                     // pegar todos os membros do time que não tenham respostas associadas à eles
                     const teamRelations = await db.query(`
-                        SELECT tm.* 
-                        FROM ${Category == "Avaliação de liderado" ? "team_leader" : "team_member"} tm
+                        SELECT tm.user_id, u.name 
+                        FROM ${Category == "Avaliação de liderado" ? "team_member" : "team_leader"} tm
+                        JOIN users u ON tm.user_id = u.id
                         LEFT JOIN survey_answer sa ON tm.user_id = sa.target_id AND sa.user_id = ?
                         WHERE tm.team_id = ? AND (sa.user_id IS NULL OR sa.user_id != ?)
-                        `, [
-                            user_id,
-                            team.team_id,
-                            user_id
-                        ])
+                    `, [user_id, team.team_id, user_id]);
+                    
                         // ISSO AQUI É MALIGNO MACUMBA MACUMBA MACUMBA MACUMBA MACUMBA MACUMBA MACUMBA 
-                    for (let teamMember of teamRelations[0] as { user_id: number, team_id: number}[]) {
+                    for (let teamMember of teamRelations[0] as { user_id: number, team_id: number, name: string }[]) {
                         // clonar pesquisa com target_id = teamMember.user_id
                         UsableSurvey = {
                             survey_id: survey.id,
@@ -158,6 +156,7 @@ export async function getUserSurveys(user_id: number): Promise<UsableSurvey[]> {
                             category: BaseSurvey.category,
                             questions: BaseSurvey.questions,
                             target_id: teamMember.user_id,
+                            target_name: teamMember.name, // Inclui o nome do usuário
                             team_id: survey.team_id,
                             uid : BaseSurvey.uid
                         }
@@ -186,8 +185,7 @@ export const answerSurvey = async (user_id: number, survey: UsableSurvey, answer
         survey.uid,
         new Date(),
         JSON.stringify(answers),
-        //survey.target_id, //temporario
-        user_id,
+        survey.target_id,
     ];
     console.log(values)
 

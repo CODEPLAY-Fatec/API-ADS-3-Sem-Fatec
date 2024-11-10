@@ -25,6 +25,7 @@ type UsableSurvey = {
   category: "Autoavaliação" | "Avaliação de líder" | "Avaliação de liderado";
   questions: Question[];
   target_id?: number;
+  target_name?: string;
   team_id: number;
 }
 

@@ -17,6 +17,7 @@ type BaseSurveyAvailable = {
   category: "Autoavaliação" | "Avaliação de líder" | "Avaliação de liderado"; // Enum
   questions: Question[]; 
   target_id?: number; // ID do usuário alvo da avaliação
+  target_name?: string;
   uid?:number //para paginas q precisam do uid da base survey 
 };
 

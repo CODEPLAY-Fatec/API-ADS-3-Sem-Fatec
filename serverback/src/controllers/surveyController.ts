@@ -128,7 +128,6 @@ export const setSurveyInstanceOpenController = async (req: Request, res: Respons
 
 export const answerSurveyController = async (req: Request, res: Response) => {
     const { user_id, survey, answers } = req.body;
-    console.log(survey)
     try {
         await answerSurvey(user_id, survey, answers);
         res.status(200).json({ message: 'Survey response submitted successfully' });

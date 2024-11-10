@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import { Collapse } from "react-bootstrap";
 import './availablesurveys.css';
-import { BaseSurveyAvailable} from "@/types/Survey";
+import { BaseSurveyAvailable } from "@/types/Survey";
 
 interface DecodedToken {
     id: string;
@@ -29,10 +29,10 @@ interface Team {
 export default function RespondSurveysPage() {
     const [surveys, setSurveys] = useState<BaseSurveyAvailable[]>([]);
     const [teamName, setTeamName] = useState<string>("");
+    const [userName, setUserName] = useState<string>("");  // Estado para armazenar o nome do usuário logado
     const [responses, setResponses] = useState<{ [key: string]: { [key: string]: string } }>({});
     const [error, setError] = useState<string | null>(null);
     const [openSurveyId, setOpenSurveyId] = useState<string | null>(null);
-    
 
     useEffect(() => {
         async function loadUserAndSurveys() {
@@ -44,6 +44,7 @@ export default function RespondSurveysPage() {
 
                 const decoded = jwtDecode<DecodedToken>(token);
                 const userId = decoded.id;
+                setUserName(decoded.name);  // Salvar o nome do usuário logado
 
                 const userResponse = await fetch("http://localhost:3001/api/users");
                 if (!userResponse.ok) {
@@ -90,19 +91,20 @@ export default function RespondSurveysPage() {
 
         loadUserAndSurveys();
     }, []);
+    
 
-    const handleResponseChange = (surveyId: string, questionId: string, answer: string) => {
+    const handleResponseChange = (surveyKey: string, questionId: string, answer: string) => {
         setResponses(prevResponses => ({
             ...prevResponses,
-            [surveyId]: {
-                ...prevResponses[surveyId],
+            [surveyKey]: {
+                ...prevResponses[surveyKey],
                 [questionId]: answer,
             },
         }));
     };
 
-    const handleToggleSurvey = (surveyId: string) => {
-        setOpenSurveyId(prevId => (prevId === surveyId ? null : surveyId));
+    const handleToggleSurvey = (surveyKey: string) => {
+        setOpenSurveyId(prevId => (prevId === surveyKey ? null : surveyKey));
     };
 
     const handleSubmit = async (survey: BaseSurveyAvailable) => {
@@ -119,9 +121,8 @@ export default function RespondSurveysPage() {
                 type: question.type,
                 options: question.options,
                 category: question.category,
-                answer: responses[survey.survey_id]?.[index.toString()] || ""
+                answer: responses[`${survey.survey_id}_${survey.target_id}`]?.[index.toString()] || ""
             }));
-            console.log(survey)
 
             const response = await fetch("http://localhost:3001/api/survey/answers/", {
                 method: "POST",
@@ -140,7 +141,7 @@ export default function RespondSurveysPage() {
             }
 
             alert("Formulario respondido com sucesso");
-            window.location.reload(); // Recarrega a página após o envio
+            window.location.reload();
         } catch (error: unknown) {
             if (error instanceof Error) {
                 setError(error.message);
@@ -155,67 +156,75 @@ export default function RespondSurveysPage() {
             <h1 className="text-center font-bold mb-4">Responder Pesquisas</h1>
             {error && <p className="alert alert-danger">{error}</p>}
             {surveys.length > 0 ? (
-                surveys.map(survey => (
-                    <div key={survey.survey_id} className="card mb-4">
-                        <div className="card-header">
-                            <h2
-                                className="survey-title"
-                                onClick={() => handleToggleSurvey(survey.survey_id)}
-                            >
-                                {survey.title} - <strong>{survey.category}</strong> ({teamName})
-                            </h2>
-                        </div>
-                        <Collapse in={openSurveyId === survey.survey_id}>
-                            <div>
-                                <div className="card-body">
-                                <span><strong>Descriçao:</strong></span>
-                                    <p className="card-text">{survey.description}</p>
-                                    <span><strong>Questões:</strong></span>
+                surveys.map(survey => {
+                    const surveyKey = `${survey.survey_id}_${survey.target_id}`;
+                    const isSelfEvaluation = survey.target_name === undefined;  // Verifica se é autoavaliação
 
-                                    {survey.questions && survey.questions.length > 0 ? (
-                                        survey.questions.map((question, questionIndex) => (
-                                            <div key={questionIndex} className="mb-3">
-                                                <label className="form-label">
-                                                    {question.question} 
-                                                    <span style={{ fontWeight: "bold", marginLeft: "8px", color: "#888" }}>
-                                                        ({question.category || "Sem categoria"})
-                                                    </span>
-                                                </label>
-                                                {question.type === "Multiple" && question.options ? (
-                                                    question.options.map((option, optionIndex) => (
-                                                        <div key={optionIndex} className="form-check">
-                                                            <input
-                                                                type="radio"
-                                                                className="form-check-input"
-                                                                name={`survey_${survey.survey_id}_question_${questionIndex}`}
-                                                                value={option}
-                                                                checked={responses[survey.survey_id]?.[questionIndex] === option}
-                                                                onChange={() => handleResponseChange(survey.survey_id, questionIndex.toString(), option)}
-                                                            />
-                                                            <label className="form-check-label">{option}</label>
-                                                        </div>
-                                                    ))
-                                                ) : (
-                                                    <input
-                                                        type="text"
-                                                        className="form-control"
-                                                        value={responses[survey.survey_id]?.[questionIndex] || ""}
-                                                        onChange={e => handleResponseChange(survey.survey_id, questionIndex.toString(), e.target.value)}
-                                                    />
-                                                )}
-                                            </div>
-                                        ))
-                                    ) : (
-                                        <p className="alert alert-warning">Nenhuma pergunta disponível</p>
+                    return (
+                        <div key={surveyKey} className="card mb-4">
+                            <div className="card-header">
+                                <h2
+                                    className="survey-title"
+                                    onClick={() => handleToggleSurvey(surveyKey)}
+                                >
+                                    {survey.title} - <strong>{survey.category}</strong> ({teamName})
+                                    {!isSelfEvaluation && (
+                                        <span> - Alvo: {survey.target_name}</span>  // Exibe o alvo apenas se não for autoavaliação
                                     )}
-                                    <button className="btn btn-primary" onClick={() => handleSubmit(survey)}>
-                                        Submit
-                                    </button>
-                                </div>
+                                </h2>
                             </div>
-                        </Collapse>
-                    </div>
-                ))
+                            <Collapse in={openSurveyId === surveyKey}>
+                                <div>
+                                    <div className="card-body">
+                                        <span><strong>Descrição:</strong></span>
+                                        <p className="card-text">{survey.description}</p>
+                                        <span><strong>Questões:</strong></span>
+
+                                        {survey.questions && survey.questions.length > 0 ? (
+                                            survey.questions.map((question, questionIndex) => (
+                                                <div key={questionIndex} className="mb-3">
+                                                    <label className="form-label">
+                                                        {question.question}
+                                                        <span style={{ fontWeight: "bold", marginLeft: "8px", color: "#888" }}>
+                                                            ({question.category || "Sem categoria"})
+                                                        </span>
+                                                    </label>
+                                                    {question.type === "Multiple" && question.options ? (
+                                                        question.options.map((option, optionIndex) => (
+                                                            <div key={optionIndex} className="form-check">
+                                                                <input
+                                                                    type="radio"
+                                                                    className="form-check-input"
+                                                                    name={`survey_${surveyKey}_question_${questionIndex}`}
+                                                                    value={option}
+                                                                    checked={responses[surveyKey]?.[questionIndex.toString()] === option}
+                                                                    onChange={() => handleResponseChange(surveyKey, questionIndex.toString(), option)}
+                                                                />
+                                                                <label className="form-check-label">{option}</label>
+                                                            </div>
+                                                        ))
+                                                    ) : (
+                                                        <input
+                                                            type="text"
+                                                            className="form-control"
+                                                            value={responses[surveyKey]?.[questionIndex.toString()] || ""}
+                                                            onChange={e => handleResponseChange(surveyKey, questionIndex.toString(), e.target.value)}
+                                                        />
+                                                    )}
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <p className="alert alert-warning">Nenhuma pergunta disponível</p>
+                                        )}
+                                        <button className="btn btn-primary" onClick={() => handleSubmit(survey)}>
+                                            Submit
+                                        </button>
+                                    </div>
+                                </div>
+                            </Collapse>
+                        </div>
+                    );
+                })
             ) : (
                 <div style={{ padding: "50px", border: "1px solid #ddd", borderRadius: "10px", textAlign: "center", backgroundColor: "#f9f9f9" }}>
                     <p style={{ fontSize: "20px", fontWeight: "bold" }}>Nenhuma pesquisa disponível no momento para você</p>

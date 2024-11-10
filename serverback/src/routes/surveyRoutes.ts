@@ -14,13 +14,13 @@ router.get('/survey/instance/:uid', getSurveyInstancesByUIDController); // pega 
 router.delete('/survey/instance/:survey_id', deleteSurveyInstanceController); // deleta instância de pesquisa
 router.put('/survey/instance/:survey_id/:state', setSurveyInstanceOpenController); // abre ou fecha instância de pesquisa
 
-router.get('/survey/available/:user_id', getUserSurveysController); // abre ou fecha instância de pesquisa
+router.get('/survey/available/:user_id', getUserSurveysController); // pega todas as pesquisas disponíveis de um usuário
 
 router.post('/survey/answers/', answerSurveyController); // envia respostas de pesquisa
 router.delete('/survey/answers/:survey_id', removeSurveyResponseController); // deleta respostas de pesquisa
-router.get('/survey/answers/user/:user_id', getSurveyResponsesByUserController); // pega respostas de pesquisa
-router.get('/survey/answers/base/:survey_uid', getSurveyResponsesByBaseSurveyController); // pega respostas de pesquisa
-router.get('/survey/answers/instance/:survey_id', getSurveyResponsesBySurveyInstanceController); // pega respostas de pesquisa
-router.get('/survey/answers/target/:target_id', getSurveyResponsesByTargetController); // pega respostas de pesquisa
+router.get('/survey/answers/user/:user_id', getSurveyResponsesByUserController); // pega respostas de pesquisa por usuário
+router.get('/survey/answers/base/:survey_uid', getSurveyResponsesByBaseSurveyController); // pega respostas de pesquisa por pesquisa base
+router.get('/survey/answers/instance/:survey_id', getSurveyResponsesBySurveyInstanceController); // pega respostas de pesquisa por instância de pesquisa
+router.get('/survey/answers/target/:target_id', getSurveyResponsesByTargetController); // pega respostas de pesquisa por alvo
 
 export default router;

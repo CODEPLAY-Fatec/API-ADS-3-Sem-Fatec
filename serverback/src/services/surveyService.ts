@@ -108,9 +108,9 @@ export async function getUserSurveys(user_id: number): Promise<UsableSurvey[]> {
                 JOIN base_survey bs ON si.uid = bs.uid
                 LEFT JOIN survey_answer sa ON si.id = sa.survey_id AND sa.user_id = ?
                 WHERE si.team_id = ? 
+                  AND (bs.category != 'Autoavaliação' OR sa.user_id IS NULL)
                   AND (bs.category = 'Autoavaliação' OR bs.category = ?)
-                  AND (sa.user_id IS NULL OR sa.user_id != ?)
-              `, [user_id, team.team_id, Category, user_id]);
+            `, [user_id, team.team_id, Category]);
                         // isso aqui é macumba.
             for (let survey of surveys[0] as SurveyInstance[]) {
                 let BaseSurvey = BaseSurveys[survey.uid]
@@ -142,13 +142,17 @@ export async function getUserSurveys(user_id: number): Promise<UsableSurvey[]> {
                         SELECT tm.user_id, u.name 
                         FROM ${Category == "Avaliação de liderado" ? "team_member" : "team_leader"} tm
                         JOIN users u ON tm.user_id = u.id
-                        LEFT JOIN survey_answer sa ON tm.user_id = sa.target_id AND sa.user_id = ?
-                        WHERE tm.team_id = ? AND (sa.user_id IS NULL OR sa.user_id != ?)
-                    `, [user_id, team.team_id, user_id]);
+                        LEFT JOIN survey_answer sa ON tm.user_id = sa.target_id 
+                                                   AND sa.user_id = ? 
+                                                   AND sa.survey_id = ?
+                        WHERE tm.team_id = ? AND sa.survey_id IS NULL
+                    `, [user_id, survey.id, team.team_id]);
+                    
                     
                         // ISSO AQUI É MALIGNO MACUMBA MACUMBA MACUMBA MACUMBA MACUMBA MACUMBA MACUMBA 
                     for (let teamMember of teamRelations[0] as { user_id: number, team_id: number, name: string }[]) {
                         // clonar pesquisa com target_id = teamMember.user_id
+                        console.log(teamMember);
                         UsableSurvey = {
                             survey_id: survey.id,
                             title: BaseSurvey.title,
@@ -185,7 +189,7 @@ export const answerSurvey = async (user_id: number, survey: UsableSurvey, answer
         survey.uid,
         new Date(),
         JSON.stringify(answers),
-        survey.target_id,
+        survey.target_id ?? null,
     ];
     console.log(values)
 
@@ -193,7 +197,7 @@ export const answerSurvey = async (user_id: number, survey: UsableSurvey, answer
 }
 
 export const removeSurveyResponse = async (response_id: number) => {
-    const query = `DELETE FROM survey_answer WHERE id = ?`;
+    const query = `DELETE FROM survey_answer WHERE answer_id = ?`;
     return db.query(query, [response_id]);
 }
 

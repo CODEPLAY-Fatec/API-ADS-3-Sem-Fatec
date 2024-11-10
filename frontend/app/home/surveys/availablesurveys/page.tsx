@@ -29,7 +29,6 @@ interface Team {
 export default function RespondSurveysPage() {
     const [surveys, setSurveys] = useState<BaseSurveyAvailable[]>([]);
     const [teamName, setTeamName] = useState<string>("");
-    const [userName, setUserName] = useState<string>("");  // Estado para armazenar o nome do usuário logado
     const [responses, setResponses] = useState<{ [key: string]: { [key: string]: string } }>({});
     const [error, setError] = useState<string | null>(null);
     const [openSurveyId, setOpenSurveyId] = useState<string | null>(null);
@@ -44,7 +43,6 @@ export default function RespondSurveysPage() {
 
                 const decoded = jwtDecode<DecodedToken>(token);
                 const userId = decoded.id;
-                setUserName(decoded.name);  // Salvar o nome do usuário logado
 
                 const userResponse = await fetch("http://localhost:3001/api/users");
                 if (!userResponse.ok) {
@@ -217,7 +215,7 @@ export default function RespondSurveysPage() {
                                             <p className="alert alert-warning">Nenhuma pergunta disponível</p>
                                         )}
                                         <button className="btn btn-primary" onClick={() => handleSubmit(survey)}>
-                                            Submit
+                                            Enviar
                                         </button>
                                     </div>
                                 </div>

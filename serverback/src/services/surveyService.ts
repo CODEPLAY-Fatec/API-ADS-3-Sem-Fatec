@@ -23,7 +23,8 @@ export const createBaseSurvey = async (survey: BaseSurvey, open: boolean, teams?
 
 export const getBaseSurveys = async () => {
     const query = `SELECT * FROM base_survey`;
-    return db.query(query);
+    const [rows] = await db.query(query);
+    return rows;
 }
 
 export const getBaseSurveyByUID = async (uid: number) => {

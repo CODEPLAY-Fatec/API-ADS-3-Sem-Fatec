@@ -317,9 +317,15 @@ const SurveyCreation = () => {
 
             )}
 
-            <button className="btn btn-primary mt-3" onClick={handleCreateSurvey}>
-                Criar Pesquisa
-            </button>
+            <div className="d-flex align-items-center mt-3">
+                <button className="btn btn-primary" onClick={handleCreateSurvey}>
+                    Criar Pesquisa
+                </button>
+                <Link href="/home/surveys/surveycrud/opensurvey">
+                    <button className="btn btn-secondary ms-3">Abrir pesquisa ja criada</button>
+                </Link>
+            </div>
+
         </div>
     );
 };

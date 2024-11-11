@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { Collapse } from "react-bootstrap";
+import ConfirmDialog from "@/components/confirmDialog"; // Importe o componente ConfirmDialog
 import './opensurvey.css';
 import { BaseSurvey } from "@/types/Survey";
 import Link from "next/link";
@@ -20,6 +21,8 @@ const SurveyList = () => {
     const [selectedTeam, setSelectedTeam] = useState<number | null>(null);
     const [submitError, setSubmitError] = useState<string | null>(null);
     const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [selectedSurveyId, setSelectedSurveyId] = useState<number | null>(null);
 
     useEffect(() => {
         const fetchSurveysAndTeams = async () => {
@@ -55,24 +58,35 @@ const SurveyList = () => {
         setOpenSurveyId(prevId => (prevId === uid ? null : uid));
     };
 
-    const handleSendSurvey = async (surveyUid: number) => {
+    const openConfirmationDialog = (surveyUid: number) => {
+        setSelectedSurveyId(surveyUid);
+        setIsDialogOpen(true);
+    };
+
+    const closeConfirmationDialog = () => {
+        setIsDialogOpen(false);
+        setSelectedSurveyId(null);
+    };
+
+    const handleSendSurvey = async () => {
         if (!selectedTeam) {
             setSubmitError("Por favor, selecione um time antes de enviar.");
             return;
         }
         console.log("Enviando pesquisa para o time:", selectedTeam);
 
-
         try {
-            await axios.post(`http://localhost:3001/api/survey/instance/${surveyUid}`, {
+            await axios.post(`http://localhost:3001/api/survey/instance/${selectedSurveyId}`, {
                 team_id: selectedTeam
             });
             setSubmitSuccess("Pesquisa enviada com sucesso!");
             setSubmitError(null);
+            closeConfirmationDialog();
         } catch (error) {
             console.error("Erro ao enviar pesquisa:", error);
             setSubmitError("Não foi possível enviar a pesquisa. Tente novamente.");
             setSubmitSuccess(null);
+            closeConfirmationDialog();
         }
     };
 
@@ -130,7 +144,7 @@ const SurveyList = () => {
                                     >
                                         <option value="">Escolha um time...</option>
                                         {teams.map((team) => (
-                                            <option key={team.id} value={team.id}>
+                                            <option key={team.name} value={team.id}>
                                                 {team.name}
                                             </option>
                                         ))}
@@ -139,7 +153,7 @@ const SurveyList = () => {
 
                                 <button
                                     className="btn btn-primary mt-3"
-                                    onClick={() => survey.uid !== undefined && handleSendSurvey(survey.uid)}
+                                    onClick={() => survey.uid !== undefined && openConfirmationDialog(survey.uid)}
                                 >
                                     Enviar Pesquisa
                                 </button>
@@ -155,6 +169,15 @@ const SurveyList = () => {
                     Nenhuma pesquisa disponível no momento.
                 </p>
             )}
+
+            {/* Usando ConfirmDialog */}
+            <ConfirmDialog
+                open={isDialogOpen}
+                title="Confirmar Envio"
+                message="Tem certeza? Se essa pesquisa já estiver aberta para esse time, o envio fechará a pesquisa anterior."
+                onConfirm={handleSendSurvey}
+                onCancel={closeConfirmationDialog}
+            />
         </div>
     );
 };

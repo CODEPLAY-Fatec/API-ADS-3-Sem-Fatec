@@ -1,9 +1,9 @@
 "use client";
-
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import Cookie from "js-cookie";
+import ConfirmDialog from "../../../components/confirmDialog";
 import './funcionarios.css';
 import 'bootstrap/dist/css/bootstrap.min.css'; 
 
@@ -33,7 +33,7 @@ export default function Page() {
   const [loggedInUserName, setLoggedInUserName] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
-  const [showModal, setShowModal] = useState<boolean>(false);
+  const [showDialog, setShowDialog] = useState<boolean>(false);
 
   useEffect(() => {
     const token = Cookie.get("authToken") || Cookie.get("userToken");
@@ -78,26 +78,24 @@ export default function Page() {
     }
   };
 
-  const handleShowModal = (userId: number) => {
+  const handleShowDialog = (userId: number) => {
     setConfirmDelete(userId);
-    setShowModal(true);
+    setShowDialog(true);
   };
 
-  const handleCloseModal = () => {
+  const handleCloseDialog = () => {
     setConfirmDelete(null);
-    setShowModal(false);
+    setShowDialog(false);
   };
 
   if (error) {
     return <div>Erro ao carregar dados: {error}</div>;
   }
 
-  // Lógica de filtragem por nome, função e times
   const filteredUsers = users
     .filter(user => {
       const searchTermLower = searchTerm.toLowerCase();
       
-      //filtro de pesquisa
       const matchesName = user.name.toLowerCase().includes(searchTermLower);
       const matchesRole = (user.isAdmin ? "admin" : "usuário").toLowerCase().includes(searchTermLower);
       const matchesTeam = user.teamRoles.some(teamRole => 
@@ -161,7 +159,7 @@ export default function Page() {
                 <td>
                   <button
                     className="btn btn-danger"
-                    onClick={() => handleShowModal(user.id)}
+                    onClick={() => handleShowDialog(user.id)}
                   >
                     Deletar
                   </button>
@@ -172,32 +170,13 @@ export default function Page() {
         </table>
       )}
 
-      {/* Modal */}
-      {showModal && confirmDelete !== null && (
-        <div className="modal show d-block" tabIndex={-1} role="dialog">
-          <div className="modal-dialog" role="document">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">Confirmar Exclusão</h5>
-                <button type="button" className="close" onClick={handleCloseModal}>
-                  <span>&times;</span>
-                </button>
-              </div>
-              <div className="modal-body">
-                <p>Tem certeza que deseja excluir este usuário?</p>
-              </div>
-              <div className="modal-footer">
-                <button type="button" className="btn btn-primary" onClick={() => handleDeleteUser(confirmDelete)}>
-                  Sim
-                </button>
-                <button type="button" className="btn btn-secondary" onClick={handleCloseModal}>
-                  Não
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmDialog
+        open={showDialog}
+        title="Confirmar Exclusão"
+        message="Tem certeza que deseja excluir este usuário?"
+        onConfirm={() => confirmDelete !== null && handleDeleteUser(confirmDelete)}
+        onCancel={handleCloseDialog}
+      />
     </div>
   );
 }

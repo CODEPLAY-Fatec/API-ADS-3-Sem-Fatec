@@ -93,7 +93,8 @@ export const getSurveyInstancesByUIDController = async (req: Request, res: Respo
 }
 
 export const createSurveyInstanceController = async (req: Request, res: Response) => {
-    const { survey_uid, team_id } = req.params;
+    const { survey_uid } = req.params;
+    const { team_id } = req.body;
     try {
         await createSurveyInstance(Number(survey_uid), Number(team_id));
         res.status(201).json({ message: 'Survey instance created successfully' });

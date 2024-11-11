@@ -29,7 +29,8 @@ export const getBaseSurveys = async () => {
 
 export const getBaseSurveyByUID = async (uid: number) => {
     const query = `SELECT * FROM base_survey WHERE uid = ?`;
-    return db.query(query, [uid]);
+    const[rows]= await db.query(query, [uid]);
+    return rows;
 }
 
 export const updateBaseSurvey = async (survey: BaseSurvey) => {
@@ -52,14 +53,34 @@ export const deleteBaseSurvey = async (uid: number) => {
 
 export const getSurveyInstancesByUID = async (uid: number) => {
     const query = `SELECT * FROM survey_instance WHERE uid = ?`;
-    return db.query(query, [uid]);
+    const [rows] =  await db.query(query, [uid]);
+    return rows
 }
 
 export const createSurveyInstance = async (survey_uid: number, team_id: number) => {
-    const insertQuery = `INSERT INTO survey_instance (uid, created, open, team_id) VALUES (?, ?, 1, ?)`;
-    const baseSurvey: BaseSurvey = await getBaseSurveyByUID(survey_uid).then((result: any) => result[0][0]);
-    return db.query(insertQuery, [baseSurvey.uid, new Date(),team_id]);
-}
+    try {
+        console.log(team_id)
+        console.log(survey_uid)
+        // Primeiro, verifica se já existe uma instância com esse uid e team_id
+        const checkQuery = `SELECT id FROM survey_instance WHERE uid = ? AND team_id = ?`;
+        const [existingInstance]: any[] = await db.query(checkQuery, [survey_uid, team_id]);
+
+        // Se a instância existe, exclui-a antes de criar uma nova
+        if (existingInstance.length > 0) {
+            await setSurveyInstanceOpen(existingInstance[0].id, 0);
+        }
+
+        // Cria uma nova instância
+        const insertQuery = `INSERT INTO survey_instance (uid, created, open, team_id) VALUES (?, ?, 1, ?)`;
+        const baseSurvey: BaseSurvey = await getBaseSurveyByUID(survey_uid).then((result: any) => result[0][0]);
+        await db.query(insertQuery, [baseSurvey.uid, new Date(), team_id]);
+
+        return { message: "Instância de pesquisa criada com sucesso." };
+    } catch (error) {
+        console.error("Erro ao criar ou recriar instância da pesquisa:", error);
+        throw error;
+    }
+};
 
 export const deleteSurveyInstance = async (survey_id: number) => {
     const query = `DELETE FROM survey_instance WHERE id = ?`;
@@ -73,12 +94,14 @@ export const setSurveyInstanceOpen = async (survey_id: number, state: number) =>
 
 export const getSurveyInstances = async () => {
     const query = `SELECT * FROM survey_instance`;
-    return db.query(query);
+    const[rows] = await db.query(query);
+    return rows;
 }
 
 export const getSurveyInstancesByTeam = async (teamId: number) => {
     const query = `SELECT * FROM survey_instance WHERE team_id = ?`;
-    return db.query(query, [teamId]);
+    const [rows] = await db.query(query, [teamId]);
+    return rows;
 }
 
 export const submitSurveyResponse = async (user_id: number, survey_id: number, survey_uid: number, data: Question[], target_id?: number) => {

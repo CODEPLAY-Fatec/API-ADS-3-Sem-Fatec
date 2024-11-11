@@ -322,7 +322,7 @@ const SurveyCreation = () => {
                     Criar Pesquisa
                 </button>
                 <Link href="/home/surveys/surveycrud/opensurvey">
-                    <button className="btn btn-secondary ms-3">Abrir pesquisa ja criada</button>
+                    <button className="btn btn-secondary ms-3">Pesquisas ja criadas</button>
                 </Link>
             </div>
 

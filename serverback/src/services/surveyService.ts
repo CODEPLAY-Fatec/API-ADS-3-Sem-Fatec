@@ -29,9 +29,8 @@ export const getBaseSurveys = async () => {
 
 export const getBaseSurveyByUID = async (uid: number) => {
     const query = `SELECT * FROM base_survey WHERE uid = ?`;
-    const[rows]= await db.query(query, [uid]);
-    return rows;
-}
+    return db.query(query, [uid]);    
+} //no caso se nao retonrar assim da problema na criaçao da instancia q utiliza essa funçao
 
 export const updateBaseSurvey = async (survey: BaseSurvey) => {
     const query = `UPDATE base_survey SET team_id = ?, title = ?, description = ?, category = ?, questions = ? WHERE uid = ?`;
@@ -72,8 +71,11 @@ export const createSurveyInstance = async (survey_uid: number, team_id: number) 
 
         // Cria uma nova instância
         const insertQuery = `INSERT INTO survey_instance (uid, created, open, team_id) VALUES (?, ?, 1, ?)`;
+        console.log(survey_uid)
         const baseSurvey: BaseSurvey = await getBaseSurveyByUID(survey_uid).then((result: any) => result[0][0]);
+        console.log(baseSurvey)
         await db.query(insertQuery, [baseSurvey.uid, new Date(), team_id]);
+
 
         return { message: "Instância de pesquisa criada com sucesso." };
     } catch (error) {

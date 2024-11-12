@@ -1,48 +1,27 @@
-
 .link-content {
-    padding: 8px 20px; 
-    transition: background-color 0.3s ease; 
+  padding: 10px 30px;
+  display: flex;
+  align-items: center;
+  transition: background-color 0.3s ease, padding 0.3s ease;
 }
-
 .link-content:hover {
-    background-color: rgba(173, 216, 230, 0.7); 
-    border-radius: 5px; 
+  background-color: rgba(173, 216, 230, 0.7);
+  border-radius: 5px;
 }
 
-/* Para esconder a barra de rolagem */
 .navbar-scroll {
-    scrollbar-width: none; 
-  }
-  
-  .navbar-scroll::-webkit-scrollbar {
-    display: none; /* Para Chrome, Safari e Edge */
-  } 
-  
-  .scroll-arrow {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: #152259;
-    color: white;
-    padding: 5px 10px;
-    border-radius: 50%;
-    cursor: pointer;
-    z-index: 10;
-  }
-  
-  .up-arrow {
-    top: 10px; /* Posição para seta de cima */
-  }
-  
-  .down-arrow {
-    bottom: 10px; /* Posição para seta de baixo */
-  }
-  
-  .scroll-arrow:hover {
-    background-color: #1b3a8b;
-  }
-  
-  
-  
+  scrollbar-width: none;
+}
 
+.navbar-scroll::-webkit-scrollbar {
+  display: none; 
+}
 
+.sidebar {
+  width: 130px; 
+  transition: width 0.5s ease; /* Transição suave */
+}
+
+.sidebar:hover {
+  width: 260px;
+}

@@ -1,22 +1,20 @@
 "use client";
 
 import Link from "next/link";
+import Image from 'next/image';
 import { useEffect, useState } from "react";
 import Cookie from "js-cookie";
 import { jwtDecode } from "jwt-decode";
-import { KeyRound, 
-        User,
-        LogOut,
-        LayoutDashboard,
-        Handshake, 
-        Users, 
-        UsersRound,Notebook,NotebookPen,UserPlus } from "lucide-react"; 
-import GroupsIcon from '@mui/icons-material/Groups'; //provavelmente depois alterar todos para mui
+import {
+  KeyRound, User, LogOut, LayoutDashboard, Handshake, Users, UsersRound, Notebook, NotebookPen, UserPlus
+} from "lucide-react";
+import GroupsIcon from '@mui/icons-material/Groups'; // provavelmente depois alterar todos para mui
 import "./Navbar.css";
 
 const Navbar: React.FC = () => {
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [isTeamLeader, setIsTeamLeader] = useState<boolean>(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   // Definindo se é admin ou líder para restringir links
   useEffect(() => {
@@ -41,15 +39,29 @@ const Navbar: React.FC = () => {
 
   return (
     <div
-      className="d-flex flex-column vh-100 text-white position-fixed overflow-auto"
-      style={{ maxHeight: "100vh", width: "250px", backgroundColor: "#152259" }}>
-
+      className={`sidebar d-flex flex-column vh-100 text-white position-fixed overflow-auto ${isExpanded ? 'expanded' : ''}`}
+      onMouseEnter={() => setIsExpanded(true)}
+      onMouseLeave={() => setIsExpanded(false)}
+      style={{ maxHeight: "100vh", backgroundColor: "#152259" }}
+    >
       <div className="text-center my-3">
-        <img src="/images/logo.png" alt="Logo" className="img-fluid mx-auto d-block" style={{ maxHeight: "100px" }} />
-        <h4 className="mt-2 mb-0 text-center">
-          <strong>QUANTUM</strong>
-        </h4>
-        <p className="m-0 text-center">ENTERPRISE</p>
+        <Image
+          src="/images/logo.png"
+          alt="Logo"
+          className="img-fluid mx-auto d-block"
+          style={{ maxHeight: "100px" }}
+          width={100}
+          height={100}
+        />
+
+        {isExpanded && (
+          <>
+            <h4 className="mt-2 mb-0 text-center">
+              <strong>QUANTUM</strong>
+            </h4>
+            <p className="m-0 text-center">ENTERPRISE</p>
+          </>
+        )}
       </div>
 
       <hr style={{ border: "1px solid white", width: "100%" }} />
@@ -60,19 +72,17 @@ const Navbar: React.FC = () => {
             <Link href="/home/profile" className="nav-link text-white">
               <div className="link-content d-flex align-items-center">
                 <User className="me-1" />
-                Perfil
+                {isExpanded && <span>Perfil</span>}
               </div>
             </Link>
           </li>
 
           {(isAdmin || isTeamLeader) && (
-            
-
             <li className="nav-item">
               <Link href="/home/dashboards" className="nav-link text-white">
-              <div className="link-content d-flex align-items-center">
-                  <LayoutDashboard className="me-1"/>
-                  Dashboards
+                <div className="link-content d-flex align-items-center">
+                  <LayoutDashboard className="me-1" />
+                  {isExpanded && <span>Dashboards</span>}
                 </div>
               </Link>
             </li>
@@ -82,8 +92,8 @@ const Navbar: React.FC = () => {
             <li className="nav-item">
               <Link href="/home/funcionarios" className="nav-link text-white">
                 <div className="link-content d-flex align-items-center">
-                  <Users className="me-1"/>
-                   Lista de Funcionários
+                  <Users className="me-1" />
+                  {isExpanded && <span>Lista de Funcionários</span>}
                 </div>
               </Link>
             </li>
@@ -92,8 +102,8 @@ const Navbar: React.FC = () => {
           <li className="nav-item">
             <Link href="/home/Myteams" className="nav-link text-white">
               <div className="link-content d-flex align-items-center">
-                <Handshake className="me-1"/>
-                Meus Times
+                <Handshake className="me-1" />
+                {isExpanded && <span>Meus Times</span>}
               </div>
             </Link>
           </li>
@@ -101,8 +111,8 @@ const Navbar: React.FC = () => {
           <li className="nav-item">
             <Link href="/home/surveys/availablesurveys" className="nav-link text-white">
               <div className="link-content d-flex align-items-center">
-                <Notebook className="me-1"/>
-                Pesquisas disponíveis
+                <Notebook className="me-1" />
+                {isExpanded && <span>Pesquisas disponíveis</span>}
               </div>
             </Link>
           </li>
@@ -111,8 +121,8 @@ const Navbar: React.FC = () => {
             <li className="nav-item">
               <Link href="/home/funcionarioslider" className="nav-link text-white">
                 <div className="link-content d-flex align-items-center">
-                  <UsersRound className="me-1"/>
-                Lista de Líderados
+                  <UsersRound className="me-1" />
+                  {isExpanded && <span>Lista de Liderados</span>}
                 </div>
               </Link>
             </li>
@@ -123,41 +133,40 @@ const Navbar: React.FC = () => {
               <li className="nav-item">
                 <Link href="/home/surveys/surveycrud" className="nav-link text-white">
                   <div className="link-content d-flex align-items-center">
-                    <NotebookPen className="me-1"/>
-                    Criação de Pesquisa
+                    <NotebookPen className="me-1" />
+                    {isExpanded && <span>Criação de Pesquisa</span>}
                   </div>
                 </Link>
               </li>
               <li className="nav-item">
                 <Link href="/home/teamregistration" className="nav-link text-white">
                   <div className="link-content d-flex align-items-center">
-                    <GroupsIcon className="me-1"/>
-                    Cadastro de Times
+                    <GroupsIcon className="me-1" />
+                    {isExpanded && <span>Cadastro de Times</span>}
                   </div>
                 </Link>
               </li>
               <li className="nav-item">
                 <Link href="/home/register" className="nav-link text-white">
                   <div className="link-content d-flex align-items-center">
-                    <UserPlus className="me-1"/>
-                    Cadastro de Usuários
+                    <UserPlus className="me-1" />
+                    {isExpanded && <span>Cadastro de Usuários</span>}
                   </div>
                 </Link>
               </li>
             </>
           )}
-
         </ul>
       </nav>
 
-      <div className="text-center d-flex justify-content-center mb-3"> 
-  <Link href="/home/changepasswordin" className="btn btn-warning me-2">
-    <KeyRound className="me-0" /> 
-  </Link>
-  <button onClick={handleLogout} className="btn btn-danger d-flex align-items-center">
-    <LogOut className="me-0" /> 
-  </button>
-</div>
+      <div className="text-center d-flex justify-content-center mb-3">
+        <Link href="/home/changepasswordin" className="btn btn-warning me-2">
+          <KeyRound className="me-0" />
+        </Link>
+        <button onClick={handleLogout} className="btn btn-danger d-flex align-items-center">
+          <LogOut className="me-0" />
+        </button>
+      </div>
     </div>
   );
 };

@@ -6,17 +6,17 @@ import { useEffect, useState } from "react";
 import Cookie from "js-cookie";
 import { jwtDecode } from "jwt-decode";
 import {
-  KeyRound, User, LogOut, LayoutDashboard, Handshake, Users, UsersRound, Notebook, NotebookPen, UserPlus
+  KeyRound, User, LogOut, LayoutDashboard, Handshake, Users, UsersRound, Notebook, NotebookPen, UserPlus,
 } from "lucide-react";
-import GroupsIcon from '@mui/icons-material/Groups'; // provavelmente depois alterar todos para mui
+import GroupsIcon from '@mui/icons-material/Groups';
+import ViewSidebarIcon from '@mui/icons-material/ViewSidebar';
 import "./Navbar.css";
 
 const Navbar: React.FC = () => {
   const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [isTeamLeader, setIsTeamLeader] = useState<boolean>(false);
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(true);
 
-  // Definindo se é admin ou líder para restringir links
   useEffect(() => {
     const token = Cookie.get("authToken") || Cookie.get("userToken");
     if (token) {
@@ -30,18 +30,19 @@ const Navbar: React.FC = () => {
     }
   }, []);
 
-  // Função para logout
   const handleLogout = () => {
     Cookie.remove("authToken");
     Cookie.remove("userToken");
     window.location.href = "/";
   };
 
+  const toggleSidebar = () => {
+    setIsExpanded(!isExpanded);
+  };
+
   return (
     <div
       className={`sidebar d-flex flex-column vh-100 text-white position-fixed overflow-auto ${isExpanded ? 'expanded' : ''}`}
-      onMouseEnter={() => setIsExpanded(true)}
-      onMouseLeave={() => setIsExpanded(false)}
       style={{ maxHeight: "100vh", backgroundColor: "#152259" }}
     >
       <div className="text-center my-3">
@@ -76,7 +77,6 @@ const Navbar: React.FC = () => {
               </div>
             </Link>
           </li>
-
           {(isAdmin || isTeamLeader) && (
             <li className="nav-item">
               <Link href="/home/dashboards" className="nav-link text-white">
@@ -87,7 +87,6 @@ const Navbar: React.FC = () => {
               </Link>
             </li>
           )}
-
           {isAdmin && (
             <li className="nav-item">
               <Link href="/home/funcionarios" className="nav-link text-white">
@@ -98,7 +97,6 @@ const Navbar: React.FC = () => {
               </Link>
             </li>
           )}
-
           <li className="nav-item">
             <Link href="/home/Myteams" className="nav-link text-white">
               <div className="link-content d-flex align-items-center">
@@ -107,7 +105,6 @@ const Navbar: React.FC = () => {
               </div>
             </Link>
           </li>
-
           <li className="nav-item">
             <Link href="/home/surveys/availablesurveys" className="nav-link text-white">
               <div className="link-content d-flex align-items-center">
@@ -116,7 +113,6 @@ const Navbar: React.FC = () => {
               </div>
             </Link>
           </li>
-
           {isTeamLeader && (
             <li className="nav-item">
               <Link href="/home/funcionarioslider" className="nav-link text-white">
@@ -127,7 +123,6 @@ const Navbar: React.FC = () => {
               </Link>
             </li>
           )}
-
           {isAdmin && (
             <>
               <li className="nav-item">
@@ -156,18 +151,38 @@ const Navbar: React.FC = () => {
               </li>
             </>
           )}
+
+
+
+
         </ul>
       </nav>
 
+       {/* Botão para expandir a sidebar */}
+       {!isExpanded && (
+        <div className="expand-button-container">
+          <button onClick={toggleSidebar} className="btn btn-primary mb-2">
+            <ViewSidebarIcon />
+          </button>
+        </div>
+      )}
+
+      {/* Botões de alteração de senha e logout */}
       <div className="text-center d-flex justify-content-center mb-3">
         <Link href="/home/changepasswordin" className="btn btn-warning me-2">
-          <KeyRound className="me-0" />
+          <KeyRound />
         </Link>
+        {isExpanded && (
+          <button onClick={toggleSidebar} className="btn btn-primary me-2">
+            <ViewSidebarIcon />
+          </button>
+        )}
         <button onClick={handleLogout} className="btn btn-danger d-flex align-items-center">
-          <LogOut className="me-0" />
+          <LogOut />
         </button>
       </div>
     </div>
+
   );
 };
 

@@ -22,6 +22,12 @@
   transition: width 0.5s ease; /* Transição suave */
 }
 
-.sidebar:hover {
+.sidebar.expanded {
   width: 260px;
+}
+
+.expand-button-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }

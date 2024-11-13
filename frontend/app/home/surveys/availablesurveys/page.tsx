@@ -89,7 +89,7 @@ export default function RespondSurveysPage() {
 
         loadUserAndSurveys();
     }, []);
-    
+
 
     const handleResponseChange = (surveyKey: string, questionId: string, answer: string) => {
         setResponses(prevResponses => ({
@@ -187,7 +187,34 @@ export default function RespondSurveysPage() {
                                                             ({question.category || "Sem categoria"})
                                                         </span>
                                                     </label>
-                                                    {question.type === "Multiple" && question.options ? (
+                                                    {question.type === "Text" ? (
+                                                        <input
+                                                            type="text"
+                                                            className="form-control"
+                                                            value={responses[surveyKey]?.[questionIndex.toString()] || ""}
+                                                            onChange={e => handleResponseChange(surveyKey, questionIndex.toString(), e.target.value)}
+                                                        />
+                                                    ) : question.type === "Multiple" && question.options ? (
+                                                        question.options.map((option, optionIndex) => (
+                                                            <div key={optionIndex} className="form-check">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    className="form-check-input"
+                                                                    name={`survey_${surveyKey}_question_${questionIndex}`}
+                                                                    value={option}
+                                                                    checked={(responses[surveyKey]?.[questionIndex.toString()] || "").split(",").includes(option)}
+                                                                    onChange={e => {
+                                                                        const currentAnswers = responses[surveyKey]?.[questionIndex.toString()]?.split(",") || [];
+                                                                        const updatedAnswers = e.target.checked
+                                                                            ? [...currentAnswers, option]
+                                                                            : currentAnswers.filter(ans => ans !== option);
+                                                                        handleResponseChange(surveyKey, questionIndex.toString(), updatedAnswers.join(","));
+                                                                    }}
+                                                                />
+                                                                <label className="form-check-label">{option}</label>
+                                                            </div>
+                                                        ))
+                                                    ) : question.type === "Single" && question.options ? (
                                                         question.options.map((option, optionIndex) => (
                                                             <div key={optionIndex} className="form-check">
                                                                 <input
@@ -202,18 +229,14 @@ export default function RespondSurveysPage() {
                                                             </div>
                                                         ))
                                                     ) : (
-                                                        <input
-                                                            type="text"
-                                                            className="form-control"
-                                                            value={responses[surveyKey]?.[questionIndex.toString()] || ""}
-                                                            onChange={e => handleResponseChange(surveyKey, questionIndex.toString(), e.target.value)}
-                                                        />
+                                                        <p className="alert alert-warning">Tipo de pergunta não reconhecido</p>
                                                     )}
                                                 </div>
                                             ))
                                         ) : (
                                             <p className="alert alert-warning">Nenhuma pergunta disponível</p>
                                         )}
+
                                         <button className="btn btn-primary" onClick={() => handleSubmit(survey)}>
                                             Enviar
                                         </button>

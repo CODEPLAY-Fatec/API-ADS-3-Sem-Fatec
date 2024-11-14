@@ -42,7 +42,7 @@ export default function Page() {
 
         const fetchUsers = async () => {
           try {
-            const response = await axios.get('http://localhost:3001/api/users');
+            const response = await axios.get('/api/users');
             const usersWithDetails = response.data.map((user: User) => ({
               ...user,
               teamRoles: user.teamRoles || [],

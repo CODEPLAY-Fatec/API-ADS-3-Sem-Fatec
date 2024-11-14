@@ -27,7 +27,7 @@ const SurveyCreation = () => {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await axios.get("http://localhost:3001/api/category");
+                const response = await axios.get("/api/category");
                 setCategories(response.data);
             } catch (error) {
                 console.error("Erro ao buscar categorias:", error);
@@ -39,7 +39,7 @@ const SurveyCreation = () => {
     useEffect(() => {
         const fetchTeams = async () => {
             try {
-                const response = await axios.get("http://localhost:3001/api/team");
+                const response = await axios.get("/api/team");
                 setTeams(response.data);
             } catch (error) {
                 console.error("Erro ao buscar times:", error);
@@ -118,7 +118,7 @@ const SurveyCreation = () => {
                 category,
                 questions,
             };
-            await axios.post("http://localhost:3001/api/survey/base", {
+            await axios.post("/api/survey/base", {
                 survey: newSurvey,
                 open: true,
                 teams: [team_id],

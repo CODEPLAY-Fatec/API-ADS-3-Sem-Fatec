@@ -49,7 +49,7 @@ export default function RespondSurveysPage() {
                 const decoded = jwtDecode<DecodedToken>(token);
                 const userId = decoded.id;
 
-                const userResponse = await fetch("http://localhost:3001/api/users");
+                const userResponse = await fetch("/api/users");
                 if (!userResponse.ok) {
                     throw new Error("Failed to fetch user details");
                 }
@@ -60,7 +60,7 @@ export default function RespondSurveysPage() {
                     throw new Error("User not found");
                 }
 
-                const teamResponse = await fetch("http://localhost:3001/api/team");
+                const teamResponse = await fetch("/api/team");
                 if (!teamResponse.ok) {
                     throw new Error("Failed to fetch teams");
                 }
@@ -76,7 +76,7 @@ export default function RespondSurveysPage() {
 
                 setTeamName(currentTeam.name);
 
-                const surveysResponse = await fetch(`http://localhost:3001/api/survey/available/${userId}`);
+                const surveysResponse = await fetch(`/api/survey/available/${userId}`);
                 if (!surveysResponse.ok) {
                     throw new Error("Failed to fetch surveys");
                 }
@@ -144,7 +144,7 @@ export default function RespondSurveysPage() {
                 return;
             }
 
-            const response = await fetch("http://localhost:3001/api/survey/answers/", {
+            const response = await fetch("/api/survey/answers/", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

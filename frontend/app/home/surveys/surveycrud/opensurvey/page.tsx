@@ -35,8 +35,8 @@ const SurveyList = () => {
         try {
             setLoading(true);
             const [surveyResponse, teamResponse] = await Promise.all([
-                axios.get("http://localhost:3001/api/survey/base"),
-                axios.get("http://localhost:3001/api/team"),
+                axios.get("/api/survey/base"),
+                axios.get("/api/team"),
             ]);
 
             if (Array.isArray(surveyResponse.data)) {
@@ -76,7 +76,7 @@ const SurveyList = () => {
 
     const handleDeleteSurvey = async () => {
         try {
-            await axios.delete(`http://localhost:3001/api/survey/base/${selectedSurveyId}`);
+            await axios.delete(`/api/survey/base/${selectedSurveyId}`);
             alert("Pesquisa deletada com sucesso!");
             closeConfirmationDialog();
             fetchSurveysAndTeams();
@@ -94,7 +94,7 @@ const SurveyList = () => {
         }
 
         try {
-            await axios.post(`http://localhost:3001/api/survey/instance/${selectedSurveyId}`, {
+            await axios.post(`/api/survey/instance/${selectedSurveyId}`, {
                 team_id: selectedTeam
             });
             alert("Pesquisa enviada com sucesso!");

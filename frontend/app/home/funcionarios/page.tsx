@@ -49,7 +49,7 @@ export default function Page() {
 
     const fetchUsers = async () => {
       try {
-        const response = await axios.get('http://localhost:3001/api/users');
+        const response = await axios.get('/api/users');
         const usersWithDetails = response.data.map((user: User) => ({
           ...user,
           teamRoles: user.teamRoles || [],
@@ -69,7 +69,7 @@ export default function Page() {
 
   const handleDeleteUser = async (id: number) => {
     try {
-      await axios.delete(`http://localhost:3001/api/users/${id}`);
+      await axios.delete(`/api/users/${id}`);
       setUsers(prevUsers => prevUsers.filter(user => user.id !== id));
       setConfirmDelete(null); 
     } catch (error) {

@@ -20,7 +20,7 @@ const RecuperacaoSenha: React.FC = () => {
   const handlePasswordRecovery = async (email: string) => {
     setLoading(true); 
     try {
-      const response = await axios.post('http://localhost:3001/api/recover-password', { email });
+      const response = await axios.post('/api/recover-password', { email });
       console.log(response.data.message);
       setCodigoEnviado(true);
       setUserId(response.data.userId);
@@ -35,7 +35,7 @@ const RecuperacaoSenha: React.FC = () => {
   // Função para verificar o código de recuperação
   const verificarCodigo = async () => {
     try {
-      const response = await axios.post('http://localhost:3001/api/verificar-codigo', { email, codigo });
+      const response = await axios.post('/api/verificar-codigo', { email, codigo });
       if (response.data.success) {
         setCodigoCorreto(true); 
       } else {
@@ -56,7 +56,7 @@ const RecuperacaoSenha: React.FC = () => {
     }
 
     try {
-      await axios.put('http://localhost:3001/api/update-password', { userId, novaSenha });
+      await axios.put('/api/update-password', { userId, novaSenha });
       alert('Senha redefinida com sucesso!');
       router.push('/'); 
     } catch (error) {

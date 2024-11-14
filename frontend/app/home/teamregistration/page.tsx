@@ -36,15 +36,15 @@ const TeamRegistration = () => {
     useEffect(() => {
         const fetchTeams = async () => {
             try {
-                const response = await axios.get('http://localhost:3001/api/team');
+                const response = await axios.get('/api/team');
                 setTeams(response.data);
 
                 const leadersMap: { [key: number]: User[] } = {};
                 const membersMap: { [key: number]: User[] } = {};
 
                 await Promise.all(response.data.map(async (team: Team) => {
-                    const leadersResponse = await axios.get(`http://localhost:3001/api/team/${team.id}/leaders`);
-                    const membersResponse = await axios.get(`http://localhost:3001/api/team/${team.id}/members`);
+                    const leadersResponse = await axios.get(`/api/team/${team.id}/leaders`);
+                    const membersResponse = await axios.get(`/api/team/${team.id}/members`);
 
                     leadersMap[team.id] = leadersResponse.data;
                     membersMap[team.id] = membersResponse.data;
@@ -64,7 +64,7 @@ const TeamRegistration = () => {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const response = await axios.get('http://localhost:3001/api/user');
+                const response = await axios.get('/api/user');
                 setUsers(response.data);
             } catch (error) {
                 console.error('Erro ao buscar usuários:', error);
@@ -107,7 +107,7 @@ const TeamRegistration = () => {
         }
 
         try {
-            const response = await axios.post('http://localhost:3001/api/team', { name: teamName });
+            const response = await axios.post('/api/team', { name: teamName });
             const newTeam = response.data.team;
             setTeams((prevTeams) => [...prevTeams, newTeam]);
             setTeamLeaders((prevLeaders) => ({ ...prevLeaders, [newTeam.id]: [] }));
@@ -122,7 +122,7 @@ const TeamRegistration = () => {
 
     const handleAddLeader = async (teamId: number) => {
         try {
-            await axios.post(`http://localhost:3001/api/team/${teamId}/leader`, { userId: leaderIds[teamId] });
+            await axios.post(`/api/team/${teamId}/leader`, { userId: leaderIds[teamId] });
             const newLeader = users.find(user => user.id === parseInt(leaderIds[teamId]));
             if (newLeader) {
                 setTeamLeaders(prev => ({
@@ -140,7 +140,7 @@ const TeamRegistration = () => {
 
     const handleAddMember = async (teamId: number) => {
         try {
-            await axios.post(`http://localhost:3001/api/team/${teamId}/member`, { userId: memberIds[teamId] });
+            await axios.post(`/api/team/${teamId}/member`, { userId: memberIds[teamId] });
             const newMember = users.find(user => user.id === parseInt(memberIds[teamId]));
             if (newMember) {
                 setTeamMembers(prev => ({
@@ -158,7 +158,7 @@ const TeamRegistration = () => {
 
     const handleRemoveTeam = async (teamId: number) => {
         try {
-            await axios.delete(`http://localhost:3001/api/team/${teamId}`);
+            await axios.delete(`/api/team/${teamId}`);
             setTeams(teams.filter(team => team.id !== teamId));
             setFeedbackMessage('Time removido com sucesso!');
             setConfirmDeleteTeam(null);
@@ -171,7 +171,7 @@ const TeamRegistration = () => {
 
     const handleRemoveUser = async (teamId: number, userId: number, type: 'leader' | 'member') => {
         try {
-            await axios.delete(`http://localhost:3001/api/team/${teamId}/user/${userId}`);
+            await axios.delete(`/api/team/${teamId}/user/${userId}`);
             if (type === 'leader') {
                 setTeamLeaders(prev => ({
                     ...prev,

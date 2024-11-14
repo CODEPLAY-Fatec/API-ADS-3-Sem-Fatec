@@ -8,10 +8,12 @@ import surveyRoutes from './routes/surveyRoutes'; //rotas para as pesquisas
 import categoryRoutes from './routes/categoryRoutes';
 import passwordRoutes from './routes/passwordRoutes'
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = Number(process.env.PORT) || 3001;
 
 app.use(bodyParser.json());
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3000',
+}));
 
 // Usando as rotas
 app.use('/api',teamRoutes) //rota para os times
@@ -21,7 +23,7 @@ app.use('/api', surveyRoutes); // Rotas para pesquisas
 app.use('/api', categoryRoutes);
 app.use('/api',passwordRoutes)
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Servidor rodando na porta ${PORT}`);
 });
 

@@ -121,7 +121,7 @@ export default function Page() {
         const decoded = jwtDecode<DecodedToken>(token);
         setUserData(decoded);
 
-        axios.get("http://localhost:3001/api/users")
+        axios.get("/api/users")
           .then(response => {
             const allUsers: UserData[] = response.data;
 

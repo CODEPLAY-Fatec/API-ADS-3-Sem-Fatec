@@ -17,7 +17,7 @@ const CategoryRegistration = () => {
     // Função para buscar as categorias da API
     const fetchCategories = async () => {
         try {
-            const response = await axios.get("http://localhost:3001/api/category");
+            const response = await axios.get("/api/category");
             setCategories(response.data);
         } catch (error) {
             console.error("Erro ao buscar categorias:", error);
@@ -34,7 +34,7 @@ const CategoryRegistration = () => {
         if (categoryName.trim() === "") return;
 
         try {
-            await axios.post("http://localhost:3001/api/category", { name: categoryName });
+            await axios.post("/api/category", { name: categoryName });
             setCategoryName(""); // Limpar o campo de texto
             fetchCategories(); // Atualiza a lista de categorias
         } catch (error) {
@@ -45,7 +45,7 @@ const CategoryRegistration = () => {
     // Função para deletar categoria
     const handleDeleteCategory = async (id: number) => {
         try {
-            await axios.delete(`http://localhost:3001/api/category/${id}`);
+            await axios.delete(`/api/category/${id}`);
             fetchCategories(); // Atualiza a lista de categorias
         } catch (error) {
             console.error("Erro ao deletar categoria:", error);
@@ -57,7 +57,7 @@ const CategoryRegistration = () => {
         if (editingCategoryName.trim() === "") return;
 
         try {
-            await axios.put(`http://localhost:3001/api/category/${id}`, { name: editingCategoryName });
+            await axios.put(`/api/category/${id}`, { name: editingCategoryName });
             setEditingCategoryId(null);
             setEditingCategoryName("");
             fetchCategories(); // Atualiza a lista de categorias

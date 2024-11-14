@@ -68,7 +68,7 @@ const Page: React.FC = () => {
     setLoading(true);
 
     try {
-      const response = await axios.put("http://localhost:3001/api/change_password", {
+      const response = await axios.put("/api/change_password", {
         userId,
         current_password: currentPassword,
         new_password: newPassword,

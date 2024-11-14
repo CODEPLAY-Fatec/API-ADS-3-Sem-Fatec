@@ -51,14 +51,14 @@ const Page = () => {
             if (!userId) return; 
 
             try {
-                const response = await axios.get(`http://localhost:3001/api/user/${userId}/teams`);
+                const response = await axios.get(`/api/user/${userId}/teams`);
                 setTeams(response.data);
 
                 const detailsMap: { [key: number]: TeamDetails } = {};
                 await Promise.all(response.data.map(async (team: Team) => {
                     const [leadersResponse, membersResponse] = await Promise.all([
-                        axios.get(`http://localhost:3001/api/team/${team.id}/leaders`),
-                        axios.get(`http://localhost:3001/api/team/${team.id}/members`)
+                        axios.get(`/api/team/${team.id}/leaders`),
+                        axios.get(`/api/team/${team.id}/members`)
                     ]);
                     detailsMap[team.id] = {
                         leaders: leadersResponse.data,

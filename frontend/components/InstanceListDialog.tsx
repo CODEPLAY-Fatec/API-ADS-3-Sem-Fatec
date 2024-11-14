@@ -38,7 +38,7 @@ const InstanceListDialog: React.FC<InstanceListDialogProps> = ({ open, onClose, 
     const fetchInstances = useCallback(async () => {
         setLoading(true);
         try {
-            const response = await axios.get(`http://localhost:3001/api/survey/instance/${surveyId}`);
+            const response = await axios.get(`/api/survey/instance/${surveyId}`);
             setInstances(response.data);
         } catch (error) {
             console.error("Erro ao buscar instâncias:", error);
@@ -50,7 +50,7 @@ const InstanceListDialog: React.FC<InstanceListDialogProps> = ({ open, onClose, 
     // Função para fechar a instância
     const closeInstance = async (id: number, state: number) => {
         try {
-            await axios.put(`http://localhost:3001/api/survey/instance/${id}/${state}`, {
+            await axios.put(`/api/survey/instance/${id}/${state}`, {
                 survey_id: id,
                 state: state
             });

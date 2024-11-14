@@ -138,7 +138,7 @@ export async function getUserSurveys(user_id: number): Promise<UsableSurvey[]> {
                 FROM survey_instance si
                 JOIN base_survey bs ON si.uid = bs.uid
                 LEFT JOIN survey_answer sa ON si.id = sa.survey_id AND sa.user_id = ?
-                WHERE si.team_id = ? 
+                WHERE si.team_id = ? AND si.open = 1
                   AND (bs.category != 'Autoavaliação' OR sa.user_id IS NULL)
                   AND (bs.category = 'Autoavaliação' OR bs.category = ?)
             `, [user_id, team.team_id, Category]);

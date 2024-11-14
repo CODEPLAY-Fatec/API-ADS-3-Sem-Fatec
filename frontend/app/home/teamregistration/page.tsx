@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Collapse } from 'react-bootstrap';
 import './teamregistration.css';
+import ConfirmDialog from "@/components/confirmDialog";
+
 
 interface Team {
     id: number;
@@ -24,6 +26,11 @@ const TeamRegistration = () => {
     const [leaderIds, setLeaderIds] = useState<{ [key: number]: string }>({});
     const [memberIds, setMemberIds] = useState<{ [key: number]: string }>({});
     const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
+    const [confirmDeleteTeam, setConfirmDeleteTeam] = useState<number | null>(null);
+    const [showDialogTeam, setShowDialogTeam] = useState<boolean>(false);
+    const [showDialogUser, setShowDialogUser] = useState<boolean>(false);
+    const [confirmDeleteUser, setConfirmDeleteUser] = useState<{ teamId: number, userId: number, type: 'leader' | 'member' } | null>(null);
+
 
     // Fetch teams
     useEffect(() => {
@@ -67,25 +74,45 @@ const TeamRegistration = () => {
         fetchUsers();
     }, []);
 
+    const handleShowDialog = (teamId: number) => {
+        setConfirmDeleteTeam(teamId);
+        setShowDialogTeam(true);
+    };
+
+    const handleCloseDialog = () => {        
+        setConfirmDeleteTeam(null);
+        setShowDialogTeam(false);
+    };
+
+    const handleShowDialogUser = (teamId: number, userId: number, type: 'leader' | 'member') => {
+        setConfirmDeleteUser({ teamId, userId, type });
+        setShowDialogUser(true);
+    };
+
+    const handleCloseDialogUser = () => {        
+        setConfirmDeleteUser(null);
+        setShowDialogUser(false);
+    };
+
     const handleCreateTeam = async () => {
         if (!teamName.trim()) {
             setFeedbackMessage('O nome do time não pode estar vazio.');
             return;
         }
-        
+
         const teamExists = teams.some(team => team.name.toLowerCase() === teamName.toLowerCase());
         if (teamExists) {
             setFeedbackMessage('O time já existe.');
             return;
         }
-    
+
         try {
             const response = await axios.post('http://localhost:3001/api/team', { name: teamName });
-            const newTeam = response.data.team; 
-            setTeams((prevTeams) => [...prevTeams, newTeam]); 
-            setTeamLeaders((prevLeaders) => ({ ...prevLeaders, [newTeam.id]: [] })); 
-            setTeamMembers((prevMembers) => ({ ...prevMembers, [newTeam.id]: [] })); 
-            setTeamName(''); 
+            const newTeam = response.data.team;
+            setTeams((prevTeams) => [...prevTeams, newTeam]);
+            setTeamLeaders((prevLeaders) => ({ ...prevLeaders, [newTeam.id]: [] }));
+            setTeamMembers((prevMembers) => ({ ...prevMembers, [newTeam.id]: [] }));
+            setTeamName('');
             setFeedbackMessage('Time criado com sucesso!');
         } catch (error) {
             console.error('Erro ao cadastrar time:', error);
@@ -134,6 +161,8 @@ const TeamRegistration = () => {
             await axios.delete(`http://localhost:3001/api/team/${teamId}`);
             setTeams(teams.filter(team => team.id !== teamId));
             setFeedbackMessage('Time removido com sucesso!');
+            setConfirmDeleteTeam(null);
+            setShowDialogTeam(false);
         } catch (error) {
             console.error('Erro ao remover time:', error);
             setFeedbackMessage('Erro ao remover time. Tente novamente.');
@@ -155,6 +184,8 @@ const TeamRegistration = () => {
                 }));
             }
             setFeedbackMessage(`${type === 'leader' ? 'Líder' : 'Membro'} removido com sucesso!`);
+            setConfirmDeleteUser(null);
+            setShowDialogUser(false);
         } catch (error) {
             console.error('Erro ao remover usuário do time:', error);
             setFeedbackMessage(`Erro ao remover ${type === 'leader' ? 'líder' : 'membro'}. Tente novamente.`);
@@ -209,7 +240,7 @@ const TeamRegistration = () => {
                                         >
                                             {team.name}
                                         </h5>
-                                        <button className="btn btn-danger" onClick={() => handleRemoveTeam(team.id)}>
+                                        <button className="btn btn-danger" onClick={() => handleShowDialog(team.id)}>
                                             Remover Time
                                         </button>
                                     </div>
@@ -222,7 +253,7 @@ const TeamRegistration = () => {
                                                         {leader.name}
                                                         <button
                                                             className="btn btn-sm btn-danger"
-                                                            onClick={() => handleRemoveUser(team.id, leader.id, 'leader')}
+                                                            onClick={() => handleShowDialogUser(team.id, leader.id, 'leader')}
                                                         >
                                                             Remover
                                                         </button>
@@ -253,7 +284,7 @@ const TeamRegistration = () => {
                                                         {member.name}
                                                         <button
                                                             className="btn btn-sm btn-danger"
-                                                            onClick={() => handleRemoveUser(team.id, member.id, 'member')}
+                                                            onClick={() => handleShowDialogUser(team.id, member.id, 'member')}
                                                         >
                                                             Remover
                                                         </button>
@@ -284,6 +315,21 @@ const TeamRegistration = () => {
                     ))}
                 </div>
             )}
+
+            <ConfirmDialog
+                open={showDialogTeam}
+                title="Confirmar Exclusão"
+                message="Tem certeza que deseja excluir esse Time?"
+                onConfirm={() => confirmDeleteTeam !== null && handleRemoveTeam(confirmDeleteTeam)}
+                onCancel={handleCloseDialog}
+            />
+            <ConfirmDialog
+                open={showDialogUser}
+                title="Confirmar Exclusão"
+                message="Tem certeza que deseja excluir esse usuario?"
+                onConfirm={() => confirmDeleteUser !== null && handleRemoveUser(confirmDeleteUser.teamId, confirmDeleteUser.userId, confirmDeleteUser.type)}
+                onCancel={handleCloseDialogUser}
+            />
         </div>
     );
 };

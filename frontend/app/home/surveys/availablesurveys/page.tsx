@@ -237,7 +237,7 @@ export default function RespondSurveysPage() {
                                                                 <label className="form-check-label">{option}</label>
                                                             </div>
                                                         ))
-                                                    ) : question.type === "Single" && question.options ? (
+                                                    ) : (question.type === "Single(number)" || question.type === "Single(text)") && question.options ? (
                                                         question.options.map((option, optionIndex) => (
                                                             <div key={optionIndex} className="form-check">
                                                                 <input

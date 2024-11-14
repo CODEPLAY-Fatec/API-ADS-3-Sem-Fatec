@@ -214,7 +214,7 @@ const SurveyList = () => {
                 message={
                     dialogAction === 'send'
                         ? "Tem certeza? Se essa pesquisa já estiver aberta para esse time, o envio fechará a pesquisa anterior."
-                        : "Tem certeza de que deseja deletar esta pesquisa? Essa ação não pode ser desfeita e perdera todos as respostas que estiveram ligação com essa pesquisa."
+                        : "Tem certeza de que deseja deletar esta pesquisa? Essa ação não pode ser desfeita e perderá todos as respostas que estiveram ligação com essa pesquisa."
                 }
                 onConfirm={dialogAction === 'send' ? handleSendSurvey : handleDeleteSurvey}
                 onCancel={closeConfirmationDialog}

@@ -28,8 +28,10 @@ export const login = async (email: string, password: string): Promise<{ token?: 
       name: user.name,
       email: user.email,
       isAdmin: user.isAdmin,
+      phone : user.phoneNumber,
       isTeamLeader
     };
+    console.log(payload.phone)
 
     if (user.isAdmin) {
       const token = jwt.sign(payload, secretKey, { expiresIn: '1h' });

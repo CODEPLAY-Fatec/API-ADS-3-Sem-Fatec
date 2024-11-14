@@ -5,6 +5,8 @@ import { jwtDecode } from "jwt-decode";
 import { Collapse } from "react-bootstrap";
 import './availablesurveys.css';
 import { BaseSurveyAvailable } from "@/types/Survey";
+import ConfirmDialog from "../../../../components/confirmDialog";
+
 
 interface DecodedToken {
     id: string;
@@ -28,10 +30,13 @@ interface Team {
 
 export default function RespondSurveysPage() {
     const [surveys, setSurveys] = useState<BaseSurveyAvailable[]>([]);
+    const [surveyConfirm,setsurveyConfirm] = useState<BaseSurveyAvailable | null>(null);
     const [teamName, setTeamName] = useState<string>("");
     const [responses, setResponses] = useState<{ [key: string]: { [key: string]: string } }>({});
     const [error, setError] = useState<string | null>(null);
     const [openSurveyId, setOpenSurveyId] = useState<string | null>(null);
+    const [showDialog, setShowDialog] = useState<boolean>(false);
+
 
     useEffect(() => {
         async function loadUserAndSurveys() {
@@ -90,6 +95,16 @@ export default function RespondSurveysPage() {
         loadUserAndSurveys();
     }, []);
 
+    const handleShowDialog = (survey: BaseSurveyAvailable) => {
+        setsurveyConfirm(survey);
+        setShowDialog(true);
+    };
+
+    const handleCloseDialog = () => {
+        setsurveyConfirm(null);
+        setShowDialog(false);
+    };
+
 
     const handleResponseChange = (surveyKey: string, questionId: string, answer: string) => {
         setResponses(prevResponses => ({
@@ -105,7 +120,7 @@ export default function RespondSurveysPage() {
         setOpenSurveyId(prevId => (prevId === surveyKey ? null : surveyKey));
     };
 
-    
+
 
     const handleSubmit = async (survey: BaseSurveyAvailable) => {
         try {
@@ -245,7 +260,7 @@ export default function RespondSurveysPage() {
                                             <p className="alert alert-warning">Nenhuma pergunta disponível</p>
                                         )}
 
-                                        <button className="btn btn-primary" onClick={() => handleSubmit(survey)}>
+                                        <button className="btn btn-primary" onClick={() => handleShowDialog(survey)}>
                                             Enviar
                                         </button>
                                     </div>
@@ -260,6 +275,13 @@ export default function RespondSurveysPage() {
                     <p style={{ fontSize: "16px" }}>Pesquisas direcionadas a você aparecerão aqui.</p>
                 </div>
             )}
+            <ConfirmDialog
+                open={showDialog}
+                title="Confirmar Envio"
+                message="Tem certeza que deseja enviar este formulário?,não será possivel alterar as respostas"
+                onConfirm={() => surveyConfirm !== null && handleSubmit(surveyConfirm)} 
+                onCancel={handleCloseDialog}
+            />
         </div>
     );
 }

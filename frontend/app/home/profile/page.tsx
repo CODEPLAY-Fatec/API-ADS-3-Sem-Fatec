@@ -11,6 +11,7 @@ interface DecodedToken {
   name: string;
   email: string;
   isAdmin: boolean;
+  phone: string;
 }
 
 interface TeamRole {
@@ -23,6 +24,7 @@ interface UserData {
   name: string;
   email: string;
   isAdmin: boolean;
+  phone : string;
   teamRoles: TeamRole[];
 }
 
@@ -218,6 +220,9 @@ export default function Page() {
 
             <p className="text-lg">
               <strong>Nível de acesso:</strong> {userData.isAdmin ? "Admin" : "Membro"}
+            </p>
+            <p className="text-lg">
+              <strong>Telefone:</strong> {userData.phone}
             </p>
             <p className="text-lg">
               <strong>Times:</strong>

@@ -226,17 +226,18 @@ const SurveyCreation = () => {
                                 <select
                                     className="form-select mb-3"
                                     value={newQuestion.type}
-                                    onChange={(e) => setNewQuestion({ ...newQuestion, type: e.target.value as "Multiple" | "Text" | "Single" })}
+                                    onChange={(e) => setNewQuestion({ ...newQuestion, type: e.target.value as "Multiple" | "Text" | "Single(text)" | "Single(number)" })}
                                 >
                                     <option value="Text">Pergunta Aberta</option>
                                     <option value="Multiple">Múltipla Escolha</option>
-                                    <option value="Single">Escolha Única</option>
+                                    <option value="Single(number)">Escolha Única(numero)</option>
+                                    <option value="Single(text)">Escolha Única(texto)</option>
                                 </select>
 
                                 {newQuestion.type !== "Text" && (
                                     <div>
                                         <input
-                                            type="text"
+                                            type={newQuestion.type === "Single(number)" ? "number" : "text"}
                                             className="form-control mb-2"
                                             placeholder="Digite uma nova opção"
                                             value={newOption}

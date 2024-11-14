@@ -1,12 +1,11 @@
 "use client";
-import { useState, useEffect } from "react";
-import axios from "axios";
-import Link from "next/link";
 import Question from "@/types/Question";
+import QuestionCategory from "@/types/QuestionCategory";
 import { BaseSurvey } from "@/types/Survey";
 import Team from "@/types/Team";
-import QuestionCategory from "@/types/QuestionCategory";
-
+import axios from "axios";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
 const SurveyCreation = () => {
     const [title, setTitle] = useState("");
@@ -21,7 +20,6 @@ const SurveyCreation = () => {
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
     const [showModal, setShowModal] = useState(false);
-
 
     const surveyCategories: BaseSurvey["category"][] = ["Autoavaliação", "Avaliação de líder", "Avaliação de liderado"];
     const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
@@ -64,6 +62,12 @@ const SurveyCreation = () => {
             return;
         }
 
+        const questionTypeCount = questions.filter((q) => q.type === newQuestion.type).length;
+        if (questionTypeCount >= 5) {
+            alert(`Você só pode adicionar até 5 perguntas do tipo ${newQuestion.type}`);
+            return;
+        }
+
         if (isEditing && editingIndex !== null) {
             const updatedQuestions = [...questions];
             updatedQuestions[editingIndex] = newQuestion;
@@ -81,7 +85,6 @@ const SurveyCreation = () => {
         setEditingIndex(index);
         setShowModal(true);
     };
-
 
     const handleAddOption = () => {
         if (newOption.trim()) {
@@ -118,7 +121,7 @@ const SurveyCreation = () => {
             await axios.post("http://localhost:3001/api/survey/base", {
                 survey: newSurvey,
                 open: true,
-                teams: [team_id]
+                teams: [team_id],
             });
             setFeedbackMessage("Pesquisa criada com sucesso!");
             setTitle("");
@@ -150,7 +153,7 @@ const SurveyCreation = () => {
                         </div>
                         <div className="mb-3">
                             <label>Categoria</label>
-                            <select className="form-select" value={category ?? ""} onChange={(e) => setCategory(e.target.value as BaseSurvey["category"])} >
+                            <select className="form-select" value={category ?? ""} onChange={(e) => setCategory(e.target.value as BaseSurvey["category"])}>
                                 <option value="">Selecione uma categoria</option>
                                 {surveyCategories.map((cat, index) => (
                                     <option key={index} value={cat}>
@@ -226,7 +229,9 @@ const SurveyCreation = () => {
                                 <select
                                     className="form-select mb-3"
                                     value={newQuestion.type}
-                                    onChange={(e) => setNewQuestion({ ...newQuestion, type: e.target.value as "Multiple" | "Text" | "Single(text)" | "Single(number)" })}
+                                    onChange={(e) =>
+                                        setNewQuestion({ ...newQuestion, type: e.target.value as "Multiple" | "Text" | "Single(text)" | "Single(number)" })
+                                    }
                                 >
                                     <option value="Text">Pergunta Aberta</option>
                                     <option value="Multiple">Múltipla Escolha</option>
@@ -278,7 +283,6 @@ const SurveyCreation = () => {
                 </div>
             )}
 
-
             {questions.length > 0 && (
                 <div className="mb-4">
                     <div className="card shadow-sm">
@@ -288,11 +292,15 @@ const SurveyCreation = () => {
                                 {questions.map((question, index) => (
                                     <li key={index} className="list-group-item mb-3 d-flex justify-content-between align-items-center">
                                         <div>
-                                            <strong>{index + 1}. {question.question}</strong>
+                                            <strong>
+                                                {index + 1}. {question.question}
+                                            </strong>
                                             {question.type !== "Text" && (question.options?.length || 0) > 0 && (
                                                 <ul className="list-group mt-2">
                                                     {(question.options || []).map((option, optionIndex) => (
-                                                        <li key={optionIndex} className="list-group-item">{option}</li>
+                                                        <li key={optionIndex} className="list-group-item">
+                                                            {option}
+                                                        </li>
                                                     ))}
                                                 </ul>
                                             )}
@@ -311,7 +319,6 @@ const SurveyCreation = () => {
                         </div>
                     </div>
                 </div>
-
             )}
 
             <div className="d-flex align-items-center mt-3">
@@ -322,8 +329,6 @@ const SurveyCreation = () => {
                     <button className="btn btn-secondary ms-1">Abrir pesquisa ja criada</button>
                 </Link>
             </div>
-
-
         </div>
     );
 };

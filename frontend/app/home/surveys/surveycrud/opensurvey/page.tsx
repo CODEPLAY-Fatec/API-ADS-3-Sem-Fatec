@@ -1,8 +1,10 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import axios from "axios";
 import { Collapse } from "react-bootstrap";
-import ConfirmDialog from "@/components/confirmDialog"; // Importe o componente ConfirmDialog
+import ConfirmDialog from "@/components/confirmDialog";
+import InstanceListDialog from "@/components/InstanceListDialog";
 import './opensurvey.css';
 import { BaseSurvey } from "@/types/Survey";
 import Link from "next/link";
@@ -19,75 +21,99 @@ const SurveyList = () => {
     const [error, setError] = useState<string | null>(null);
     const [openSurveyId, setOpenSurveyId] = useState<number | null>(null);
     const [selectedTeam, setSelectedTeam] = useState<number | null>(null);
-    const [submitError, setSubmitError] = useState<string | null>(null);
-    const [submitSuccess, setSubmitSuccess] = useState<string | null>(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [dialogAction, setDialogAction] = useState<'send' | 'delete' | null>(null); // Novo estado para ação do diálogo
     const [selectedSurveyId, setSelectedSurveyId] = useState<number | null>(null);
+    const [isInstanceDialogOpen, setIsInstanceDialogOpen] = useState(false);
+    const [instanceSurveyId, setInstanceSurveyId] = useState<number | null>(null);
 
     useEffect(() => {
-        const fetchSurveysAndTeams = async () => {
-            try {
-                setLoading(true);
-                const [surveyResponse, teamResponse] = await Promise.all([
-                    axios.get("http://localhost:3001/api/survey/base"),
-                    axios.get("http://localhost:3001/api/team"),
-                ]);
-
-                if (Array.isArray(surveyResponse.data)) {
-                    setSurveys(surveyResponse.data);
-                } else {
-                    throw new Error("Formato inesperado de dados da resposta de pesquisas.");
-                }
-
-                if (Array.isArray(teamResponse.data)) {
-                    setTeams(teamResponse.data);
-                } else {
-                    throw new Error("Formato inesperado de dados da resposta de times.");
-                }
-            } catch (error) {
-                console.error("Erro ao buscar dados:", error);
-                setError("Não foi possível carregar os dados. Tente novamente.");
-            } finally {
-                setLoading(false);
-            }
-        };
         fetchSurveysAndTeams();
     }, []);
+
+    const fetchSurveysAndTeams = async () => {
+        try {
+            setLoading(true);
+            const [surveyResponse, teamResponse] = await Promise.all([
+                axios.get("http://localhost:3001/api/survey/base"),
+                axios.get("http://localhost:3001/api/team"),
+            ]);
+
+            if (Array.isArray(surveyResponse.data)) {
+                setSurveys(surveyResponse.data);
+            } else {
+                throw new Error("Formato inesperado de dados da resposta de pesquisas.");
+            }
+
+            if (Array.isArray(teamResponse.data)) {
+                setTeams(teamResponse.data);
+            } else {
+                throw new Error("Formato inesperado de dados da resposta de times.");
+            }
+        } catch (error) {
+            console.error("Erro ao buscar dados:", error);
+            setError("Não foi possível carregar os dados. Tente novamente.");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const toggleSurvey = (uid: number) => {
         setOpenSurveyId(prevId => (prevId === uid ? null : uid));
     };
 
-    const openConfirmationDialog = (surveyUid: number) => {
+    const openConfirmationDialog = (surveyUid: number, action: 'send' | 'delete') => {
         setSelectedSurveyId(surveyUid);
+        setDialogAction(action);
         setIsDialogOpen(true);
     };
 
     const closeConfirmationDialog = () => {
         setIsDialogOpen(false);
         setSelectedSurveyId(null);
+        setDialogAction(null);
+    };
+
+    const handleDeleteSurvey = async () => {
+        try {
+            await axios.delete(`http://localhost:3001/api/survey/base/${selectedSurveyId}`);
+            alert("Pesquisa deletada com sucesso!");
+            closeConfirmationDialog();
+            fetchSurveysAndTeams();
+        } catch (error) {
+            console.error("Erro ao deletar pesquisa:", error);
+            alert("Não foi possível deletar a pesquisa. Tente novamente.");
+            closeConfirmationDialog();
+        }
     };
 
     const handleSendSurvey = async () => {
         if (!selectedTeam) {
-            setSubmitError("Por favor, selecione um time antes de enviar.");
+            alert("Por favor, selecione um time antes de enviar.");
             return;
         }
-        console.log("Enviando pesquisa para o time:", selectedTeam);
 
         try {
             await axios.post(`http://localhost:3001/api/survey/instance/${selectedSurveyId}`, {
                 team_id: selectedTeam
             });
-            setSubmitSuccess("Pesquisa enviada com sucesso!");
-            setSubmitError(null);
+            alert("Pesquisa enviada com sucesso!");
             closeConfirmationDialog();
         } catch (error) {
             console.error("Erro ao enviar pesquisa:", error);
-            setSubmitError("Não foi possível enviar a pesquisa. Tente novamente.");
-            setSubmitSuccess(null);
+            alert("Não foi possível enviar a pesquisa. Tente novamente.");
             closeConfirmationDialog();
         }
+    };
+
+    const openInstanceDialog = (surveyUid: number) => {
+        setInstanceSurveyId(surveyUid);
+        setIsInstanceDialogOpen(true);
+    };
+
+    const closeInstanceDialog = () => {
+        setIsInstanceDialogOpen(false);
+        setInstanceSurveyId(null);
     };
 
     if (loading) return <p>Carregando...</p>;
@@ -120,7 +146,6 @@ const SurveyList = () => {
                                             <p><strong>Pergunta:</strong> {question.question}</p>
                                             <p><strong>Categoria da Pergunta:</strong> {question.category}</p>
                                             <p><strong>Tipo:</strong> {question.type}</p>
-
                                             {question.type !== "Text" && question.options && question.options.length > 0 && (
                                                 <ul className="mt-2">
                                                     {question.options.map((option, optionIndex) => (
@@ -152,14 +177,26 @@ const SurveyList = () => {
                                 </div>
 
                                 <button
-                                    className="btn btn-primary mt-3"
-                                    onClick={() => survey.uid !== undefined && openConfirmationDialog(survey.uid)}
+                                    className="btn btn-primary mt-3 me-2"
+                                    onClick={() => survey.uid !== undefined && openConfirmationDialog(survey.uid, 'send')}
                                 >
                                     Enviar Pesquisa
                                 </button>
 
-                                {submitError && <p className="alert alert-danger mt-2">{submitError}</p>}
-                                {submitSuccess && <p className="alert alert-success mt-2">{submitSuccess}</p>}
+                                <button
+                                    className="btn btn-danger mt-3 me-2"
+                                    onClick={() => survey.uid !== undefined && openConfirmationDialog(survey.uid, 'delete')}
+                                >
+                                    Deletar pesquisa
+                                </button>
+
+                                <button
+                                    className="btn btn-info mt-3"
+                                    onClick={() => survey.uid !== undefined && openInstanceDialog(survey.uid)}
+                                >
+                                    Ver Instâncias
+                                </button>
+
                             </div>
                         </Collapse>
                     </div>
@@ -173,11 +210,23 @@ const SurveyList = () => {
             {/* Usando ConfirmDialog */}
             <ConfirmDialog
                 open={isDialogOpen}
-                title="Confirmar Envio"
-                message="Tem certeza? Se essa pesquisa já estiver aberta para esse time, o envio fechará a pesquisa anterior."
-                onConfirm={handleSendSurvey}
+                title={dialogAction === 'send' ? "Confirmar Envio" : "Confirmar Exclusão"}
+                message={
+                    dialogAction === 'send'
+                        ? "Tem certeza? Se essa pesquisa já estiver aberta para esse time, o envio fechará a pesquisa anterior."
+                        : "Tem certeza de que deseja deletar esta pesquisa? Essa ação não pode ser desfeita e perdera todos as respostas que estiveram ligação com essa pesquisa."
+                }
+                onConfirm={dialogAction === 'send' ? handleSendSurvey : handleDeleteSurvey}
                 onCancel={closeConfirmationDialog}
             />
+
+            {instanceSurveyId && (
+                <InstanceListDialog
+                    open={isInstanceDialogOpen}
+                    onClose={closeInstanceDialog}
+                    surveyId={instanceSurveyId}
+                />
+            )}
         </div>
     );
 };

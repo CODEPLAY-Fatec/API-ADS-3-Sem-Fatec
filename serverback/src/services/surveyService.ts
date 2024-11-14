@@ -51,9 +51,14 @@ export const deleteBaseSurvey = async (uid: number) => {
 }
 
 export const getSurveyInstancesByUID = async (uid: number) => {
-    const query = `SELECT * FROM survey_instance WHERE uid = ?`;
-    const [rows] =  await db.query(query, [uid]);
-    return rows
+    const query = `
+        SELECT si.*, t.name as team_name
+        FROM survey_instance si
+        JOIN team t ON si.team_id = t.id
+        WHERE si.uid = ?
+    `;
+    const [rows] = await db.query(query, [uid]);
+    return rows;
 }
 
 export const createSurveyInstance = async (survey_uid: number, team_id: number) => {

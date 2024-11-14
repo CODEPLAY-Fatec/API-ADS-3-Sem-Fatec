@@ -105,6 +105,8 @@ export default function RespondSurveysPage() {
         setOpenSurveyId(prevId => (prevId === surveyKey ? null : surveyKey));
     };
 
+    
+
     const handleSubmit = async (survey: BaseSurveyAvailable) => {
         try {
             const token = Cookie.get("authToken") || Cookie.get("userToken");
@@ -122,6 +124,11 @@ export default function RespondSurveysPage() {
                 answer: responses[`${survey.survey_id}_${survey.target_id}`]?.[index.toString()] || ""
             }));
 
+            if (formattedAnswers.some(ans => ans.answer === "")) {
+                alert("Responda todas as perguntas");
+                return;
+            }
+
             const response = await fetch("http://localhost:3001/api/survey/answers/", {
                 method: "POST",
                 headers: {
@@ -133,6 +140,7 @@ export default function RespondSurveysPage() {
                     answers: formattedAnswers,
                 }),
             });
+            console.log(formattedAnswers.map(ans => ans.answer));
 
             if (!response.ok) {
                 throw new Error("Falha em responde formulario");

@@ -5,13 +5,8 @@ import Link from "next/link";
 import Question from "@/types/Question";
 import { BaseSurvey } from "@/types/Survey";
 import Team from "@/types/Team";
+import QuestionCategory from "@/types/QuestionCategory";
 
-//fazer a possibilidade de adicionar mais times, no caso o backend ja esta preparado
-
-type QuestionCategory = {
-    id: number;
-    name: string;
-};
 
 const SurveyCreation = () => {
     const [title, setTitle] = useState("");
@@ -26,6 +21,7 @@ const SurveyCreation = () => {
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
     const [showModal, setShowModal] = useState(false);
+
 
     const surveyCategories: BaseSurvey["category"][] = ["Autoavaliação", "Avaliação de líder", "Avaliação de liderado"];
     const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
@@ -322,9 +318,10 @@ const SurveyCreation = () => {
                     Criar Pesquisa
                 </button>
                 <Link href="/home/surveys/surveycrud/opensurvey">
-                    <button className="btn btn-secondary ms-3">Pesquisas ja criadas</button>
+                    <button className="btn btn-secondary ms-1">Abrir pesquisa ja criada</button>
                 </Link>
             </div>
+
 
         </div>
     );

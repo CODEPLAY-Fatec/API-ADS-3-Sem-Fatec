@@ -22,7 +22,7 @@ const SurveyList = () => {
     const [openSurveyId, setOpenSurveyId] = useState<number | null>(null);
     const [selectedTeam, setSelectedTeam] = useState<number | null>(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [dialogAction, setDialogAction] = useState<'send' | 'delete' | null>(null); // Novo estado para ação do diálogo
+    const [dialogAction, setDialogAction] = useState<'send' | 'delete' | 'send+auto' | null>(null); // Novo estado para ação do diálogo
     const [selectedSurveyId, setSelectedSurveyId] = useState<number | null>(null);
     const [isInstanceDialogOpen, setIsInstanceDialogOpen] = useState(false);
     const [instanceSurveyId, setInstanceSurveyId] = useState<number | null>(null);
@@ -62,7 +62,7 @@ const SurveyList = () => {
         setOpenSurveyId(prevId => (prevId === uid ? null : uid));
     };
 
-    const openConfirmationDialog = (surveyUid: number, action: 'send' | 'delete') => {
+    const openConfirmationDialog = (surveyUid: number, action: 'send' | 'delete' | 'send+auto') => {
         setSelectedSurveyId(surveyUid);
         setDialogAction(action);
         setIsDialogOpen(true);
@@ -97,6 +97,9 @@ const SurveyList = () => {
             await axios.post(`/api/survey/instance/${selectedSurveyId}`, {
                 team_id: selectedTeam
             });
+            if (dialogAction === 'send+auto') {
+              // TODO: DEPOIS EU CONTINUO ISSO AQUI (ass: Gabriel Vasconcelos)
+            }
             alert("Pesquisa enviada com sucesso!");
             closeConfirmationDialog();
         } catch (error) {
@@ -182,6 +185,13 @@ const SurveyList = () => {
                                 >
                                     Enviar Pesquisa
                                 </button>
+                                <button
+                                    className="btn btn-secondary mt-3 me-2"
+                                    onClick={() => survey.uid !== undefined && openConfirmationDialog(survey.uid, 'send+auto')}
+                                >
+                                Enviar com autoavaliação correspondente
+                                </button>
+
 
                                 <button
                                     className="btn btn-danger mt-3 me-2"
@@ -210,13 +220,13 @@ const SurveyList = () => {
             {/* Usando ConfirmDialog */}
             <ConfirmDialog
                 open={isDialogOpen}
-                title={dialogAction === 'send' ? "Confirmar Envio" : "Confirmar Exclusão"}
+                title={dialogAction === 'send' && "Confirmar Envio" || dialogAction == 'send+auto' && "Confirmar envio com autoavaliação correspondente" || "Confirmar Exclusão"}
                 message={
-                    dialogAction === 'send'
+                    dialogAction === 'send' || dialogAction === 'send+auto'
                         ? "Tem certeza? Se essa pesquisa já estiver aberta para esse time, o envio fechará a pesquisa anterior."
                         : "Tem certeza de que deseja deletar esta pesquisa? Essa ação não pode ser desfeita e perderá todos as respostas que estiveram ligação com essa pesquisa."
                 }
-                onConfirm={dialogAction === 'send' ? handleSendSurvey : handleDeleteSurvey}
+                onConfirm={dialogAction === 'send' || dialogAction === 'send+auto' ? handleSendSurvey : handleDeleteSurvey}
                 onCancel={closeConfirmationDialog}
             />
 

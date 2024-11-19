@@ -9,7 +9,6 @@ export const createBaseSurvey = async (survey: BaseSurvey, open: boolean, teams?
     const values = [
         survey.title,
         survey.description,
-        survey.category,
         questions,
     ];
     const result = await db.query(query, values);
@@ -38,7 +37,6 @@ export const updateBaseSurvey = async (survey: BaseSurvey) => {
     const values = [
         survey.title,
         survey.description,
-        survey.category,
         questions,
         survey.uid,
     ];
@@ -155,19 +153,19 @@ export async function getUserSurveys(user_id: number): Promise<UsableSurvey[]> {
                 let UsableSurvey: UsableSurvey
                 if (!BaseSurvey) continue;
                 
-                if (BaseSurvey.category == "Autoavaliação") {
+                if (survey.category == "Autoavaliação") {
                     UsableSurvey = {
                         survey_id: survey.id,
                         title: BaseSurvey.title,
                         description: BaseSurvey.description,
-                        category: BaseSurvey.category,
+                        category: survey.category,
                         questions: BaseSurvey.questions,
                         team_id: survey.team_id,
                         uid : BaseSurvey.uid
                     }
                     Surveys.push(UsableSurvey)
                     
-                } else if (BaseSurvey.category == Category) {
+                } else if (survey.category == Category) {
                     // pegar todos os membros do time que não tenham respostas associadas à eles
                     const teamRelations = await db.query(`
                         SELECT tm.user_id, u.name 
@@ -188,7 +186,7 @@ export async function getUserSurveys(user_id: number): Promise<UsableSurvey[]> {
                             survey_id: survey.id,
                             title: BaseSurvey.title,
                             description: BaseSurvey.description,
-                            category: BaseSurvey.category,
+                            category: survey.category,
                             questions: BaseSurvey.questions,
                             target_id: teamMember.user_id,
                             target_name: teamMember.name, // Inclui o nome do usuário

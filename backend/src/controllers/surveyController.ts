@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { answerSurvey, createBaseSurvey, createSurveyInstance, deleteBaseSurvey, deleteSurveyInstance, getBaseSurveyByUID, getBaseSurveys, getSurveyInstances, getSurveyInstancesByUID, getSurveyResponsesByBaseSurvey, getSurveyResponsesBySurveyInstance, getSurveyResponsesByTarget, getSurveyResponsesByUser, getUserSurveys, removeSurveyResponse, setSurveyInstanceOpen, submitSurveyResponse, updateBaseSurvey } from "../services/surveyService";
+import  * as surveyService from "../services/surveyService";
 import { BaseSurvey } from "../types/Survey";
 
 export const createBaseSurveyController = async (req: Request, res: Response) => {
@@ -7,7 +7,7 @@ export const createBaseSurveyController = async (req: Request, res: Response) =>
     const open: boolean = req.body.open;
     const teams: [] = req.body.teams
     try {
-        await createBaseSurvey(survey, open,teams);
+        await surveyService.createBaseSurvey(survey, open,teams);
         res.status(201).json({ message: 'Survey created successfully' });
     } catch (error: any) {
         res.status(500).json({ error: error.message });
@@ -17,7 +17,7 @@ export const createBaseSurveyController = async (req: Request, res: Response) =>
 
 export const getBaseSurveysController = async (req: Request, res: Response) => {
     try {
-        const surveys = await getBaseSurveys();
+        const surveys = await surveyService.getBaseSurveys();
         res.status(200).json(surveys);
     } catch (error: any) {
         res.status(500).json({ error: error.message });
@@ -28,7 +28,7 @@ export const getBaseSurveysController = async (req: Request, res: Response) => {
 export const getBaseSurveyByUIDController = async (req: Request, res: Response) => {
     const { uid } = req.params;
     try {
-        const survey = await getBaseSurveyByUID(Number(uid));
+        const survey = await surveyService.getBaseSurveyByUID(Number(uid));
         res.status(200).json(survey);
     } catch (error: any) {
         res.status(500).json({ error: error.message });
@@ -41,7 +41,7 @@ export const getUserSurveysController = async (req: Request, res: Response) => {
     const { user_id } = req.params;
     
     try {
-        const surveys = await getUserSurveys(Number(user_id));
+        const surveys = await surveyService.getUserSurveys(Number(user_id));
         res.status(200).json(surveys);
     } catch (error: any) {
         res.status(500).json({ error: error.message });
@@ -52,7 +52,7 @@ export const getUserSurveysController = async (req: Request, res: Response) => {
 export const updateBaseSurveyController = async (req: Request, res: Response) => {
     const survey: BaseSurvey = req.body;
     try {
-        await updateBaseSurvey(survey);
+        await surveyService.updateBaseSurvey(survey);
         res.status(200).json({ message: 'Survey updated successfully' });
     } catch (error: any) {
         res.status(500).json({ error: error.message });
@@ -63,7 +63,7 @@ export const updateBaseSurveyController = async (req: Request, res: Response) =>
 export const deleteBaseSurveyController = async (req: Request, res: Response) => {
     const { uid } = req.params;
     try {
-        await deleteBaseSurvey(Number(uid));
+        await surveyService.deleteBaseSurvey(Number(uid));
         res.status(200).json({ message: 'Survey deleted successfully' });
     } catch (error: any) {
         res.status(500).json({ error: error.message });
@@ -73,7 +73,7 @@ export const deleteBaseSurveyController = async (req: Request, res: Response) =>
 
 export const getSurveyInstancesController = async (req: Request, res: Response) => {
     try {
-        const surveys = await getSurveyInstances();
+        const surveys = await surveyService.getSurveyInstances();
         res.status(200).json(surveys);
     } catch (error: any) {
         res.status(500).json({ error: error.message });
@@ -84,7 +84,7 @@ export const getSurveyInstancesController = async (req: Request, res: Response) 
 export const getSurveyInstancesByUIDController = async (req: Request, res: Response) => {
     const { uid } = req.params;
     try {
-        const surveys = await getSurveyInstancesByUID(Number(uid));
+        const surveys = await surveyService.getSurveyInstancesByUID(Number(uid));
         res.status(200).json(surveys);
     } catch (error: any) {
         res.status(500).json({ error: error.message });
@@ -107,7 +107,7 @@ export const createSurveyInstanceController = async (req: Request, res: Response
 export const deleteSurveyInstanceController = async (req: Request, res: Response) => {
     const { survey_id } = req.params;
     try {
-        await deleteSurveyInstance(Number(survey_id));
+        await surveyService.deleteSurveyInstance(Number(survey_id));
         res.status(200).json({ message: 'Survey instance deleted successfully' });
     }
     catch (error: any) {
@@ -119,7 +119,7 @@ export const deleteSurveyInstanceController = async (req: Request, res: Response
 export const setSurveyInstanceOpenController = async (req: Request, res: Response) => {
     const { survey_id, state } = req.body;
     try {
-        await setSurveyInstanceOpen(Number(survey_id), state);
+        await surveyService.setSurveyInstanceOpen(Number(survey_id), state);
         res.status(200).json({ message: 'Survey instance updated successfully' });
     } catch (error: any) {
         res.status(500).json({ error: error.message });
@@ -130,7 +130,7 @@ export const setSurveyInstanceOpenController = async (req: Request, res: Respons
 export const answerSurveyController = async (req: Request, res: Response) => {
     const { user_id, survey, answers } = req.body;
     try {
-        await answerSurvey(user_id, survey, answers);
+        await surveyService.answerSurvey(user_id, survey, answers);
         res.status(200).json({ message: 'Survey response submitted successfully' });
     } catch (error: any) {
         res.status(500).json({ error: error.message });
@@ -141,7 +141,7 @@ export const answerSurveyController = async (req: Request, res: Response) => {
 export const removeSurveyResponseController = async (req: Request, res: Response) => {
     const { response_id } = req.params;
     try {
-        await removeSurveyResponse(Number(response_id));
+        await surveyService.removeSurveyResponse(Number(response_id));
         res.status(200).json({ message: 'Survey response removed successfully' });
     } catch (error: any) {
         res.status(500).json({ error: error.message });
@@ -152,7 +152,7 @@ export const removeSurveyResponseController = async (req: Request, res: Response
 export const getSurveyResponsesByUserController = async (req: Request, res: Response) => {
     const { user_id } = req.params;
     try {
-        const responses = await getSurveyResponsesByUser(Number(user_id));
+        const responses = await surveyService.getSurveyResponsesByUser(Number(user_id));
         res.status(200).json({responses});
     } catch (error: any) {
         res.status(500).json({ error: error.message });
@@ -163,7 +163,7 @@ export const getSurveyResponsesByUserController = async (req: Request, res: Resp
 export const getSurveyResponsesBySurveyInstanceController = async (req: Request, res: Response) => {
     const { survey_id } = req.params;
     try {
-        const responses = await getSurveyResponsesBySurveyInstance(Number(survey_id));
+        const responses = await surveyService.getSurveyResponsesBySurveyInstance(Number(survey_id));
         res.status(200).json({ responses });
     }
     catch (error: any) {
@@ -175,7 +175,7 @@ export const getSurveyResponsesBySurveyInstanceController = async (req: Request,
 export const getSurveyResponsesByBaseSurveyController = async (req: Request, res: Response) => {
     const { survey_uid } = req.params;
     try {
-        const responses = await getSurveyResponsesByBaseSurvey(Number(survey_uid));
+        const responses = await surveyService.getSurveyResponsesByBaseSurvey(Number(survey_uid));
         res.status(200).json({responses});
     } catch (error: any) {
         res.status(500).json({ error: error.message });
@@ -186,7 +186,7 @@ export const getSurveyResponsesByBaseSurveyController = async (req: Request, res
 export const getSurveyResponsesByTargetController = async (req: Request, res: Response) => {
     const { target_id } = req.params;
     try {
-        const responses = await getSurveyResponsesByTarget(Number(target_id));
+        const responses = await surveyService.getSurveyResponsesByTarget(Number(target_id));
         res.status(200).json({ responses });
     } catch (error: any) {
         res.status(500).json({ error: error.message });

@@ -1,13 +1,14 @@
 import { Request, Response } from "express";
 import  * as surveyService from "../services/surveyService";
-import { BaseSurvey } from "../types/Survey";
+import { BaseSurvey, SurveyCategory } from "../types/Survey";
 
 export const createBaseSurveyController = async (req: Request, res: Response) => {
     const survey: BaseSurvey = req.body.survey;
     const open: boolean = req.body.open;
     const teams: [] = req.body.teams
+    const category: SurveyCategory = req.body.category;
     try {
-        await surveyService.createBaseSurvey(survey, open,teams);
+        await surveyService.createBaseSurvey(survey, open, teams, category);
         res.status(201).json({ message: 'Survey created successfully' });
     } catch (error: any) {
         res.status(500).json({ error: error.message });
@@ -94,9 +95,9 @@ export const getSurveyInstancesByUIDController = async (req: Request, res: Respo
 
 export const createSurveyInstanceController = async (req: Request, res: Response) => {
     const { survey_uid } = req.params;
-    const { team_id } = req.body;
+    const { team_id, category } = req.body;
     try {
-        await createSurveyInstance(Number(survey_uid), Number(team_id));
+        await surveyService.createSurveyInstance(Number(survey_uid), Number(team_id), category);
         res.status(201).json({ message: 'Survey instance created successfully' });
     } catch (error: any) {
         res.status(500).json({ error: error.message });

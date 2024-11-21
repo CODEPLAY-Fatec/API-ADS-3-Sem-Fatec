@@ -1,7 +1,7 @@
 import Question from "./Question";
 
 export enum SurveyCategory {
-  "que" = "Autoavaliação",
+  "Autoavaliação" = "Autoavaliação",
   "Avaliação de líder" = "Avaliação de líder",
   "Avaliação de liderado" = "Avaliação de liderado",
   "Autoavaliação de líder" = "Autoavaliação de líder",

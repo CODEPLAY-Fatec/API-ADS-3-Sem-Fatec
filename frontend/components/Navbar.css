@@ -19,7 +19,7 @@
 }
 
 .navbar-scroll {
-  overflow-y: auto;
+  scrollbar-width: none;
 }
 
 .navbar-scroll::-webkit-scrollbar {
@@ -40,4 +40,91 @@
 
 .icon {
   margin-right: 10px;
+}
+
+/* Sidebar apenas em telas maiores */
+@media (min-width: 768px) {
+  .sidebar {
+    display: flex;
+  }
+  .responsive-navbar {
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+
+  .sidebar {
+    display: none !important;
+  }
+
+  .responsive-navbar {
+    display: flex;
+    flex-direction: column;
+    background-color: #152259; 
+    position: fixed; 
+    top: 0;
+    left: 0;
+    width: 100%; /* Ocupa toda a largura */
+    z-index: 1000; /* Coloca acima de todo o conteúdo */
+    height: 70px; /* Aumentar a altura */
+    margin-bottom: 10px; 
+  }
+
+  .responsive-navbar .logo-section {
+    height: 100%; /* Alinha o conteúdo centralmente */
+    display: flex;
+    align-items: center;
+  }
+
+  .responsive-navbar button {
+    background: transparent; /* Fundo transparente */
+    border: none; /* Sem borda */
+    color: white; /* Cor dos riscos */
+    font-size: 24px; /* Tamanho dos riscos */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px;
+  }
+
+  .responsive-menu {
+    display: none;
+    background-color: #152259; /* Fundo azul */
+    width: 100%; /* Ocupa toda a largura */
+  }
+
+  .responsive-menu.open {
+    display: block;
+    position: fixed;
+    top: 70px; /* Ajustado para altura da navbar */
+    left: 0;
+    width: 100%;
+    z-index: 999; /* Ainda acima do conteúdo */
+  }
+
+  .responsive-menu ul {
+    list-style: none;
+    padding: 10px;
+    margin: 0;
+  }
+
+  .responsive-menu ul li {
+    padding: 10px 15px;
+    border-bottom: 1px solid #fff; /* Separadores */
+  }
+
+  .responsive-menu ul li a {
+    color: white;
+    text-decoration: none;
+  }
+}
+.sidebar.expanded {
+  width: 260px;
+}
+
+.expand-button-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }

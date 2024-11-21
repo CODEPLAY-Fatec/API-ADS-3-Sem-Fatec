@@ -21,7 +21,16 @@ export const createBaseSurvey = async (survey: BaseSurvey, open: boolean, teams?
 };
 
 export const getBaseSurveys = async () => {
-    const query = `SELECT * FROM base_survey`;
+    const query = `
+        SELECT bs.*, si.category as last_category
+        FROM base_survey bs
+        LEFT JOIN survey_instance si ON bs.uid = si.uid
+        WHERE si.id = (
+            SELECT MAX(id)
+            FROM survey_instance
+        WHERE uid = bs.uid
+        )
+    `;
     const [rows] = await db.query(query);
     return rows;
 }

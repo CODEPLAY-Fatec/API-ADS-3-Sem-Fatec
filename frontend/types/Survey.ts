@@ -4,7 +4,7 @@ type BaseSurvey = {
   id?:string //no caso para paginas q precisa do id da survey
   title: string; // Título do survey
   description: string; 
-  category: "Autoavaliação" | "Avaliação de líder" | "Avaliação de liderado"; // Enum
+  last_category: "Autoavaliação" | "Avaliação de líder" | "Avaliação de liderado"; // Enum
   questions: Question[]; 
   target_id?: number; // ID do usuário alvo da avaliação
   uid?:number //para paginas q precisam do uid da base survey 

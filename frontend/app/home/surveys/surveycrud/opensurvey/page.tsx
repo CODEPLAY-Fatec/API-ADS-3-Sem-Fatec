@@ -22,8 +22,9 @@ const SurveyList = () => {
     const [openSurveyId, setOpenSurveyId] = useState<number | null>(null);
     const [selectedTeam, setSelectedTeam] = useState<number | null>(null);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [dialogAction, setDialogAction] = useState<'send' | 'delete' | null>(null); // Novo estado para ação do diálogo
+    const [dialogAction, setDialogAction] = useState<'send' | 'delete' | 'send+auto' | null>(null); // Novo estado para ação do diálogo
     const [selectedSurveyId, setSelectedSurveyId] = useState<number | null>(null);
+    const [selectedSurveyLastCategory, setSelectedSurveyLastCategory] = useState<string | null>(null);
     const [isInstanceDialogOpen, setIsInstanceDialogOpen] = useState(false);
     const [instanceSurveyId, setInstanceSurveyId] = useState<number | null>(null);
 
@@ -62,8 +63,9 @@ const SurveyList = () => {
         setOpenSurveyId(prevId => (prevId === uid ? null : uid));
     };
 
-    const openConfirmationDialog = (surveyUid: number, action: 'send' | 'delete') => {
+    const openConfirmationDialog = (surveyUid: number, action: 'send' | 'delete' | 'send+auto', category: string) => {
         setSelectedSurveyId(surveyUid);
+        setSelectedSurveyLastCategory(category);
         setDialogAction(action);
         setIsDialogOpen(true);
     };
@@ -71,6 +73,7 @@ const SurveyList = () => {
     const closeConfirmationDialog = () => {
         setIsDialogOpen(false);
         setSelectedSurveyId(null);
+        setSelectedSurveyLastCategory(null);
         setDialogAction(null);
     };
 
@@ -95,8 +98,16 @@ const SurveyList = () => {
 
         try {
             await axios.post(`/api/survey/instance/${selectedSurveyId}`, {
-                team_id: selectedTeam
+                team_id: selectedTeam,
+				        category: selectedSurveyLastCategory
             });
+            if (dialogAction === 'send+auto') {
+              // TODO: DEPOIS EU CONTINUO ISSO AQUI (ass: Gabriel Vasconcelos)
+              await axios.post(`/api/survey/instance/${selectedSurveyId}`, {
+                team_id: selectedTeam,
+                category: selectedSurveyLastCategory == "Avaliação de líder" ? "Autoavaliação de líder" : "Autoavaliação de liderado"
+              })
+            }
             alert("Pesquisa enviada com sucesso!");
             closeConfirmationDialog();
         } catch (error) {
@@ -137,7 +148,7 @@ const SurveyList = () => {
                         <Collapse in={openSurveyId === survey.uid}>
                             <div className="card-body">
                                 <p><strong>Descrição:</strong> {survey.description}</p>
-                                <p><strong>Categoria:</strong> {survey.category}</p>
+                                <p><strong>Categoria:</strong> {survey.last_category}</p>
 
                                 <h5>Perguntas:</h5>
                                 <ul className="list-group">
@@ -178,14 +189,23 @@ const SurveyList = () => {
 
                                 <button
                                     className="btn btn-primary mt-3 me-2"
-                                    onClick={() => survey.uid !== undefined && openConfirmationDialog(survey.uid, 'send')}
+                                    onClick={() => survey.uid !== undefined && openConfirmationDialog(survey.uid, 'send', survey.last_category)}
                                 >
                                     Enviar Pesquisa
                                 </button>
+                                {
+                                  survey.last_category == "Avaliação de líder" || survey.last_category == "Avaliação de liderado" ? (
+                                <button
+                                    className="btn btn-secondary mt-3 me-2"
+                                    onClick={() => survey.uid !== undefined && openConfirmationDialog(survey.uid, 'send+auto', survey.last_category)}
+                                >
+                                Enviar com autoavaliação correspondente
+                                </button>) : null}
+                                
 
                                 <button
                                     className="btn btn-danger mt-3 me-2"
-                                    onClick={() => survey.uid !== undefined && openConfirmationDialog(survey.uid, 'delete')}
+                                    onClick={() => survey.uid !== undefined && openConfirmationDialog(survey.uid, 'delete', survey.last_category)}
                                 >
                                     Deletar pesquisa
                                 </button>
@@ -210,13 +230,13 @@ const SurveyList = () => {
             {/* Usando ConfirmDialog */}
             <ConfirmDialog
                 open={isDialogOpen}
-                title={dialogAction === 'send' ? "Confirmar Envio" : "Confirmar Exclusão"}
+                title={dialogAction === 'send' && "Confirmar Envio" || dialogAction == 'send+auto' && "Confirmar envio com autoavaliação correspondente" || "Confirmar Exclusão"}
                 message={
-                    dialogAction === 'send'
+                    dialogAction === 'send' || dialogAction === 'send+auto'
                         ? "Tem certeza? Se essa pesquisa já estiver aberta para esse time, o envio fechará a pesquisa anterior."
                         : "Tem certeza de que deseja deletar esta pesquisa? Essa ação não pode ser desfeita e perderá todos as respostas que estiveram ligação com essa pesquisa."
                 }
-                onConfirm={dialogAction === 'send' ? handleSendSurvey : handleDeleteSurvey}
+                onConfirm={dialogAction === 'send' || dialogAction === 'send+auto' ? handleSendSurvey : handleDeleteSurvey}
                 onCancel={closeConfirmationDialog}
             />
 

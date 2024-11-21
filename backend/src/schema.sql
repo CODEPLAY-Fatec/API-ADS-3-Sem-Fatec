@@ -35,7 +35,6 @@ CREATE TABLE `base_survey` (
   `uid` INT PRIMARY KEY AUTO_INCREMENT,
   `title` VARCHAR(255) NOT NULL,
   `description` TEXT(65535) NOT NULL,
-  `category` ENUM ('Autoavaliação', 'Avaliação de líder', 'Avaliação de liderado') NOT NULL,
   `questions` JSON NOT NULL COMMENT 'Question[]: {
   Type: ''Multiple'' | ''Single'' | ''Text'', 
   Title: string,
@@ -47,6 +46,7 @@ CREATE TABLE `base_survey` (
 CREATE TABLE `survey_instance` (
   `id` INT PRIMARY KEY AUTO_INCREMENT,
   `uid` INT NOT NULL,
+  `category` ENUM ('Autoavaliação', 'Avaliação de líder', 'Avaliação de liderado', 'Autoavaliação de líder', 'Autoavaliação de liderado') NOT NULL,
   `team_id` INT NOT NULL,
   `created` DATE NOT NULL,
   `open` BOOLEAN NOT NULL

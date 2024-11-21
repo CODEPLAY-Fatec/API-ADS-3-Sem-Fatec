@@ -1,28 +1,36 @@
 import { QueryResult, ResultSetHeader } from "mysql2";
 import { db } from "../config/database2";
 import Question from "../types/Question";
-import { BaseSurvey, SurveyInstance, UsableSurvey } from "../types/Survey";
+import { BaseSurvey, SurveyCategory, SurveyInstance, UsableSurvey } from "../types/Survey";
 
-export const createBaseSurvey = async (survey: BaseSurvey, open: boolean, teams?: number[]) => {
-    const query = `INSERT INTO base_survey (title, description, category, questions) VALUES (?, ?, ?, ?)`;
+export const createBaseSurvey = async (survey: BaseSurvey, open: boolean, teams?: number[], category?: SurveyCategory) => {
+    const query = `INSERT INTO base_survey (title, description, questions) VALUES (?, ?, ?)`;
     const questions = JSON.stringify(survey.questions);
     const values = [
         survey.title,
         survey.description,
-        survey.category,
         questions,
     ];
     const result = await db.query(query, values);
     const uid: ResultSetHeader = result[0] as unknown as ResultSetHeader;
-    if (open && teams) {
+    if (open && teams && category) {
         for (const team of teams) {
-            await createSurveyInstance(uid.insertId, team);
+            await createSurveyInstance(uid.insertId, team, category);
         }
     }
 };
 
 export const getBaseSurveys = async () => {
-    const query = `SELECT * FROM base_survey`;
+    const query = `
+        SELECT bs.*, si.category as last_category
+        FROM base_survey bs
+        LEFT JOIN survey_instance si ON bs.uid = si.uid
+        WHERE si.id = (
+            SELECT MAX(id)
+            FROM survey_instance
+        WHERE uid = bs.uid
+        )
+    `;
     const [rows] = await db.query(query);
     return rows;
 }
@@ -33,12 +41,11 @@ export const getBaseSurveyByUID = async (uid: number) => {
 } //no caso se nao retonrar assim da problema na criaçao da instancia q utiliza essa funçao
 
 export const updateBaseSurvey = async (survey: BaseSurvey) => {
-    const query = `UPDATE base_survey SET team_id = ?, title = ?, description = ?, category = ?, questions = ? WHERE uid = ?`;
+    const query = `UPDATE base_survey SET team_id = ?, title = ?, description = ?, questions = ? WHERE uid = ?`;
     const questions = JSON.stringify(survey.questions);
     const values = [
         survey.title,
         survey.description,
-        survey.category,
         questions,
         survey.uid,
     ];
@@ -61,13 +68,13 @@ export const getSurveyInstancesByUID = async (uid: number) => {
     return rows;
 }
 
-export const createSurveyInstance = async (survey_uid: number, team_id: number) => {
+export const createSurveyInstance = async (survey_uid: number, team_id: number, category: SurveyCategory) => {
     try {
         console.log(team_id)
         console.log(survey_uid)
         // Primeiro, verifica se já existe uma instância com esse uid e team_id
-        const checkQuery = `SELECT id FROM survey_instance WHERE uid = ? AND team_id = ?`;
-        const [existingInstance]: any[] = await db.query(checkQuery, [survey_uid, team_id]);
+        const checkQuery = `SELECT id FROM survey_instance WHERE uid = ? AND team_id = ? AND category = ?`;
+        const [existingInstance]: any[] = await db.query(checkQuery, [survey_uid, team_id, category]);
 
         // Se a instância existe, exclui-a antes de criar uma nova
         if (existingInstance.length > 0) {
@@ -75,12 +82,11 @@ export const createSurveyInstance = async (survey_uid: number, team_id: number) 
         }
 
         // Cria uma nova instância
-        const insertQuery = `INSERT INTO survey_instance (uid, created, open, team_id) VALUES (?, ?, 1, ?)`;
+        const insertQuery = `INSERT INTO survey_instance (uid, created, open, team_id, category) VALUES (?, ?, 1, ?, ?)`;
         console.log(survey_uid)
         const baseSurvey: BaseSurvey = await getBaseSurveyByUID(survey_uid).then((result: any) => result[0][0]);
         console.log(baseSurvey)
-        await db.query(insertQuery, [baseSurvey.uid, new Date(), team_id]);
-
+        await db.query(insertQuery, [baseSurvey.uid, new Date(), team_id, category]);
 
         return { message: "Instância de pesquisa criada com sucesso." };
     } catch (error) {
@@ -130,8 +136,9 @@ export async function getUserSurveys(user_id: number): Promise<UsableSurvey[]> {
     let Surveys: UsableSurvey[] = []
     const BaseSurveys: { [key: string]: BaseSurvey } = {};
     
-    async function AddSurveys(Scope: QueryResult, Category: "Avaliação de líder" | "Avaliação de liderado"): Promise<void> {
-        
+    async function AddSurveys(Scope: QueryResult, Category: SurveyCategory): Promise<void> {
+        const Complement: SurveyCategory = Category == SurveyCategory["Avaliação de líder"] ? SurveyCategory["Autoavaliação de liderado"] : SurveyCategory["Autoavaliação de líder"];
+        // buscando avaliações de líder, pode-se deduzir que o usuário é um liderado, portanto, o complemento deve ser autoavaliação de liderado.        
         for (let team of Scope as {team_id: number, user_id: number}[]) {
             const surveys = await db.query(`
                 SELECT si.* 
@@ -139,10 +146,11 @@ export async function getUserSurveys(user_id: number): Promise<UsableSurvey[]> {
                 JOIN base_survey bs ON si.uid = bs.uid
                 LEFT JOIN survey_answer sa ON si.id = sa.survey_id AND sa.user_id = ?
                 WHERE si.team_id = ? AND si.open = 1
-                  AND (bs.category != 'Autoavaliação' OR sa.user_id IS NULL)
-                  AND (bs.category = 'Autoavaliação' OR bs.category = ?)
+                  AND (si.category != 'Autoavaliação' OR sa.user_id IS NULL)
+                  AND (si.category = 'Autoavaliação' OR si.category = ?)
             `, [user_id, team.team_id, Category]);
                         // isso aqui é macumba.
+            
             for (let survey of surveys[0] as SurveyInstance[]) {
                 let BaseSurvey = BaseSurveys[survey.uid]
                 if (!BaseSurvey) {
@@ -154,21 +162,25 @@ export async function getUserSurveys(user_id: number): Promise<UsableSurvey[]> {
                 
                 let UsableSurvey: UsableSurvey
                 if (!BaseSurvey) continue;
-                
-                if (BaseSurvey.category == "Autoavaliação") {
+                console.log(survey); 
+                if (survey.category == "Autoavaliação") {
+                  console.log("auto");
+                  
                     UsableSurvey = {
                         survey_id: survey.id,
                         title: BaseSurvey.title,
                         description: BaseSurvey.description,
-                        category: BaseSurvey.category,
+                        category: survey.category,
                         questions: BaseSurvey.questions,
                         team_id: survey.team_id,
                         uid : BaseSurvey.uid
                     }
                     Surveys.push(UsableSurvey)
                     
-                } else if (BaseSurvey.category == Category) {
+                } else if (survey.category == Category) {
                     // pegar todos os membros do time que não tenham respostas associadas à eles
+                    console.log(Category);
+                     
                     const teamRelations = await db.query(`
                         SELECT tm.user_id, u.name 
                         FROM ${Category == "Avaliação de liderado" ? "team_member" : "team_leader"} tm
@@ -188,12 +200,12 @@ export async function getUserSurveys(user_id: number): Promise<UsableSurvey[]> {
                             survey_id: survey.id,
                             title: BaseSurvey.title,
                             description: BaseSurvey.description,
-                            category: BaseSurvey.category,
+                            category: survey.category,
                             questions: BaseSurvey.questions,
                             target_id: teamMember.user_id,
                             target_name: teamMember.name, // Inclui o nome do usuário
                             team_id: survey.team_id,
-                            uid : BaseSurvey.uid
+                            uid: BaseSurvey.uid
                         }
                         Surveys.push(UsableSurvey)
                     }
@@ -201,10 +213,11 @@ export async function getUserSurveys(user_id: number): Promise<UsableSurvey[]> {
             }
         }
     }
-    await AddSurveys(userLedTeams[0], "Avaliação de líder")
-    await AddSurveys(userLeadsTeams[0], "Avaliação de liderado")
+    await AddSurveys(userLedTeams[0], SurveyCategory["Avaliação de líder"])
+    await AddSurveys(userLeadsTeams[0], SurveyCategory["Autoavaliação de liderado"])
     // eu odeio esse código
     
+    console.log(Surveys);
     
     return Surveys
 }

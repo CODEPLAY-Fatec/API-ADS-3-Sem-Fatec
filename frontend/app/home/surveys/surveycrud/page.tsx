@@ -122,6 +122,7 @@ const SurveyCreation = () => {
                 survey: newSurvey,
                 open: true,
                 teams: [team_id],
+				category: category
             });
             setFeedbackMessage("Pesquisa criada com sucesso!");
             setTitle("");

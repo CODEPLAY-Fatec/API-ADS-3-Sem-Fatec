@@ -65,23 +65,23 @@
     position: fixed; 
     top: 0;
     left: 0;
-    width: 100%; /* Ocupa toda a largura */
-    z-index: 1000; /* Coloca acima de todo o conteúdo */
-    height: 70px; /* Aumentar a altura */
+    width: 100%;
+    z-index: 1000; 
+    height: 70px; 
     margin-bottom: 10px; 
   }
 
   .responsive-navbar .logo-section {
-    height: 100%; /* Alinha o conteúdo centralmente */
+    height: 100%; 
     display: flex;
     align-items: center;
   }
 
   .responsive-navbar button {
-    background: transparent; /* Fundo transparente */
-    border: none; /* Sem borda */
-    color: white; /* Cor dos riscos */
-    font-size: 24px; /* Tamanho dos riscos */
+    background: transparent; 
+    border: none;
+    color: white;
+    font-size: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -90,17 +90,17 @@
 
   .responsive-menu {
     display: none;
-    background-color: #152259; /* Fundo azul */
-    width: 100%; /* Ocupa toda a largura */
+    background-color: #152259; 
+    width: 100%;
   }
 
   .responsive-menu.open {
     display: block;
     position: fixed;
-    top: 70px; /* Ajustado para altura da navbar */
+    top: 70px; 
     left: 0;
     width: 100%;
-    z-index: 999; /* Ainda acima do conteúdo */
+    z-index: 999; 
   }
 
   .responsive-menu ul {
@@ -111,7 +111,7 @@
 
   .responsive-menu ul li {
     padding: 10px 15px;
-    border-bottom: 1px solid #fff; /* Separadores */
+    border-bottom: 1px solid #fff; 
   }
 
   .responsive-menu ul li a {

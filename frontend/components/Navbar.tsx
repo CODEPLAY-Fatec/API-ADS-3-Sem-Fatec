@@ -77,6 +77,7 @@ const Navbar: React.FC<{ onToggleSidebar: (isExpanded: boolean) => void }> = ({ 
 
   return (
     <>
+    {window.innerWidth > 768 && (
       <div
           className={`sidebar d-flex flex-column vh-100 text-white position-fixed overflow-auto ${
               isExpanded ? "expanded" : ""
@@ -228,7 +229,10 @@ const Navbar: React.FC<{ onToggleSidebar: (isExpanded: boolean) => void }> = ({ 
         </button>
       </div>
     </div>
+    )}
 {/* Navbar responsiva */}
+
+{window.innerWidth < 768 && (
 <div className="responsive-navbar">
   <div className="d-flex justify-content-between align-items-center px-3 py-2">
     <div className="logo-section d-flex align-items-center">
@@ -299,6 +303,7 @@ const Navbar: React.FC<{ onToggleSidebar: (isExpanded: boolean) => void }> = ({ 
     </ul>
   </div>
 </div>
+)}
 </>
   );
 };

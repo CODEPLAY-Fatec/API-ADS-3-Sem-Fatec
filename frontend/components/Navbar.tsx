@@ -186,7 +186,7 @@ const Navbar: React.FC<{ onToggleSidebar: (isExpanded: boolean) => void }> = ({ 
                 >
                   <div className="link-content">
                     <NotebookPen className="icon" />
-                    {isExpanded && <span>Criação de Pesquisa</span>}
+                    {isExpanded && <span>Criar Pesquisa</span>}
                   </div>
                 </Link>
               </li>
@@ -197,7 +197,7 @@ const Navbar: React.FC<{ onToggleSidebar: (isExpanded: boolean) => void }> = ({ 
                 >
                   <div className="link-content">
                     <GroupsIcon className="icon" />
-                    {isExpanded && <span>Cadastro de Times</span>}
+                    {isExpanded && <span>Cadastrar Time</span>}
                   </div>
                 </Link>
               </li>
@@ -205,7 +205,7 @@ const Navbar: React.FC<{ onToggleSidebar: (isExpanded: boolean) => void }> = ({ 
                 <Link href="/home/register" className="nav-link text-white">
                   <div className="link-content">
                     <UserPlus className="icon" />
-                    {isExpanded && <span>Cadastro de Usuários</span>}
+                    {isExpanded && <span>Cadastrar Usuário</span>}
                   </div>
                 </Link>
               </li>

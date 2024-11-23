@@ -29,17 +29,20 @@
 .link-content {
   display: flex;
   align-items: center;
-  padding: 10px 15px;
-  transition: background-color 0.3s ease, padding 0.3s ease;
+  padding: 9px 40px;
+  transition: 0.3s ease, padding 0.3s ease;
+  white-space: nowrap;
+  overflow: hidden;
 }
 
 .link-content:hover {
   background-color: rgba(173, 216, 230, 0.7);
-  border-radius: 5px;
+  border-radius: 8px;
 }
 
 .icon {
-  margin-right: 10px;
+  margin-right: 12px;
+  flex-shrink: 0;
 }
 
 /* Sidebar apenas em telas maiores */
@@ -128,3 +131,4 @@
   justify-content: center;
   align-items: center;
 }
+

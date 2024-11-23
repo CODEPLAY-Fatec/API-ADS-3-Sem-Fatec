@@ -51,8 +51,15 @@ const Navbar: React.FC<{ onToggleSidebar: (isExpanded: boolean) => void }> = ({ 
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (isMenuOpen && !document.querySelector(".responsive-menu")?.contains(event.target as Node)) {
-        setIsMenuOpen(false);
+      const menuButton = document.querySelector(".btn-light"); 
+      const menu = document.querySelector(".responsive-menu"); 
+  
+      if (
+        isMenuOpen &&
+        !menu?.contains(event.target as Node) && 
+        !menuButton?.contains(event.target as Node) 
+      ) {
+        setIsMenuOpen(false); 
       }
     };
   

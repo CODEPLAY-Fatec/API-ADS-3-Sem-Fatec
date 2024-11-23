@@ -45,6 +45,11 @@
   flex-shrink: 0;
 }
 
+.sidebar.expanded .link-content {
+  padding-left: 10px; 
+  padding-right: 30px; 
+}
+
 /* Sidebar apenas em telas maiores */
 @media (min-width: 768px) {
   .sidebar {
@@ -131,4 +136,5 @@
   justify-content: center;
   align-items: center;
 }
+
 

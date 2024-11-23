@@ -122,7 +122,7 @@ const SurveyCreation = () => {
                 survey: newSurvey,
                 open: true,
                 teams: [team_id],
-				category: category
+                category: category
             });
             setFeedbackMessage("Pesquisa criada com sucesso!");
             setTitle("");
@@ -176,15 +176,6 @@ const SurveyCreation = () => {
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <div className="mb-4 text-center">
-                <button className="btn btn-primary" onClick={() => setShowModal(true)}>
-                    Adicionar Pergunta
-                </button>
-                <Link href="/home/surveys/surveycategories">
-                    <button className="btn btn-secondary ms-3">Adicionar Categoria</button>
-                </Link>
             </div>
 
             {/* Modal para adicionar pergunta */}
@@ -321,15 +312,22 @@ const SurveyCreation = () => {
                     </div>
                 </div>
             )}
-
-            <div className="d-flex align-items-center mt-3">
+            <div className="d-flex flex-wrap justify-content-center gap-3 mt-4">
+                <button className="btn btn-primary" onClick={() => setShowModal(true)}>
+                    Adicionar Pergunta
+                </button>
+                <Link href="/home/surveys/surveycategories">
+                    <button className="btn btn-primary">Adicionar Categoria</button>
+                </Link>
                 <button className="btn btn-primary" onClick={handleCreateSurvey}>
                     Criar Pesquisa
                 </button>
                 <Link href="/home/surveys/surveycrud/opensurvey">
-                    <button className="btn btn-secondary ms-1">Abrir pesquisa ja criada</button>
+                    <button className="btn btn-primary">Abrir Pesquisa</button>
                 </Link>
             </div>
+
+
         </div>
     );
 };

@@ -95,6 +95,15 @@ const Navbar: React.FC<{ onToggleSidebar: (isExpanded: boolean) => void }> = ({ 
               <p className="m-0 text-center">ENTERPRISE</p>
             </>
           )}
+          {/* Quando a sidebar não está expandida, a marca "QUANTUM ENTERPRISE" aparece mesmo assim */}
+          {!isExpanded && (
+            <div className="sidebar-expanded-text">
+              <h4 className="mt-2 mb-0 text-center">
+                <strong>QUANTUM</strong>
+              </h4>
+              <p className="m-0 text-center">ENTERPRISE</p>
+            </div>
+          )}
       </div>
 
       <hr className="sidebar-divider" />
@@ -106,6 +115,7 @@ const Navbar: React.FC<{ onToggleSidebar: (isExpanded: boolean) => void }> = ({ 
               <div className="link-content">
                 <User className="icon" />
                 {isExpanded && <span>Perfil</span>}
+                
               </div>
             </Link>
           </li>

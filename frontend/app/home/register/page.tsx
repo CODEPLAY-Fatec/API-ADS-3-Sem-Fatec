@@ -9,17 +9,30 @@ const Page: React.FC = () => {
     const [isAdmin, setIsAdmin] = useState<boolean>(false);
     const [error, setError] = useState<string>('');
     const [success, setSuccess] = useState<string>('');
+    const [photo, setPhoto] = useState<File | null>(null);
 
     const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         
+        const formData = new FormData();
+        formData.append('name', name);
+        formData.append('email', email);
+        formData.append('password', password);
+        formData.append('phoneNumber', phoneNumber);
+        formData.append('isAdmin', isAdmin ? '1' : '0'); // Convert boolean to numeric string
+        if (photo) {
+            formData.append('photo', photo);
+        }
+
+        // Log FormData content
+        for (let [key, value] of formData.entries()) {
+            console.log(`${key}: ${value}`);
+        }
+
         try {
             const response = await fetch('/api/users', { 
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ name, email, password, phoneNumber, isAdmin }),
+                body: formData,
             });
 
             if (!response.ok) {
@@ -40,6 +53,7 @@ const Page: React.FC = () => {
             setPassword('');
             setPhoneNumber('');
             setIsAdmin(false);
+            setPhoto(null);
         } catch (error: unknown) {
             if (error instanceof Error) {
                 setError(error.message);
@@ -111,6 +125,18 @@ const Page: React.FC = () => {
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                         required
+                    />
+                </div>
+
+                <div className="mb-3">
+                    <label htmlFor="photo" className="form-label">
+                        Foto
+                    </label>
+                    <input 
+                        type="file" 
+                        id="photo" 
+                        className="form-control" 
+                        onChange={(e) => setPhoto(e.target.files?.[0] || null)}
                     />
                 </div>
 

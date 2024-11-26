@@ -1,9 +1,18 @@
 import { Request, Response } from 'express';
 import { getAllUsersWithDetails, createUser, updateUser, deleteUser, getLeaders } from '../services/userService';
+import { db } from '../config/database2'; // Import the db variable
+import fs from 'fs';
+import path from 'path';
 
 export const getUsersController = async (req: Request, res: Response) => {
   try {
     const users = await getAllUsersWithDetails();
+    for (const user of users) {
+      const [pictures] = await db.query('SELECT image FROM user_pictures WHERE user_id = ?', [user.id]);
+      if (pictures.length > 0) {
+        user.photo = pictures[0].image.toString('base64');
+      }
+    }
     res.status(200).json(users);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -12,15 +21,24 @@ export const getUsersController = async (req: Request, res: Response) => {
 
 export const createUserController = async (req: Request, res: Response) => {
   const { name, email, password, isAdmin, phoneNumber } = req.body;
+  const photo = req.file;
+
+  // Log request body and file
+  console.log('Request Body:', req.body);
+  console.log('Uploaded File:', req.file);
+
   try {
-    const newUser = await createUser(name, email, password, isAdmin, phoneNumber);
+    const newUser = await createUser({ name, email, password, phoneNumber, isAdmin: isAdmin === '1' });
+
+    if (photo) {
+      const photoPath = path.join(__dirname, '../../uploads', `${newUser.id}-${photo.originalname}`);
+      fs.writeFileSync(photoPath, photo.buffer);
+      await db.query('INSERT INTO user_pictures (user_id, image) VALUES (?, ?)', [newUser.id, photo.buffer]);
+    }
+
     res.status(201).json(newUser);
   } catch (error: any) {
-    if (error.message === 'Este email já está em uso.') {
-      res.status(400).json({ error: error.message });
-    } else {
-      res.status(500).json({ error: 'Erro ao criar usuário.' });
-    }
+    res.status(400).json({ error: error.message });
   }
 };
 

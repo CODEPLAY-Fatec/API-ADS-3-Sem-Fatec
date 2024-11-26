@@ -7,8 +7,9 @@ export const createBaseSurveyController = async (req: Request, res: Response) =>
     const open: boolean = req.body.open;
     const teams: [] = req.body.teams
     const category: SurveyCategory = req.body.category;
+    const auxiliarySurvey = req.body.auxiliarySurvey;
     try {
-        await surveyService.createBaseSurvey(survey, open, teams, category);
+        await surveyService.createBaseSurvey(survey, open, teams, category, auxiliarySurvey);
         res.status(201).json({ message: 'Survey created successfully' });
     } catch (error: any) {
         res.status(500).json({ error: error.message });

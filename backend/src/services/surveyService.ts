@@ -3,12 +3,12 @@ import { db } from "../config/database2";
 import Question from "../types/Question";
 import { BaseSurvey, SurveyCategory, SurveyInstance, UsableSurvey } from "../types/Survey";
 
-export const createBaseSurvey = async (survey: BaseSurvey, open: boolean, teams?: number[], category?: SurveyCategory) => {
+export const createBaseSurvey = async (survey: BaseSurvey, open: boolean, teams?: number[], category?: SurveyCategory, auxiliarySurvey?: boolean) => {
     const query = `INSERT INTO base_survey (title, description, questions) VALUES (?, ?, ?)`;
     const questions = JSON.stringify(survey.questions);
     const values = [
         survey.title,
-        survey.description,
+        survey.description, 
         questions,
     ];
     const result = await db.query(query, values);
@@ -16,6 +16,9 @@ export const createBaseSurvey = async (survey: BaseSurvey, open: boolean, teams?
     if (open && teams && category) {
         for (const team of teams) {
             await createSurveyInstance(uid.insertId, team, category);
+            if (auxiliarySurvey) {
+                await createSurveyInstance(uid.insertId, team, category == SurveyCategory["Avaliação de líder"] ? SurveyCategory["Autoavaliação de líder"] : SurveyCategory["Autoavaliação de liderado"]);
+            }
         }
     }
 };

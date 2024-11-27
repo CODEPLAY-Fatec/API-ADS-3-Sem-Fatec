@@ -36,6 +36,8 @@ export const getUserSurveysForTeamController = async (req: Request, res: Respons
 
 export const getRelevantAnswersForBaseSurveyController = async (req: Request, res: Response) => {
     const { user_id, team_id, survey_uid } = req.params;
+    console.log(req);
+    
     try {
         const relevantAnswers = await getRelevantAnswersForBaseSurvey(Number(user_id), Number(team_id), Number(survey_uid));
         res.status(200).json(relevantAnswers);

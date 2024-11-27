@@ -1,7 +1,7 @@
 import { QueryResult, ResultSetHeader } from "mysql2";
 import { db } from "../config/database2";
 import { Question } from "../types/Question";
-import { BaseSurvey, SurveyCategory, SurveyInstance, UsableSurvey } from "../types/Survey";
+import { AnsweredSurvey, BaseSurvey, SurveyCategory, SurveyInstance, UsableSurvey } from "../types/Survey";
 
 export const createBaseSurvey = async (survey: BaseSurvey, open: boolean, teams?: number[], category?: SurveyCategory, auxiliarySurvey?: boolean) => {
     const query = `INSERT INTO base_survey (title, description, questions) VALUES (?, ?, ?)`;
@@ -40,7 +40,7 @@ export const getBaseSurveys = async () => {
 
 export const getBaseSurveyByUID = async (uid: number) => {
     const query = `SELECT * FROM base_survey WHERE uid = ?`;
-    return db.query(query, [uid]);    
+    return db.typedQuery<BaseSurvey>(query, [uid]);    
 } //no caso se nao retonrar assim da problema na criaçao da instancia q utiliza essa funçao
 
 export const updateBaseSurvey = async (survey: BaseSurvey) => {
@@ -67,8 +67,7 @@ export const getSurveyInstancesByUID = async (uid: number) => {
         JOIN team t ON si.team_id = t.id
         WHERE si.uid = ?
     `;
-    const [rows] = await db.query(query, [uid]);
-    return rows;
+    return await db.typedQuery<SurveyInstance>(query, [uid]);
 }
 
 export const createSurveyInstance = async (survey_uid: number, team_id: number, category: SurveyCategory) => {
@@ -110,14 +109,12 @@ export const setSurveyInstanceOpen = async (survey_id: number, state: number) =>
 
 export const getSurveyInstances = async () => {
     const query = `SELECT * FROM survey_instance`;
-    const[rows] = await db.query(query);
-    return rows;
+    return db.typedQuery<SurveyInstance>(query);
 }
 
 export const getSurveyInstancesByTeam = async (teamId: number) => {
     const query = `SELECT * FROM survey_instance WHERE team_id = ?`;
-    const [rows] = await db.query(query, [teamId]);
-    return rows;
+    return db.typedQuery<SurveyInstance>(query, [teamId]);
 }
 
 export const submitSurveyResponse = async (user_id: number, survey_id: number, survey_uid: number, data: Question[], target_id?: number) => {
@@ -250,26 +247,22 @@ export const removeSurveyResponse = async (response_id: number) => {
 
 export const getSurveyResponsesByUser = async (user_id: number) => {
     const query = `SELECT * FROM survey_answer WHERE user_id = ?`;
-    const [rows] = await db.query(query, [user_id]);
-    return rows;
+    return db.typedQuery<AnsweredSurvey>(query, [user_id]);
 };
 
 export const getSurveyResponsesBySurveyInstance = async (survey_id: number) => {
     const query = `SELECT * FROM survey_answer WHERE survey_id = ?`;
-    const [rows]= await db.query(query, [survey_id]);
-    return rows
+    return db.typedQuery<AnsweredSurvey>(query, [survey_id]);
 }
 
 export const getSurveyResponsesByBaseSurvey = async (survey_uid: number) => {
     const query = `SELECT * FROM survey_answer WHERE survey_uid = ?`;
-    const [rows] = await db.query(query, [survey_uid]);
-    return rows
+    return db.typedQuery<AnsweredSurvey>(query, [survey_uid]);
 }
 
 export const getSurveyResponsesByTarget = async (target_id: number) => {
     const query = `SELECT * FROM survey_answer WHERE target_id = ?`;
-    const [rows]= await db.query(query, [target_id]);
-    return rows
+    return db.typedQuery<AnsweredSurvey>(query, [target_id]);
     
 }
 
@@ -278,5 +271,5 @@ export const getTeamSurveys = async (team_id: number) => {
         SELECT * FROM survey_instance
         WHERE team_id = ?
     `;
-    return db.query(query, [team_id]);
+    return db.typedQuery<SurveyInstance>(query, [team_id]);
 }

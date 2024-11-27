@@ -31,7 +31,7 @@ export const getBaseSurveysForTeam = async (user_id: number, team_id: number) =>
     )
     `;
 
-    const rows = await db.query(query, [team_id]);
+    const rows = await db.typedQuery<BaseSurvey>(query, [team_id]);
 
     return rows;
 }
@@ -40,17 +40,17 @@ export const getUserSurveysForTeam = async (user_id: number, team_id: number) =>
     const query = `
     SELECT * FROM survey_instance
     WHERE team_id = ? AND id IN (
-        SELECT survey_id FROM survey_answers
+        SELECT survey_id FROM survey_answer
         WHERE user_id = ?
     )
     `;
-    const [rows] = await db.query(query, [team_id, user_id]);
+    const rows = await db.typedQuery<SurveyInstance>(query, [team_id, user_id]);
     return rows;
 }
 
 export const getRelevantAnswersForBaseSurvey = async (user_id: number, team_id: number, survey_uid: number) => {
     const baseSurvey: BaseSurvey = await getBaseSurveyByUID(survey_uid) as unknown as BaseSurvey;
-    const leaderRows = await db.query(`SELECT * FROM team_leader WHERE team_id = ? AND user_id = ?`, [team_id, user_id]).then((rows) => rows[0]) as unknown as any[];
+    const leaderRows = await db.typedQuery<{user_id: number, team_id: number}>(`SELECT * FROM team_leader WHERE team_id = ? AND user_id = ?`, [team_id, user_id])
     const groupedSurvey: SurveyAnswers = {
         BaseSurvey: baseSurvey,
         Answers: []
@@ -61,17 +61,19 @@ export const getRelevantAnswersForBaseSurvey = async (user_id: number, team_id: 
     // nah, eu ganharia
 
     const answersQuery = `
-    SELECT sa.*, si.category FROM survey_answers sa
+    SELECT sa.*, si.category FROM survey_answer sa
     JOIN survey_instance si ON sa.survey_id = si.id
-    WHERE si.uid = ? AND si.team_id = ? AND (si.category = ${isLeader ? "'Avaliação de liderado'" : "'Avaliação de líder'"} OR si.category = ${isLeader ? "'Autoavaliação de líder'" : "'Autoavaliação de liderado'"} OR si.category = 'Autoavaliação')
+    WHERE sa.user_id = ? AND si.uid = ? AND si.team_id = ? AND (si.category = ${isLeader ? "'Avaliação de liderado'" : "'Avaliação de líder'"} OR si.category = ${isLeader ? "'Autoavaliação de líder'" : "'Autoavaliação de liderado'"} OR si.category = 'Autoavaliação')
     `;
     
-    const answerRows = await db.query(answersQuery, [user_id, survey_uid, team_id]) as unknown as AnsweredSurvey[];
+    const answerRows = await db.typedQuery<AnsweredSurvey>(answersQuery, [user_id, survey_uid, team_id]);
     groupedSurvey.Answers = answerRows;
+    console.log(answersQuery, answerRows);
+    
     // TODO: TEST
     // combine all of the answers into a single object
 
-    
+    return groupedSurvey;
 }
 
 // necessidades do dashboard:

@@ -28,4 +28,8 @@ export const db = {
     const conn = await connectDb();
     return conn.execute(query, values);
   },
+  typedQuery: async <T>(query: string, values?: any) => {
+    const rows = await db.query(query, values).then((rows) => rows[0]) as unknown as T[];
+    return rows;
+  }
 };

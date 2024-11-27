@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 import { PieChart, Pie, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Legend, Tooltip } from 'recharts';
 import Team from "@/types/Team";
 import axios from "axios";
+import { UsableSurvey } from "@/types/Survey";
 
 interface DecodedToken {
   id: string;
@@ -125,20 +126,21 @@ export default function DashboardPage() {
   const [userData, setUserData] = useState<DecodedToken | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
   const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
+  const [selectedTeamSurveys, setSelectedTeamSurveys] = useState<UsableSurvey[]>([]);
+  const [selectedSurvey, setSelectedSurvey] = useState<UsableSurvey | null>(null);
   const router = useRouter();
 
   useEffect(() => {
     const token = Cookie.get("authToken") || Cookie.get("userToken");
-    axios.get<Team[]>("/api/teams").then((response) => {
-      setTeams(response.data);
-    }
-    );
     if (token) {
       try {
         const decoded = jwtDecode<DecodedToken>(token);
         setUserData(decoded);
-        console.log(userData);
-        
+        if (decoded) {
+          axios.get(`/api/user/${decoded.id}/teams`).then((response) => {
+            setTeams(response.data);
+          });
+        }
       } catch (error) {
         console.error("Erro ao decodificar o token:", error);
       }
@@ -179,6 +181,10 @@ export default function DashboardPage() {
             style={{ fontSize: "16px" }}
             onChange={(e) => {
               setSelectedTeam(teams.find((team) => team.id === Number(e.target.value)) || null);
+              const teamId = e.target.value;
+              axios.get(`/api/team/${teamId}/surveys`).then((response) => {
+                setSelectedTeamSurveys(response.data);
+              });
             }}
           >
             <option value="">Selecione um time</option>
@@ -195,6 +201,27 @@ export default function DashboardPage() {
       <div className="flex justify-between mx-6 space-x-6 h-[calc(95vh-8rem)]">
         {/* Contêiner de gráficos com ajuste de layout para empilhamento e maior tamanho */}
         <div className="w-1/2 h-full bg-[#152259] rounded-lg flex flex-col items-center justify-center space-y-8 p-4">
+          <select
+            className="text-white bg-[#509CDB] px-4 py-2 rounded hover:bg-[#407CAD] mb-4"
+            style={{ fontSize: "16px" }}
+            onChange={(e) => {
+              // Handle survey selection change
+            }}
+          >
+            <option value="">Selecione uma pesquisa</option>
+            {
+              // Fetch and map surveys
+              selectedTeamSurveys.map((survey) => (
+                <option key={survey.survey_id} value={survey.survey_id}>
+                  {survey.title}
+                </option>
+              ))
+            }
+            {/* Example surveys */}
+            <option value="1">Pesquisa 1</option>
+            <option value="2">Pesquisa 2</option>
+            <option value="3">Pesquisa 3</option>
+          </select>
           <h3 className="text-white text-lg">Exemplo</h3>
 
           {/* Gráfico de barras sem fundo quadriculado e com nova cor */}

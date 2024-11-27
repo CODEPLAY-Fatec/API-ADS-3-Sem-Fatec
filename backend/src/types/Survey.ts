@@ -1,4 +1,4 @@
-import Question from "./Question";
+import { Question, Answer } from "./Question";
 
 export enum SurveyCategory {
   "Autoavaliação" = "Autoavaliação",
@@ -35,6 +35,12 @@ type UsableSurvey = {
   target_id?: number;
   target_name?: string;
   team_id: number;
+}
+
+type AnsweredSurvey = {
+  BaseSurvey: BaseSurvey,
+  Category: SurveyCategory,
+  Answers: Answer[]
 }
 
 export type { BaseSurvey, SurveyInstance, UsableSurvey };

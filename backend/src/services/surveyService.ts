@@ -1,6 +1,6 @@
 import { QueryResult, ResultSetHeader } from "mysql2";
 import { db } from "../config/database2";
-import Question from "../types/Question";
+import { Question } from "../types/Question";
 import { BaseSurvey, SurveyCategory, SurveyInstance, UsableSurvey } from "../types/Survey";
 
 export const createBaseSurvey = async (survey: BaseSurvey, open: boolean, teams?: number[], category?: SurveyCategory, auxiliarySurvey?: boolean) => {
@@ -271,4 +271,12 @@ export const getSurveyResponsesByTarget = async (target_id: number) => {
     const [rows]= await db.query(query, [target_id]);
     return rows
     
+}
+
+export const getTeamSurveys = async (team_id: number) => {
+    const query = `
+        SELECT * FROM survey_instance
+        WHERE team_id = ?
+    `;
+    return db.query(query, [team_id]);
 }

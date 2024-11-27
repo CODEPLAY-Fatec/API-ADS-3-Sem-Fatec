@@ -278,7 +278,7 @@ export default function RespondSurveysPage() {
             <ConfirmDialog
                 open={showDialog}
                 title="Confirmar Envio"
-                message="Tem certeza que deseja enviar este formulário?,não será possivel alterar as respostas"
+                message="Tem certeza que deseja enviar este formulário? Não será possivel alterar as respostas após o envio."
                 onConfirm={() => surveyConfirm !== null && handleSubmit(surveyConfirm)} 
                 onCancel={handleCloseDialog}
             />

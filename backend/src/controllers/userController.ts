@@ -6,9 +6,10 @@ import path from 'path';
 
 export const getUsersController = async (req: Request, res: Response) => {
   try {
-    const users = await getAllUsersWithDetails();
+    const users = await getAllUsersWithDetails() as any[];
     for (const user of users) {
-      const [pictures] = await db.query('SELECT image FROM user_pictures WHERE user_id = ?', [user.id]);
+      const pictures = await db.query('SELECT image FROM user_pictures WHERE user_id = ?', [user.id]) as unknown as any[];
+      // daniel safado
       if (pictures.length > 0) {
         user.photo = pictures[0].image.toString('base64');
       }

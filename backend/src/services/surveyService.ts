@@ -86,7 +86,7 @@ export const createSurveyInstance = async (survey_uid: number, team_id: number, 
         // Cria uma nova instância
         const insertQuery = `INSERT INTO survey_instance (uid, created, open, team_id, category) VALUES (?, ?, 1, ?, ?)`;
         console.log(survey_uid)
-        const baseSurvey: BaseSurvey = await getBaseSurveyByUID(survey_uid).then((result: any) => result[0][0]);
+        const baseSurvey: BaseSurvey = await getBaseSurveyByUID(survey_uid).then((result) => result[0]);
         console.log(baseSurvey)
         await db.query(insertQuery, [baseSurvey.uid, new Date(), team_id, category]);
 
@@ -130,42 +130,51 @@ export const submitSurveyResponse = async (user_id: number, survey_id: number, s
 }
 // pegar as pesquisas disponíveis de um usuário
 export async function getUserSurveys(user_id: number): Promise<UsableSurvey[]> {
-    const userLedTeams = await db.query(`SELECT * FROM team_member WHERE user_id = ?`, [user_id]); // times onde o usuário é liderado
-    const userLeadsTeams = await db.query(`SELECT * FROM team_leader WHERE user_id = ?`, [user_id]); // times onde o usuário é líder
+    console.log("--------------------------------");
+    
+    const userLedTeams = await db.typedQuery<{team_id: number, user_id: number}>(`SELECT * FROM team_member WHERE user_id = ?`, [user_id]) // times onde o usuário é liderado
+    const userLeadsTeams = await db.typedQuery<{team_id: number, user_id: number}>(`SELECT * FROM team_leader WHERE user_id = ?`, [user_id]) // times onde o usuário é líder
 
     let Surveys: UsableSurvey[] = []
     const BaseSurveys: { [key: string]: BaseSurvey } = {};
     
-    async function AddSurveys(Scope: QueryResult, Category: SurveyCategory): Promise<void> {
+    async function AddSurveys(Scope: {team_id: number, user_id: number}[], Category: SurveyCategory): Promise<void> {
         const Complement: SurveyCategory = Category == SurveyCategory["Avaliação de líder"] ? SurveyCategory["Autoavaliação de liderado"] : SurveyCategory["Autoavaliação de líder"];
         // buscando avaliações de líder, pode-se deduzir que o usuário é um liderado, portanto, o complemento deve ser autoavaliação de liderado.        
-        for (let team of Scope as {team_id: number, user_id: number}[]) {
-            const surveys = await db.query(`
+        for (let team of Scope) {
+            const surveys: SurveyInstance[] = await db.typedQuery<SurveyInstance>(`
                 SELECT si.* 
                 FROM survey_instance si
                 JOIN base_survey bs ON si.uid = bs.uid
                 LEFT JOIN survey_answer sa ON si.id = sa.survey_id AND sa.user_id = ?
                 WHERE si.team_id = ? AND si.open = 1
-                  AND (si.category != 'Autoavaliação' OR sa.user_id IS NULL)
-                  AND (si.category = 'Autoavaliação' OR si.category = ?)
-            `, [user_id, team.team_id, Category]);
+                AND ( (si.category = 'Autoavaliação' or si.category = ? AND sa.user_id IS NULL) OR si.category = ?)
+            `, 
+                // novo:
+                // a pesquisa é autoavaliativa e não tem resposta OU
+                // a pesquisa é da categoria desejada
+                // arglist:
+                // user_id, team_id, Complement, Category
+
+                // a pesquisa não é autoavaliativa ou tem resposta E
+                // pesquisas autoavaliativas podem ter apenas uma resposta.
+                // pesquisas não autoavaliativas podem ter várias respostas (para diferentes alvos apenas)
+
+            [user_id, team.team_id, Complement, Category]);
                         // isso aqui é macumba.
             
-            for (let survey of surveys[0] as SurveyInstance[]) {
+            for (let survey of surveys) {
                 let BaseSurvey = BaseSurveys[survey.uid]
                 if (!BaseSurvey) {
-                    const baseSurveyResult = await getBaseSurveyByUID(survey.uid);
-                    BaseSurvey = (baseSurveyResult as unknown as [BaseSurvey[]])[0][0];
-                    BaseSurveys[survey.uid] = BaseSurvey;
-                    //                      meu deus.
+                    const baseSurveyResult = await getBaseSurveyByUID(survey.uid).then((result) => result[0]);
+                    BaseSurvey = baseSurveyResult
+                    BaseSurveys[survey.uid] = baseSurveyResult;
                 }
                 
                 let UsableSurvey: UsableSurvey
                 if (!BaseSurvey) continue;
-                console.log(survey); 
-                if (survey.category == "Autoavaliação") {
-                  console.log("auto");
-                  
+                console.log(survey.category); 
+                if (survey.category == "Autoavaliação" || survey.category == Complement) {
                     UsableSurvey = {
                         survey_id: survey.id,
                         title: BaseSurvey.title,
@@ -179,8 +188,6 @@ export async function getUserSurveys(user_id: number): Promise<UsableSurvey[]> {
                     
                 } else if (survey.category == Category) {
                     // pegar todos os membros do time que não tenham respostas associadas à eles
-                    console.log(Category);
-                     
                     const teamRelations = await db.query(`
                         SELECT tm.user_id, u.name 
                         FROM ${Category == "Avaliação de liderado" ? "team_member" : "team_leader"} tm
@@ -195,7 +202,7 @@ export async function getUserSurveys(user_id: number): Promise<UsableSurvey[]> {
                         // ISSO AQUI É MALIGNO MACUMBA MACUMBA MACUMBA MACUMBA MACUMBA MACUMBA MACUMBA 
                     for (let teamMember of teamRelations[0] as { user_id: number, team_id: number, name: string }[]) {
                         // clonar pesquisa com target_id = teamMember.user_id
-                        console.log(teamMember);
+                        // console.log(teamMember);
                         UsableSurvey = {
                             survey_id: survey.id,
                             title: BaseSurvey.title,
@@ -213,11 +220,11 @@ export async function getUserSurveys(user_id: number): Promise<UsableSurvey[]> {
             }
         }
     }
-    await AddSurveys(userLedTeams[0], SurveyCategory["Avaliação de líder"])
-    await AddSurveys(userLeadsTeams[0], SurveyCategory["Autoavaliação de liderado"])
+    await AddSurveys(userLedTeams, SurveyCategory["Avaliação de líder"])
+    await AddSurveys(userLeadsTeams, SurveyCategory["Avaliação de liderado"])
     // eu odeio esse código
-    
-    console.log(Surveys);
+    console.log("--------------------------------");
+    // console.log(Surveys);
     
     return Surveys
 }

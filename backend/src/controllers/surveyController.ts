@@ -39,7 +39,6 @@ export const getBaseSurveyByUIDController = async (req: Request, res: Response) 
 }
 
 export const getUserSurveysController = async (req: Request, res: Response) => {
-    console.log("QUE");
     const { user_id } = req.params;
     
     try {

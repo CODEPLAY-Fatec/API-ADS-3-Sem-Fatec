@@ -25,9 +25,7 @@ const Page: React.FC = () => {
         }
 
         // Log FormData content
-        for (let [key, value] of formData.entries()) {
-            console.log(`${key}: ${value}`);
-        }
+        
 
         try {
             const response = await fetch('/api/users', { 

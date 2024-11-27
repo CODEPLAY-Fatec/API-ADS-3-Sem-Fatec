@@ -125,9 +125,7 @@ const data02 = [
 export default function DashboardPage() {
   const [userData, setUserData] = useState<DecodedToken | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
-  const [selectedTeam, setSelectedTeam] = useState<Team | null>(null);
   const [selectedTeamSurveys, setSelectedTeamSurveys] = useState<UsableSurvey[]>([]);
-  const [selectedSurvey, setSelectedSurvey] = useState<UsableSurvey | null>(null);
   const router = useRouter();
 
   useEffect(() => {

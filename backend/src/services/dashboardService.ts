@@ -1,6 +1,6 @@
-import { getBaseSurveyByUID, getSurveyResponsesBySurveyInstance, getUserSurveys } from "./surveyService";
+import { answerSurvey, getBaseSurveyByUID, getSurveyResponsesBySurveyInstance, getUserSurveys } from "./surveyService";
 import { db } from "../config/database2";
-import { BaseSurvey } from "../types/Survey";
+import { AnsweredSurvey, BaseSurvey, SurveyAnswers, SurveyInstance } from "../types/Survey";
 
 export const getAllUserSurveyAnswers = async (user_id: number) => {
     const userSurveys = await getUserSurveys(user_id);
@@ -22,31 +22,16 @@ export const getBaseSurveysForTeam = async (user_id: number, team_id: number) =>
     // from a user_id and team_id; get all the survey instances (grouped by their base surveys) that the user has access to
     // from this, we can then get the answers the user has given to these instances
     // (function getRelevantAnswersForBaseSurvey(user_id, team_id, survey_uid: number) -> AnsweredSurvey[])
+
     const query = `
     SELECT * FROM base_survey
     WHERE id IN (
-        SELECT survey_id FROM survey_instances
+        SELECT DISTINCT uid FROM survey_instance
         WHERE team_id = ?
     )
     `;
-    let rows = await db.query(query, [team_id]) as unknown as BaseSurvey[];;
 
-    // remove surveys that the user doesn't have access to
-    // if the user is a leader for this team, remove surveys that are not for leaders
-    // if the user is a member for this team, remove surveys that are not for members
-    const isLeaderQuery = `
-        SELECT * FROM team_leader
-        WHERE team_id = ? AND user_id = ?
-    `;
-    let leaderRows = await db.query(isLeaderQuery, [team_id, user_id]) as unknown as {team_id: number, user_id: number}[];
-
-    const isMemberQuery = `
-        SELECT * FROM team_member
-        WHERE team_id = ? AND user_id = ?
-    `;
-    let memberRows = await db.query(isMemberQuery, [team_id, user_id]) as unknown as {team_id: number, user_id: number}[];;
-    // TODO: correlate the user's answers 
-    
+    const rows = await db.query(query, [team_id]);
 
     return rows;
 }
@@ -63,20 +48,30 @@ export const getUserSurveysForTeam = async (user_id: number, team_id: number) =>
     return rows;
 }
 
-export const getAnswersForBaseSurvey = async (user_id: number, survey_uid: number, team_id: number) => {
+export const getRelevantAnswersForBaseSurvey = async (user_id: number, team_id: number, survey_uid: number) => {
     const baseSurvey: BaseSurvey = await getBaseSurveyByUID(survey_uid) as unknown as BaseSurvey;
-    const query = `
-    SELECT * FROM survey_answers
-    WHERE user_id = ? AND survey_id IN (
-        SELECT id FROM survey_instances
-        WHERE uid = ? AND team_id = ?
-    )
-    `;
-    const [rows] = await db.query(query, [user_id, survey_uid, team_id]);
-
-    // combine all of the answers into a single object
+    const leaderRows = await db.query(`SELECT * FROM team_leader WHERE team_id = ? AND user_id = ?`, [team_id, user_id]).then((rows) => rows[0]) as unknown as any[];
+    const groupedSurvey: SurveyAnswers = {
+        BaseSurvey: baseSurvey,
+        Answers: []
+    }
+    const isLeader = leaderRows.length > 0;
     
-    return rows;
+    // se não for membro do time?????????????????????
+    // nah, eu ganharia
+
+    const answersQuery = `
+    SELECT sa.*, si.category FROM survey_answers sa
+    JOIN survey_instance si ON sa.survey_id = si.id
+    WHERE si.uid = ? AND si.team_id = ? AND (si.category = ${isLeader ? "'Avaliação de liderado'" : "'Avaliação de líder'"} OR si.category = ${isLeader ? "'Autoavaliação de líder'" : "'Autoavaliação de liderado'"} OR si.category = 'Autoavaliação')
+    `;
+    
+    const answerRows = await db.query(answersQuery, [user_id, survey_uid, team_id]) as unknown as AnsweredSurvey[];
+    groupedSurvey.Answers = answerRows;
+    // TODO: TEST
+    // combine all of the answers into a single object
+
+    
 }
 
 // necessidades do dashboard:

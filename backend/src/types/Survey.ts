@@ -38,10 +38,21 @@ type UsableSurvey = {
 }
 
 type AnsweredSurvey = {
-  BaseSurvey: BaseSurvey,
-  Category: SurveyCategory,
-  Answers: Answer[]
+  base_survey: BaseSurvey;
+  answer_id: number;
+  user_id: number;
+  survey_id: number;
+  survey_uid: number;
+  created: Date;
+  data: Answer[];
+  target_id?: number;
+  category: SurveyCategory;
 }
 
-export type { BaseSurvey, SurveyInstance, UsableSurvey };
+type SurveyAnswers = {
+  BaseSurvey: BaseSurvey;
+  Answers: AnsweredSurvey[];
+}
+
+export type { BaseSurvey, SurveyInstance, UsableSurvey, AnsweredSurvey, SurveyAnswers};
 

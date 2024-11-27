@@ -10,7 +10,7 @@ export const getUsersController = async (req: Request, res: Response) => {
     for (const user of users) {
       const pictures = await db.query('SELECT image FROM user_pictures WHERE user_id = ?', [user.id]) as unknown as any[];
       // daniel safado
-      if (pictures.length > 0) {
+      if (pictures.length > 0 && pictures[0].image) {
         user.photo = pictures[0].image.toString('base64');
       }
     }

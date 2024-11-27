@@ -112,7 +112,7 @@ const data02 = [
 export default function Page() {
     const [userData, setUserData] = useState<DecodedToken | null>(null);
     const [userTeams, setUserTeams] = useState<TeamRole[]>([]);
-    const [userPhoto, setUserPhoto] = useState<string | null>(null); // Add state for user photo
+    const [userPhoto, setUserPhoto] = useState<string | null>(null);
 
     useEffect(() => {
         const token = Cookie.get("authToken") || Cookie.get("userToken");
@@ -142,7 +142,9 @@ export default function Page() {
                 console.error("Erro ao decodificar o token:", error);
             }
         }
-    }, []);
+    }, []);// [] para executar apenas uma vez
+
+    console.log(userData);
 
     if (!userData) {
         return <p>Carregando dados do usuário...</p>;

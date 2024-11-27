@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 const SurveyCreation = () => {
     const [title, setTitle] = useState("");
     const [description, setDescription] = useState("");
-    const [category, setCategory] = useState<BaseSurvey["category"] | null>(null);
+    const [category, setCategory] = useState<BaseSurvey["last_category"] | null>(null);
     const [team_id, setTeamId] = useState<number>(0);
     const [categories, setCategories] = useState<QuestionCategory[]>([]);
     const [teams, setTeams] = useState<Team[]>([]);
@@ -21,7 +21,7 @@ const SurveyCreation = () => {
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
     const [showModal, setShowModal] = useState(false);
 
-    const surveyCategories: BaseSurvey["category"][] = ["Autoavaliação", "Avaliação de líder", "Avaliação de liderado"];
+    const surveyCategories: BaseSurvey["last_category"][] = ["Autoavaliação", "Avaliação de líder", "Avaliação de liderado"];
     const [feedbackMessage, setFeedbackMessage] = useState<string | null>(null);
 
     useEffect(() => {
@@ -115,7 +115,7 @@ const SurveyCreation = () => {
             const newSurvey: BaseSurvey = {
                 title,
                 description,
-                category,
+                last_category: category,
                 questions,
             };
             await axios.post("/api/survey/base", {
@@ -124,6 +124,7 @@ const SurveyCreation = () => {
                 teams: [team_id],
                 category: category
             });
+            
             setFeedbackMessage("Pesquisa criada com sucesso!");
             setTitle("");
             setDescription("");
@@ -154,7 +155,7 @@ const SurveyCreation = () => {
                         </div>
                         <div className="mb-3">
                             <label>Categoria</label>
-                            <select className="form-select" value={category ?? ""} onChange={(e) => setCategory(e.target.value as BaseSurvey["category"])}>
+                            <select className="form-select" value={category ?? ""} onChange={(e) => setCategory(e.target.value as BaseSurvey["last_category"])}>
                                 <option value="">Selecione uma categoria</option>
                                 {surveyCategories.map((cat, index) => (
                                     <option key={index} value={cat}>

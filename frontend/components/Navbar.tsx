@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect,useState } from "react";
 import Cookie from "js-cookie";
 import { jwtDecode } from "jwt-decode";
 import { KeyRound, User, LogOut, LayoutDashboard, Handshake, Users, UsersRound, Notebook, NotebookPen, UserPlus, } from "lucide-react";
@@ -15,7 +15,6 @@ const Navbar: React.FC<{ onToggleSidebar: (isExpanded: boolean) => void }> = ({ 
   const [isTeamLeader, setIsTeamLeader] = useState<boolean>(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
 
   const toggleSidebar = (expand: boolean) => {
     setIsExpanded(expand);
@@ -71,11 +70,6 @@ const Navbar: React.FC<{ onToggleSidebar: (isExpanded: boolean) => void }> = ({ 
     };
   }, [isMenuOpen]);
   
-
-  const closeMenu = () => {
-    setIsMenuOpen(false);
-  };
-
   useEffect(() => {
     const updateScreenSize = () => {
         setIsMobile(window.innerWidth <= 768);
@@ -242,7 +236,7 @@ const Navbar: React.FC<{ onToggleSidebar: (isExpanded: boolean) => void }> = ({ 
           aria-label="Change Password"
           title="Alterar senha"
         >
-          <KeyRound className="icon" />
+          <KeyRound />
         </Link>
         <button
           onClick={handleLogout}
@@ -250,7 +244,7 @@ const Navbar: React.FC<{ onToggleSidebar: (isExpanded: boolean) => void }> = ({ 
           aria-label="Logout"
           title="Logout"
         >
-          <LogOut className="icon" />
+          <LogOut />
         </button>
       </div>
     </div>

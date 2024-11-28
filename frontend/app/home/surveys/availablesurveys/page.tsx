@@ -161,7 +161,7 @@ export default function RespondSurveysPage() {
                 throw new Error("Falha em responde formulario");
             }
 
-            alert("Formulario respondido com sucesso");
+            
             window.location.reload();
         } catch (error: unknown) {
             if (error instanceof Error) {

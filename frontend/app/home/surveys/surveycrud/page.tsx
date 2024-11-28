@@ -123,7 +123,7 @@ const SurveyCreation = () => {
                 open: true,
                 teams: [team_id],
                 category: category,
-                auxiliarySurvey: true,
+                auxiliarySurvey: category === "Autoavaliação" ? false : true,
             });
             
             setFeedbackMessage("Pesquisa criada com sucesso!");

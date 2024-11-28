@@ -1,18 +1,9 @@
-import { answerSurvey, getBaseSurveyByUID, getSurveyResponsesBySurveyInstance, getUserSurveys } from "./surveyService";
+import { getBaseSurveyByUID, getUserSurveys } from "./surveyService";
 import { db } from "../config/database2";
 import { AnsweredSurvey, BaseSurvey, SurveyAnswers, SurveyInstance } from "../types/Survey";
 
 export const getAllUserSurveyAnswers = async (user_id: number) => {
-    const userSurveys = await getUserSurveys(user_id);
-    const surveyAnswers = [];
-
-    for (const survey of userSurveys) {
-        const answers = await getSurveyResponsesBySurveyInstance(survey.survey_id);
-        surveyAnswers.push({
-            survey,
-            answers
-        });
-    }
+    const surveyAnswers = await db.typedQuery<AnsweredSurvey>(`SELECT * FROM survey_answer WHERE user_id = ?`, [user_id]);
 
     return surveyAnswers;
 };
@@ -22,16 +13,16 @@ export const getBaseSurveysForTeam = async (user_id: number, team_id: number) =>
     // from a user_id and team_id; get all the survey instances (grouped by their base surveys) that the user has access to
     // from this, we can then get the answers the user has given to these instances
     // (function getRelevantAnswersForBaseSurvey(user_id, team_id, survey_uid: number) -> AnsweredSurvey[])
-
+    const userSurveys = await getUserSurveys(user_id);
     const query = `
     SELECT * FROM base_survey
-    WHERE id IN (
+    WHERE uid IN (
         SELECT DISTINCT uid FROM survey_instance
         WHERE team_id = ?
     )
     `;
 
-    const rows = await db.typedQuery<BaseSurvey>(query, [team_id]);
+    const rows = (await db.typedQuery<BaseSurvey>(query, [team_id])).filter(survey => userSurveys.find(userSurvey => userSurvey.uid === survey.uid));
 
     return rows;
 }

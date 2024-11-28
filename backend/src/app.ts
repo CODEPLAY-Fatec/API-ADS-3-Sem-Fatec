@@ -17,12 +17,12 @@ app.use(cors({
 }));
 
 // Usando as rotas
-app.use('/api',teamRoutes) //rota para os times
+app.use('/api', teamRoutes) //rota para os times
 app.use('/api', userRoutes); // Rotas de usuários
 app.use('/api', authRoutes); // Rotas para login
 app.use('/api', surveyRoutes); // Rotas para pesquisas
 app.use('/api', categoryRoutes);
-app.use('/api',passwordRoutes);
+app.use('/api', passwordRoutes);
 app.use('/api', dashboardRoutes); 
 
 app.listen(PORT, '0.0.0.0', () => {

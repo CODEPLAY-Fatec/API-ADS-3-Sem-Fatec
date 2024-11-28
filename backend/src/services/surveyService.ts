@@ -130,7 +130,7 @@ export const submitSurveyResponse = async (user_id: number, survey_id: number, s
 }
 // pegar as pesquisas disponíveis de um usuário
 export async function getUserSurveys(user_id: number): Promise<UsableSurvey[]> {
-    console.log("--------------------------------");
+    // console.log("--------------------------------");
     
     const userLedTeams = await db.typedQuery<{team_id: number, user_id: number}>(`SELECT * FROM team_member WHERE user_id = ?`, [user_id]) // times onde o usuário é liderado
     const userLeadsTeams = await db.typedQuery<{team_id: number, user_id: number}>(`SELECT * FROM team_leader WHERE user_id = ?`, [user_id]) // times onde o usuário é líder
@@ -223,7 +223,7 @@ export async function getUserSurveys(user_id: number): Promise<UsableSurvey[]> {
     await AddSurveys(userLedTeams, SurveyCategory["Avaliação de líder"])
     await AddSurveys(userLeadsTeams, SurveyCategory["Avaliação de liderado"])
     // eu odeio esse código
-    console.log("--------------------------------");
+    // console.log("--------------------------------");
     // console.log(Surveys);
     
     return Surveys
@@ -271,12 +271,4 @@ export const getSurveyResponsesByTarget = async (target_id: number) => {
     const query = `SELECT * FROM survey_answer WHERE target_id = ?`;
     return db.typedQuery<AnsweredSurvey>(query, [target_id]);
     
-}
-
-export const getTeamSurveys = async (team_id: number) => {
-    const query = `
-        SELECT * FROM survey_instance
-        WHERE team_id = ?
-    `;
-    return db.typedQuery<SurveyInstance>(query, [team_id]);
 }

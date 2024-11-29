@@ -4,27 +4,40 @@ import { User } from "../types/user";
 
 // Obtém todos os usuários com detalhes de times e funções
 export const getAllUsersWithDetails = async (): Promise<User[]> => {
-    const usersQuery = `SELECT id, name, email, isAdmin, phoneNumber FROM users;`;
+    // Consulta para obter os usuários
+    const usersQuery = `
+        SELECT id, name, email, isAdmin, phoneNumber 
+        FROM users;
+    `;
     const [usersRows]: any = await db.query(usersQuery);
 
+    // Consulta para obter os líderes de times
     const leadersQuery = `
-    SELECT tl.user_id, t.name AS team_name 
-    FROM team_leader tl 
-    JOIN team t ON tl.team_id = t.id;
-  `;
+        SELECT tl.user_id, t.name AS team_name 
+        FROM team_leader tl 
+        JOIN team t ON tl.team_id = t.id;
+    `;
     const [leadersRows]: any = await db.query(leadersQuery);
 
+    // Consulta para obter os membros de times
     const membersQuery = `
-    SELECT tm.user_id, t.name AS team_name 
-    FROM team_member tm 
-    JOIN team t ON tm.team_id = t.id;
-  `;
+        SELECT tm.user_id, t.name AS team_name 
+        FROM team_member tm 
+        JOIN team t ON tm.team_id = t.id;
+    `;
     const [membersRows]: any = await db.query(membersQuery);
 
-    // Objeto para armazenar os roles dos usuários
+    // Consulta para obter as fotos dos usuários
+    const picturesQuery = `
+        SELECT user_id, image 
+        FROM user_pictures;
+    `;
+    const [picturesRows]: any = await db.query(picturesQuery);
+
+    // Mapeia os papéis nos times (Líder e Membro)
     const teamRoles: { [key: number]: { team: string; role: string }[] } = {};
 
-    // Adicionar líderes
+    // Adiciona os papéis de Líder
     leadersRows.forEach((row: any) => {
         const { user_id, team_name } = row;
         if (!teamRoles[user_id]) {
@@ -33,7 +46,7 @@ export const getAllUsersWithDetails = async (): Promise<User[]> => {
         teamRoles[user_id].push({ team: team_name, role: "Líder" });
     });
 
-    // Adicionar membros
+    // Adiciona os papéis de Membro
     membersRows.forEach((row: any) => {
         const { user_id, team_name } = row;
         if (!teamRoles[user_id]) {
@@ -42,10 +55,18 @@ export const getAllUsersWithDetails = async (): Promise<User[]> => {
         teamRoles[user_id].push({ team: team_name, role: "Membro" });
     });
 
-    // Retornar os usuários com o campo `teamRoles` no formato antigo
+    // Mapeia as fotos dos usuários
+    const picturesMap: { [key: number]: string | null } = {};
+    picturesRows.forEach((row: any) => {
+        const { user_id, image } = row;
+        picturesMap[user_id] = image ? image.toString("base64") : null; // Converte para Base64 (opcional)
+    });
+
+    // Retorna os usuários com as informações adicionais (papéis nos times e fotos)
     return usersRows.map((user: any) => ({
         ...user,
-        teamRoles: teamRoles[user.id] || [],
+        teamRoles: teamRoles[user.id] || [], // Adiciona os papéis nos times
+        photo: picturesMap[user.id] || null, // Adiciona a foto (null se não existir)
     }));
 };
 

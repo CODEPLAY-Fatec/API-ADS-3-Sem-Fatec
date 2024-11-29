@@ -10,6 +10,19 @@ type BaseSurvey = {
   uid?:number //para paginas q precisam do uid da base survey 
 };
 
+interface Dashboardsurvey {
+  uid: number;
+  title: string;
+  description: string;
+  questions: {
+    type: string;
+    options: string[]; // Array de strings para as opções.
+    category: string;
+    question: string;
+    categoryId: number;
+  }[];
+}
+
 type BaseSurveyAvailable = {
   survey_id:string //no caso para paginas q precisa do id da survey
   title: string; // Título do survey
@@ -30,7 +43,7 @@ type UsableSurvey = {
   target_id?: number;
 }
 
-export type { BaseSurvey, UsableSurvey,BaseSurveyAvailable };
+export type { BaseSurvey, UsableSurvey,BaseSurveyAvailable,Dashboardsurvey };
 
 
 

@@ -129,7 +129,7 @@ export const submitSurveyResponse = async (user_id: number, survey_id: number, s
     return db.query(query, values);
 }
 // pegar as pesquisas disponíveis de um usuário
-export async function getUserSurveys(user_id: number): Promise<UsableSurvey[]> {
+export async function getUserSurveys(user_id: number, open: boolean = true): Promise<UsableSurvey[]> {
     // console.log("--------------------------------");
     
     const userLedTeams = await db.typedQuery<{team_id: number, user_id: number}>(`SELECT * FROM team_member WHERE user_id = ?`, [user_id]) // times onde o usuário é liderado
@@ -147,9 +147,10 @@ export async function getUserSurveys(user_id: number): Promise<UsableSurvey[]> {
                 FROM survey_instance si
                 JOIN base_survey bs ON si.uid = bs.uid
                 LEFT JOIN survey_answer sa ON si.id = sa.survey_id AND sa.user_id = ?
-                WHERE si.team_id = ? AND si.open = 1
+                WHERE si.team_id = ? ${open ? "AND si.open = 1" : ""}
                 AND ( (si.category = 'Autoavaliação' or si.category = ? AND sa.user_id IS NULL) OR si.category = ?)
             `, 
+            // uid, teamid, open, complement, category
                 // novo:
                 // a pesquisa é autoavaliativa e não tem resposta OU
                 // a pesquisa é da categoria desejada

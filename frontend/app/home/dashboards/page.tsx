@@ -19,6 +19,15 @@ import {
 import "./dahsboards.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Dashboardsurvey } from "@/types/Survey";
+import Cookie from "js-cookie";
+import { jwtDecode } from "jwt-decode";
+
+interface DecodedToken {
+  id: string;
+  name: string;
+  email: string;
+  isAdmin: boolean;
+}
 
 
 
@@ -71,8 +80,32 @@ export default function Page() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await axios.get("/api/users");
-        setUsers(response.data);
+        const token = Cookie.get("authToken") || Cookie.get("userToken");
+        if (token) {
+          const decoded = jwtDecode<DecodedToken>(token);
+
+          const response = await axios.get("/api/users");
+          const allUsers = response.data;
+
+          if (decoded.isAdmin) {
+            setUsers(allUsers); // Admin vê todos os usuários
+          } else {
+            // Filtrar times liderados pelo usuário logado
+            const loggedUserTeams = allUsers
+              .find((u: User) => u.id === parseInt(decoded.id))
+              ?.teamRoles.filter((role: TeamRole) => role.role === "Líder")
+              .map((role: TeamRole) => role.team) || [];
+
+            // Filtrar apenas membros de times liderados
+            const filteredUsers = allUsers.filter((user: User) =>
+              user.teamRoles.some(
+                (role: TeamRole) =>
+                  loggedUserTeams.includes(role.team) && role.role === "Membro"
+              )
+            );
+            setUsers(filteredUsers);
+          }
+        }
       } catch (error: unknown) {
         if (error instanceof Error) {
           setError(error.message);

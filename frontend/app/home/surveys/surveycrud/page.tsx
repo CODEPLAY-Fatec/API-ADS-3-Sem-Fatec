@@ -142,10 +142,10 @@ const SurveyCreation = () => {
             <h1 className="text-center font-bold mb-4">Criação de Pesquisa</h1>
             {feedbackMessage && <div className="alert alert-info">{feedbackMessage}</div>}
 
-            <div className="mb-4">
-                <div className="card shadow-sm">
+          
+                <div className="p-4 mb-3 m-auto bg-light rounded shadow-sm">
                     <div className="card-body">
-                        <h5 className="card-title">Informações da Pesquisa</h5>
+                        <h4 className="card-title font-bold">Informações da Pesquisa</h4>
                         <div className="mb-3">
                             <label>Título da Pesquisa</label>
                             <input type="text" className="form-control" value={title} onChange={(e) => setTitle(e.target.value)} />
@@ -178,7 +178,7 @@ const SurveyCreation = () => {
                         </div>
                     </div>
                 </div>
-            </div>
+            
 
             {/* Modal para adicionar pergunta */}
             {showModal && (

@@ -63,9 +63,9 @@ const Page: React.FC = () => {
     };
 
     return (
-        <div>
+        <div className="d-flex mt-4 align-middle flex-col md:m-auto">
             <h1 className="text-center font-bold mb-4">Cadastro de Usuários</h1>
-            <form className="p-4 mb-3 bg-light rounded shadow-sm" onSubmit={handleSubmit}>
+            <form className="p-4 mb-3 w-max m-auto bg-light rounded shadow-sm" onSubmit={handleSubmit}>
                 <div className="mb-3">
                     <label htmlFor="name" className="form-label">
                         Nome

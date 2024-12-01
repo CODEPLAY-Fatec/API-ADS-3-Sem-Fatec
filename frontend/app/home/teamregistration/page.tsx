@@ -210,7 +210,7 @@ const TeamRegistration = () => {
         <div className="container mt-4">
             <h1 className="text-center font-bold mb-4">Cadastro de Times</h1>
             {feedbackMessage && <div className="alert alert-info">{feedbackMessage}</div>}
-            <div className="mb-3">
+            <div className="d-flex mb-3 h-10 w-fit">
                 <input
                     type="text"
                     className="form-control"
@@ -218,7 +218,7 @@ const TeamRegistration = () => {
                     value={teamName}
                     onChange={(e) => setTeamName(e.target.value)}
                 />
-                <button className="btn btn-primary mt-2" onClick={handleCreateTeam}>Criar Time</button>
+                <button className="btn btn-primary ml-2 h-10 w-50" onClick={handleCreateTeam}>Criar Time</button>
             </div>
 
             <h2>Times Cadastrados</h2>

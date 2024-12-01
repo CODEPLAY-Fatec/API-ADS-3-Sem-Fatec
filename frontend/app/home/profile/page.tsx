@@ -152,7 +152,7 @@ export default function Page() {
 
     return (
         <div className="p-4">
-            <h1 className="text-4xl font-bold mb-12">Perfil pessoal</h1>
+            <h1 className="flex justify-center text-4xl font-bold mb-12">Perfil pessoal</h1>
             <div className="flex flex-col lg:flex-row justify-between items-stretch mx-6 space-y-6 lg:space-y-0 lg:space-x-6">
                 {/* Seção com as caixas */}
                 <div className="w-full lg:w-1/2 flex flex-col">

@@ -1,6 +1,13 @@
 {
   "dependencies": {
-    "apexcharts": "^3.54.1",
+    "apexcharts": "^4.1.0",
+    "file-saver": "^2.0.5",
+    "html2canvas": "^1.4.1",
+    "pdf-lib": "^1.17.1",
     "react-apexcharts": "^1.5.0"
+  },
+  "devDependencies": {
+    "@types/file-saver": "^2.0.7",
+    "@types/html2canvas": "^1.0.0"
   }
 }

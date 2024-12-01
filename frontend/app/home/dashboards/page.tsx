@@ -29,8 +29,6 @@ interface DecodedToken {
   isAdmin: boolean;
 }
 
-
-
 interface TeamRole {
   team: string;
   role: string;
@@ -51,7 +49,7 @@ interface User {
   photo?: string;
 }
 
-
+//pegar dessa rotas os dados /dashboard/user/:user_id/team/:team_id/survey/:survey_uid/answers, com o id do time o id do usuario e o id da base survey.
 
 const data = [
   { name: "Page A", uv: 4000, pv: 2400, amt: 2400 },
@@ -65,8 +63,6 @@ const data01 = [
   { name: "Group B", value: 300 },
   { name: "Group C", value: 300 },
 ];
-
-
 
 export default function Page() {
   const [users, setUsers] = useState<User[]>([]);
@@ -88,7 +84,7 @@ export default function Page() {
           const allUsers = response.data;
 
           if (decoded.isAdmin) {
-            setUsers(allUsers); // Admin vê todos os usuários
+            setUsers(allUsers.filter((user: User) => user.id !== parseInt(decoded.id))); // Admin vê todos os usuários exceto ele mesmo
           } else {
             // Filtrar times liderados pelo usuário logado
             const loggedUserTeams = allUsers
@@ -102,7 +98,7 @@ export default function Page() {
                 (role: TeamRole) =>
                   loggedUserTeams.includes(role.team) && role.role === "Membro"
               )
-            );
+            ).filter((user: User) => user.id !== parseInt(decoded.id)); // Excluir o próprio usuário
             setUsers(filteredUsers);
           }
         }
@@ -146,7 +142,7 @@ export default function Page() {
     setOpenUserId((prevId) => (prevId === userId ? null : userId));
     setBaseSurveys({});
     setSelectedTeamId(null);
-    
+
     if (!teams[userId]) {
       fetchTeams(userId);
     }
@@ -198,42 +194,37 @@ export default function Page() {
           </div>
           <Collapse in={openUserId === user.id}>
             <div className="p-4">
-
-
               {/* Gráficos e informações do usuário */}
               <div className="h-screen p-6">
-                <div className="flex justify-between items-center mb-3">
-                </div>
+                <div className="flex justify-between items-center mb-3"></div>
 
                 <div className="flex justify-between mx-6 space-x-6 h-[calc(95vh-8rem)]">
                   <div className="w-1/2 h-full bg-[#152259] rounded-lg flex flex-col p-6 space-y-6">
-                    
                     <div className="flex space-x-4">
-                  {/* Dropdown de times */}
-                  <select
-                    className="text-white bg-[#407CAD] px-4 py-2 rounded"
-                    onChange={(e) => handleTeamChange(user.id, Number(e.target.value))}
-                  >
-                    <option value="">Selecione um time</option>
-                    {teams[user.id]?.map((team) => (
-                      <option key={team.id} value={team.id}>
-                        {team.name}
-                      </option>
-                    ))}
-                  </select>
+                      {/* Dropdown de times */}
+                      <select
+                        className="text-white bg-[#407CAD] px-4 py-2 rounded"
+                        onChange={(e) => handleTeamChange(user.id, Number(e.target.value))}
+                      >
+                        <option value="">Selecione um time</option>
+                        {teams[user.id]?.map((team) => (
+                          <option key={team.id} value={team.id}>
+                            {team.name}
+                          </option>
+                        ))}
+                      </select>
 
-                  {/* Dropdown de base surveys */}
-                  <select className="text-white bg-[#407CAD] px-4 py-2 rounded">
-                    <option value="">Selecione uma pesquisa base</option>
-                    {selectedTeamId &&
-                      baseSurveys[selectedTeamId]?.map((survey) => (
-                        <option key={survey.uid} value={survey.uid}>
-                          {survey.title}
-                        </option>
-                      ))}
-                  </select>
-                </div>
-
+                      {/* Dropdown de base surveys */}
+                      <select className="text-white bg-[#407CAD] px-4 py-2 rounded">
+                        <option value="">Selecione uma pesquisa base</option>
+                        {selectedTeamId &&
+                          baseSurveys[selectedTeamId]?.map((survey) => (
+                            <option key={survey.uid} value={survey.uid}>
+                              {survey.title}
+                            </option>
+                          ))}
+                      </select>
+                    </div>
 
                     {/* Gráfico  */}
                     <div className="flex justify-center">
@@ -266,8 +257,6 @@ export default function Page() {
                     </div>
                   </div>
 
-
-
                   <div className="w-1/2 h-full flex flex-col space-y-6">
                     <div className="flex space-x-6 h-1/2">
                       <div className="w-1/2 bg-[#152259] rounded-lg flex items-center justify-center">
@@ -296,7 +285,9 @@ export default function Page() {
                     </div>
 
                     <div className="h-1/2 bg-[#152259] rounded-lg flex items-center justify-center">
-                      <p className="text-[#32ADE6]">As explicações/categorias/coisas extras dos dashboards podem ficar aqui</p>
+                      <p className="text-[#32ADE6]">
+                        As explicações/categorias/coisas extras dos dashboards podem ficar aqui
+                      </p>
                     </div>
                   </div>
                 </div>

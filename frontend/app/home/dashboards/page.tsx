@@ -12,7 +12,6 @@ import {
   Line,
   XAxis,
   YAxis,
-  Rectangle,
   CartesianGrid,
   Tooltip,
   Legend,
@@ -22,9 +21,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { Dashboardsurvey } from "@/types/Survey";
 import Cookie from "js-cookie";
 import { jwtDecode } from "jwt-decode";
-import html2pdf from "html2pdf.js"; // Importando a bibliotecaimport { Answer } from "@/types/dashboard";
-import { BaseSurvey } from "@/types/dashboard";
-
+import html2pdf from "html2pdf.js"; // Importando a biblioteca
 interface DecodedToken {
   id: string;
   name: string;
@@ -52,8 +49,6 @@ interface User {
   photo?: string;
 }
 // Dados de exemplo
-
-
 const data = [
   { name: "Page A", uv: 4000, pv: 2400, amt: 2400 },
   { name: "Page B", uv: 3000, pv: 1398, amt: 2210 },
@@ -76,7 +71,40 @@ export default function Page() {
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [openUserId, setOpenUserId] = useState<number | null>(null);
 
-//pega os usuarios e filtra eles com base em qm esta logado
+  // Função para gerar o PDF
+  const handleExportToPDF = (userId: number) => {
+    const element = document.getElementById(`user-dashboard-${userId}`);
+    if (!element) {
+      alert("Erro: conteúdo do usuário não encontrado!");
+      return;
+    }
+  
+    // Ocultar os elementos indesejados
+    const dropdowns = element.querySelectorAll("select") as NodeListOf<HTMLSelectElement>;
+    const button = element.querySelector(`#export-button-${userId}`) as HTMLButtonElement | null;
+  
+    dropdowns.forEach((dropdown) => (dropdown.style.display = "none"));
+    if (button) button.style.display = "none";
+  
+    const opt = {
+      margin: 1,
+      filename: `dashboard-usuario-${userId}.pdf`,
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: { dpi: 192, letterRendering: true },
+      jsPDF: { unit: "mm", format: "a4", orientation: "landscape" },
+    };
+  
+    html2pdf()
+      .from(element)
+      .set(opt)
+      .save()
+      .finally(() => {
+        // Restaurar os elementos após a geração do PDF
+        dropdowns.forEach((dropdown) => (dropdown.style.display = ""));
+        if (button) button.style.display = "";
+      });
+  };
+  
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -118,19 +146,6 @@ export default function Page() {
     fetchUsers();
   }, []);
 
-//funçao q pega as respostas do usuario com base no time e na pesquisa
-  const fetchSurveyAnswers = async (userId: number, teamId: number, surveyUid: number) => {
-    try {
-      const response = await axios.get(
-        `/api/dashboard/user/${userId}/team/${teamId}/survey/${surveyUid}/answers`
-      );
-      setSurveyAnswers(response.data.Answers);
-      setBaseSurvey(response.data.BaseSurvey[0]);
-    } catch (error) {
-      console.error("Erro ao buscar respostas da pesquisa:", error);
-    }
-  };
-//busca os times do usuario(no caso nao esta filtrando direito mas o importante é colocar no grafico agora)
   const fetchTeams = async (userId: number) => {
     try {
       const response = await axios.get(`/api/user/${userId}/teams`);
@@ -142,7 +157,9 @@ export default function Page() {
       console.error("Erro ao buscar times:", error);
     }
   };
-//pega as base surveys do time em questao
+
+  
+
   const fetchBaseSurveys = async (userId: number, teamId: number) => {
     try {
       const response = await axios.get(`/api/dashboard/user/${userId}/team/${teamId}/base-surveys`);
@@ -155,21 +172,16 @@ export default function Page() {
     }
   };
 
-  //funçao q abre e fecha o collpase do usuario
   const handleToggleUser = (userId: number) => {
     setOpenUserId((prevId) => (prevId === userId ? null : userId));
     setBaseSurveys({});
     setSelectedTeamId(null);
-    setSurveyAnswers([]);
-    setSelectedSurveyUid(null);
-    setTeams({});
 
     if (!teams[userId]) {
       fetchTeams(userId);
     }
   };
 
-  //funçao q muda o time selecionado
   const handleTeamChange = (userId: number, teamId: number) => {
     setSelectedTeamId(teamId);
     fetchBaseSurveys(userId, teamId);
@@ -244,24 +256,23 @@ export default function Page() {
                           ))}
                         </select>
 
-                      {/* Dropdown de base surveys */}
-                      <select className="text-white bg-[#407CAD] px-4 py-2 rounded">
-                        <option value="">Selecione uma pesquisa base</option>
-                        {selectedTeamId &&
-                          baseSurveys[selectedTeamId]?.map((survey) => (
-                            <option key={survey.uid} value={survey.uid}>
-                              {survey.title}
-                            </option>
-                          ))}
-                      </select>
-                    </div>
-
-                    {/* Gráfico  */}
-                    <div className="flex justify-center">
-                      <BarChart width={400} height={150} data={data}>
-                        <Bar dataKey="uv" fill="#32ADE6" />
-                      </BarChart>
-                    </div>
+                        {/* Dropdown de base surveys */}
+                        <select className="text-white bg-[#407CAD] px-4 py-2 rounded">
+                          <option value="">Selecione uma pesquisa base</option>
+                          {selectedTeamId &&
+                            baseSurveys[selectedTeamId]?.map((survey) => (
+                              <option key={survey.uid} value={survey.uid}>
+                                {survey.title}
+                              </option>
+                            ))}
+                        </select>
+                      </div>
+                      {/* Gráficos */}
+                      <div className="flex justify-center">
+                        <BarChart width={400} height={150} data={data}>
+                          <Bar dataKey="uv" fill="#32ADE6" />
+                        </BarChart>
+                      </div>
 
                       <div className="flex justify-center">
                         <LineChart
@@ -286,45 +297,45 @@ export default function Page() {
                       </div>
                     </div>
 
-                  <div className="w-1/2 h-full flex flex-col space-y-6">
-                    <div className="flex space-x-6 h-1/2">
-                      <div className="w-1/2 bg-[#152259] rounded-lg flex items-center justify-center">
-                        <PieChart width={400} height={400}>
-                          <Pie
-                            dataKey="value"
-                            isAnimationActive={false}
-                            data={data01}
-                            cx="50%"
-                            cy="50%"
-                            outerRadius={80}
-                            fill="#32ADE6"
-                            label
-                          />
-                          <Tooltip />
-                        </PieChart>
-                      </div>
-                      <div className="w-1/2 bg-[#152259] rounded-lg p-6 flex flex-col justify-center space-y-6">
-                        <div className="text-left space-y-2">
-                          <h2 className="text-white text-xl font-bold">Nome: {user.name}</h2>
-                          <p className="text-white text-lg">ID: {user.id}</p>
-                          <p className="text-white text-lg">Email: {user.email}</p>
-                          <p className="text-white text-lg">Telefone: {user.phoneNumber}</p>
+                    <div className="w-1/2 h-full flex flex-col space-y-6">
+                      <div className="flex space-x-6 h-1/2">
+                        <div className="w-1/2 bg-[#152259] rounded-lg flex items-center justify-center">
+                          <PieChart width={400} height={400}>
+                            <Pie
+                              dataKey="value"
+                              isAnimationActive={false}
+                              data={data01}
+                              cx="50%"
+                              cy="50%"
+                              outerRadius={80}
+                              fill="#32ADE6"
+                              label
+                            />
+                            <Tooltip />
+                          </PieChart>
+                        </div>
+                        <div className="w-1/2 bg-[#152259] rounded-lg p-6 flex flex-col justify-center space-y-6">
+                          <div className="text-left space-y-2">
+                            <h2 className="text-white text-xl font-bold">Nome: {user.name}</h2>
+                            <p className="text-white text-lg">ID: {user.id}</p>
+                            <p className="text-white text-lg">Email: {user.email}</p>
+                            <p className="text-white text-lg">Telefone: {user.phoneNumber}</p>
+                          </div>
                         </div>
                       </div>
-                    </div>
-
-                    <div className="h-1/2 bg-[#152259] rounded-lg flex items-center justify-center">
-                      <p className="text-[#32ADE6]">
-                        As explicações/categorias/coisas extras dos dashboards podem ficar aqui
-                      </p>
+                      <div className="h-1/2 bg-[#152259] rounded-lg flex items-center justify-center">
+                        <p className="text-[#32ADE6]">
+                          Informações extras do dashboard do usuário podem ficar aqui.
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </Collapse>
-        </div>
-      ))}
+              </Collapse>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

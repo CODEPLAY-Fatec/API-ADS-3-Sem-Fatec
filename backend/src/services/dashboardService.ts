@@ -1,4 +1,4 @@
-import { getBaseSurveyByUID, getUserSurveys } from "./surveyService";
+import { getBaseSurveyByUID } from "./surveyService";
 import { db } from "../config/database2";
 import {
   AnsweredSurvey,
@@ -6,7 +6,9 @@ import {
   SurveyAnswers,
   SurveyInstance,
 } from "../types/Survey";
-
+// TODO:
+// adicionar respostas dedicadas à admins:
+// admins podem ver todas as respostas associadas ao usuário alvo (autoavaliações preenchidas por ele e avaliações feitas sobre ele)''
 export const getAllUserSurveyAnswers = async (user_id: number) => {
   const surveyAnswers = await db.typedQuery<AnsweredSurvey>(
     `SELECT * FROM survey_answer WHERE user_id = ?`,
@@ -20,12 +22,18 @@ export const getBaseSurveysForTeam = async (
   user_id: number,
   team_id: number,
 ) => {
+  console.log("Getting base surveys for team: ", user_id, team_id);
+
   // this function is supposed to:
   // from a user_id and team_id; get all the survey instances (grouped by their base surveys) that the user has access to
   // from this, we can then get the answers the user has given to these instances
   // (function getRelevantAnswersForBaseSurvey(user_id, team_id, survey_uid: number) -> AnsweredSurvey[])
-  const userSurveys = await getUserSurveys(user_id, false);
-  const query = `
+  const isLeaderRows = await db.typedQuery(
+    `SELECT * FROM team_leader WHERE team_id = ? AND user_id = ?`,
+    [team_id, user_id],
+  );
+
+  const baseSurveysQuery = `
     SELECT * FROM base_survey
     WHERE uid IN (
         SELECT DISTINCT uid FROM survey_instance
@@ -33,8 +41,40 @@ export const getBaseSurveysForTeam = async (
     )
     `;
 
-  const rows = (await db.typedQuery<BaseSurvey>(query, [team_id])).filter(
-    (survey) => userSurveys.find((userSurvey) => userSurvey.uid === survey.uid),
+  const visibleSurveysRows = await db.typedQuery<SurveyInstance>(
+    `
+        SELECT si.* 
+        FROM survey_instance si
+        JOIN base_survey bs ON si.uid = bs.uid
+        LEFT JOIN survey_answer sa ON si.id = sa.survey_id AND sa.user_id = ?
+        WHERE si.team_id = ? 
+        AND ( ((si.category = 'Autoavaliação' or (si.category = ? AND sa.target_id = ?))) OR si.category = ?)
+    `,
+    [
+      user_id,
+      team_id,
+      isLeaderRows.length > 0
+        ? "Autoavaliação de liderado"
+        : "Autoavaliação de líder",
+      user_id,
+      isLeaderRows.length > 0 ? "Avaliação de líder" : "Avaliação de liderado",
+    ],
+  );
+  // quais pesquisas base deveriam ser mostradas aqui?
+  // autoavaliações, e:
+  // pesquisas que o usuário já respondeu e AINDA TEM acesso;
+
+  // quais RESPOSTAS deveriam ser mostradas?
+  // todas as respostas de autoavaliações;
+  // todas as respostas que ele já deu;
+  // todas as respostas de complementos caso aplique:
+  // (o usuário é líder e a pesquisa é de liderado) e a resposta é sobre o usuário atual
+  // o usuário é admin e a pesquisa tem complementos ^^
+
+  const rows = (
+    await db.typedQuery<BaseSurvey>(baseSurveysQuery, [team_id])
+  ).filter((survey) =>
+    visibleSurveysRows.find((userSurvey) => userSurvey.uid === survey.uid),
   );
 
   return rows;

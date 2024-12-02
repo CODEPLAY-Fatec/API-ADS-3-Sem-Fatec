@@ -26,8 +26,17 @@ import { BaseSurvey } from "@/types/dashboard";
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
 
-
-
+// dadas as respostas, o que fazer?
+// iterar pelas perguntas:
+// se a pergunta for de tipo numérico
+// adicionar ao gráfico de barras a média das respostas dessa pergunta
+// adicionar ao gráfico de pizza quantas vezes cada opção foi selecionada
+// caso tenha uma categoria, adicionar entrada ao gráfico de tempo
+// IMPORTANTE: DETALHAMENTO SOBRE OS GRÁFICOS DA PÁGINA
+// o gráfico de barras é dedicado a mostrar a média das respostas de perguntas numéricas ?
+// o gráfico de pizza é dedicado a mostrar o número de vezes que cada resposta apareceu em uma determinada pergunta
+// o gráfico de tempo/linha mostra a progressão de uma pergunta de uma categoria ao longo do tempo
+//
 
 interface DecodedToken {
   id: string;
@@ -56,7 +65,6 @@ interface User {
   photo?: string;
 }
 
-
 const data = [
   { name: "Page A", uv: 4000, pv: 2400, amt: 2400 },
   { name: "Page B", uv: 3000, pv: 1398, amt: 2210 },
@@ -73,15 +81,18 @@ const data01 = [
 export default function Page() {
   const [users, setUsers] = useState<User[]>([]);
   const [teams, setTeams] = useState<{ [key: number]: Team[] }>({});
-  const [baseSurveys, setBaseSurveys] = useState<{ [key: number]: Dashboardsurvey[] }>({});
+  const [baseSurveys, setBaseSurveys] = useState<{
+    [key: number]: Dashboardsurvey[];
+  }>({});
   const [selectedTeamId, setSelectedTeamId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [openUserId, setOpenUserId] = useState<number | null>(null);
   const [surveyAnswers, setSurveyAnswers] = useState<Answer[]>([]);
-  const [selectedSurveyUid, setSelectedSurveyUid] = useState<number | null>(null);
+  const [selectedSurveyUid, setSelectedSurveyUid] = useState<number | null>(
+    null,
+  );
   const [baseSurvey, setBaseSurvey] = useState<BaseSurvey | null>(null);
-
 
   //pega os usuarios e filtra eles com base em qm esta logado
   useEffect(() => {
@@ -95,21 +106,27 @@ export default function Page() {
           const allUsers = response.data;
 
           if (decoded.isAdmin) {
-            setUsers(allUsers.filter((user: User) => user.id !== parseInt(decoded.id))); // Admin vê todos os usuários exceto ele mesmo
+            setUsers(
+              allUsers.filter((user: User) => user.id !== parseInt(decoded.id)),
+            ); // Admin vê todos os usuários exceto ele mesmo
           } else {
             // Filtrar times liderados pelo usuário logado
-            const loggedUserTeams = allUsers
-              .find((u: User) => u.id === parseInt(decoded.id))
-              ?.teamRoles.filter((role: TeamRole) => role.role === "Líder")
-              .map((role: TeamRole) => role.team) || [];
+            const loggedUserTeams =
+              allUsers
+                .find((u: User) => u.id === parseInt(decoded.id))
+                ?.teamRoles.filter((role: TeamRole) => role.role === "Líder")
+                .map((role: TeamRole) => role.team) || [];
 
             // Filtrar apenas membros de times liderados
-            const filteredUsers = allUsers.filter((user: User) =>
-              user.teamRoles.some(
-                (role: TeamRole) =>
-                  loggedUserTeams.includes(role.team) && role.role === "Membro"
+            const filteredUsers = allUsers
+              .filter((user: User) =>
+                user.teamRoles.some(
+                  (role: TeamRole) =>
+                    loggedUserTeams.includes(role.team) &&
+                    role.role === "Membro",
+                ),
               )
-            ).filter((user: User) => user.id !== parseInt(decoded.id)); // Excluir o próprio usuário
+              .filter((user: User) => user.id !== parseInt(decoded.id)); // Excluir o próprio usuário
             setUsers(filteredUsers);
           }
         }
@@ -125,13 +142,15 @@ export default function Page() {
     fetchUsers();
   }, []);
 
-
-
   //funçao q pega as respostas do usuario com base no time e na pesquisa
-  const fetchSurveyAnswers = async (userId: number, teamId: number, surveyUid: number) => {
+  const fetchSurveyAnswers = async (
+    userId: number,
+    teamId: number,
+    surveyUid: number,
+  ) => {
     try {
       const response = await axios.get(
-        `/api/dashboard/user/${userId}/team/${teamId}/survey/${surveyUid}/answers`
+        `/api/dashboard/user/${userId}/team/${teamId}/survey/${surveyUid}/answers`,
       );
       setSurveyAnswers(response.data.Answers);
       setBaseSurvey(response.data.BaseSurvey[0]);
@@ -140,29 +159,28 @@ export default function Page() {
     }
   };
 
-
   const captureAndDownloadPDF = async (userId: number) => {
     const content = document.getElementById(`capture-content-${userId}`);
     if (!content) return;
-  
+
     try {
       // Captura o conteúdo como imagem usando html2canvas
       const canvas = await html2canvas(content, {
         ignoreElements: (element) =>
           element.tagName === "BUTTON" || element.tagName === "SELECT", // Ignora botões e dropdowns
       });
-  
+
       const imgData = canvas.toDataURL("image/png"); // Converte o canvas para uma imagem
-  
+
       // Cria um PDF usando jsPDF
       const pdf = new jsPDF({
         orientation: "landscape", // Altere para 'landscape' se necessário
         unit: "px",
         format: [canvas.width, canvas.height], // Ajusta ao tamanho do canvas
       });
-  
+
       pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height); // Adiciona a imagem ao PDF
-  
+
       // Faz o download do PDF
       pdf.save(`dashboard_user_${userId}.pdf`);
     } catch (error) {
@@ -186,7 +204,9 @@ export default function Page() {
   //pega as base surveys do time em questao
   const fetchBaseSurveys = async (userId: number, teamId: number) => {
     try {
-      const response = await axios.get(`/api/dashboard/user/${userId}/team/${teamId}/base-surveys`);
+      const response = await axios.get(
+        `/api/dashboard/user/${userId}/team/${teamId}/base-surveys`,
+      );
       setBaseSurveys((prevSurveys) => ({
         ...prevSurveys,
         [teamId]: response.data,
@@ -229,7 +249,7 @@ export default function Page() {
     const matchesTeam = user.teamRoles.some(
       (teamRole) =>
         teamRole.team.toLowerCase().includes(searchTermLower) ||
-        teamRole.role.toLowerCase().includes(searchTermLower)
+        teamRole.role.toLowerCase().includes(searchTermLower),
     );
 
     return matchesName || matchesRole || matchesTeam;
@@ -251,7 +271,10 @@ export default function Page() {
       {filteredUsers.map((user) => (
         <div key={user.id} className="card mb-3">
           <div className="card-header">
-            <h2 className="user-title" onClick={() => handleToggleUser(user.id)}>
+            <h2
+              className="user-title"
+              onClick={() => handleToggleUser(user.id)}
+            >
               {user.name} - {user.isAdmin ? "Admin" : "Usuário"}
             </h2>
           </div>
@@ -275,7 +298,9 @@ export default function Page() {
                         {/* Dropdown de times */}
                         <select
                           className="text-white bg-[#407CAD] px-4 py-2 rounded"
-                          onChange={(e) => handleTeamChange(user.id, Number(e.target.value))}
+                          onChange={(e) =>
+                            handleTeamChange(user.id, Number(e.target.value))
+                          }
                         >
                           <option value="">Selecione um time</option>
                           {teams[user.id]?.map((team) => (
@@ -288,7 +313,9 @@ export default function Page() {
                         {/* Dropdown de base surveys */}
                         <select
                           className="text-white bg-[#407CAD] px-4 py-2 rounded"
-                          onChange={(e) => setSelectedSurveyUid(Number(e.target.value))}
+                          onChange={(e) =>
+                            setSelectedSurveyUid(Number(e.target.value))
+                          }
                         >
                           <option value="">Selecione uma pesquisa base</option>
                           {selectedTeamId &&
@@ -298,16 +325,16 @@ export default function Page() {
                               </option>
                             ))}
                         </select>
-
-
-
-
                       </div>
                       <button
                         className="btn btn-primary"
                         onClick={() => {
                           if (selectedTeamId && selectedSurveyUid) {
-                            fetchSurveyAnswers(user.id, selectedTeamId, selectedSurveyUid);
+                            fetchSurveyAnswers(
+                              user.id,
+                              selectedTeamId,
+                              selectedSurveyUid,
+                            );
                           }
                         }}
                         disabled={!selectedTeamId || !selectedSurveyUid}
@@ -340,7 +367,12 @@ export default function Page() {
                           <YAxis stroke="#FFFFFF" />
                           <Tooltip />
                           <Legend />
-                          <Line type="monotone" dataKey="pv" stroke="#32ADE6" activeDot={{ r: 8 }} />
+                          <Line
+                            type="monotone"
+                            dataKey="pv"
+                            stroke="#32ADE6"
+                            activeDot={{ r: 8 }}
+                          />
                           <Line type="monotone" dataKey="uv" stroke="#82ca9d" />
                         </LineChart>
                       </div>
@@ -365,10 +397,16 @@ export default function Page() {
                         </div>
                         <div className="w-1/2 bg-[#152259] rounded-lg p-6 flex flex-col justify-center space-y-6">
                           <div className="text-left space-y-2">
-                            <h2 className="text-white text-xl font-bold">Nome: {user.name}</h2>
+                            <h2 className="text-white text-xl font-bold">
+                              Nome: {user.name}
+                            </h2>
                             <p className="text-white text-lg">ID: {user.id}</p>
-                            <p className="text-white text-lg">Email: {user.email}</p>
-                            <p className="text-white text-lg">Telefone: {user.phoneNumber}</p>
+                            <p className="text-white text-lg">
+                              Email: {user.email}
+                            </p>
+                            <p className="text-white text-lg">
+                              Telefone: {user.phoneNumber}
+                            </p>
                           </div>
                         </div>
                       </div>
@@ -376,31 +414,47 @@ export default function Page() {
                       <div className="h-1/2 bg-[#152259] rounded-lg flex items-center justify-center">
                         {surveyAnswers.length > 0 ? (
                           <div className="mt-4 bg-[#152259] p-4 rounded-lg w-full max-h-80 overflow-y-auto">
-                            <h3 className="text-white text-lg font-bold">Respostas da Pesquisa</h3>
-                            <h4 className="text-white text-lg font-bold">Nome da pesquisa: {baseSurvey?.title}</h4>
-                            <h4 className="text-white text-lg font-bold">Descrição: {baseSurvey?.description}</h4>
+                            <h3 className="text-white text-lg font-bold">
+                              Respostas da Pesquisa
+                            </h3>
+                            <h4 className="text-white text-lg font-bold">
+                              Nome da pesquisa: {baseSurvey?.title}
+                            </h4>
+                            <h4 className="text-white text-lg font-bold">
+                              Descrição: {baseSurvey?.description}
+                            </h4>
 
                             {surveyAnswers.map((answer) => (
-                              <div key={answer.answer_id} className="text-white mb-2">
+                              <div
+                                key={answer.answer_id}
+                                className="text-white mb-2"
+                              >
                                 <p>-----------------------------------</p>
                                 <p>Categoria da avaliação: {answer.category}</p>
-                                <p>Respondido em: {new Date(answer.created).toLocaleDateString()}</p>
+                                <p>
+                                  Respondido em:{" "}
+                                  {new Date(
+                                    answer.created,
+                                  ).toLocaleDateString()}
+                                </p>
                                 <div>
                                   {answer.data.map((dataItem, index) => (
                                     <div key={index} className="mb-2">
                                       <p>Pergunta: {dataItem.question}</p>
                                       <p>Resposta: {dataItem.answer}</p>
-
                                     </div>
                                   ))}
                                 </div>
                               </div>
                             ))}
                           </div>
-                        ) : (<div className="text-white">Pesquisa as respostas escolhendo o time e o formulario em questão.</div>)}
-
+                        ) : (
+                          <div className="text-white">
+                            Pesquisa as respostas escolhendo o time e o
+                            formulario em questão.
+                          </div>
+                        )}
                       </div>
-
                     </div>
                   </div>
                 </div>
@@ -412,3 +466,4 @@ export default function Page() {
     </div>
   );
 }
+

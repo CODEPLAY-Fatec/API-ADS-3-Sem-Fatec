@@ -130,7 +130,7 @@ export const submitSurveyResponse = async (user_id: number, survey_id: number, s
 }
 // pegar as pesquisas disponíveis de um usuário
 export async function getUserSurveys(user_id: number, open: boolean = true): Promise<UsableSurvey[]> {
-    // console.log("--------------------------------");
+    console.log("--------------------------------");
     
     const userLedTeams = await db.typedQuery<{team_id: number, user_id: number}>(`SELECT * FROM team_member WHERE user_id = ?`, [user_id]) // times onde o usuário é liderado
     const userLeadsTeams = await db.typedQuery<{team_id: number, user_id: number}>(`SELECT * FROM team_leader WHERE user_id = ?`, [user_id]) // times onde o usuário é líder
@@ -148,7 +148,7 @@ export async function getUserSurveys(user_id: number, open: boolean = true): Pro
                 JOIN base_survey bs ON si.uid = bs.uid
                 LEFT JOIN survey_answer sa ON si.id = sa.survey_id AND sa.user_id = ?
                 WHERE si.team_id = ? ${open ? "AND si.open = 1" : ""}
-                AND ( (si.category = 'Autoavaliação' or si.category = ? AND sa.user_id IS NULL) OR si.category = ?)
+                AND ( ((si.category = 'Autoavaliação' or si.category = ?) AND sa.user_id IS NULL) OR si.category = ?)
             `, 
             // uid, teamid, open, complement, category
                 // novo:
@@ -162,6 +162,8 @@ export async function getUserSurveys(user_id: number, open: boolean = true): Pro
                 // pesquisas não autoavaliativas podem ter várias respostas (para diferentes alvos apenas)
 
             [user_id, team.team_id, Complement, Category]);
+            console.log(surveys, "!");
+            
                         // isso aqui é macumba.
             
             for (let survey of surveys) {
@@ -224,8 +226,8 @@ export async function getUserSurveys(user_id: number, open: boolean = true): Pro
     await AddSurveys(userLedTeams, SurveyCategory["Avaliação de líder"])
     await AddSurveys(userLeadsTeams, SurveyCategory["Avaliação de liderado"])
     // eu odeio esse código
-    // console.log("--------------------------------");
-    // console.log(Surveys);
+    console.log(Surveys);
+    console.log("--------------------------------");
     
     return Surveys
 }

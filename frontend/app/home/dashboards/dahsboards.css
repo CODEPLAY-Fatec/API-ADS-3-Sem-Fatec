@@ -1,37 +1,39 @@
 .employee-list {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-  }
-  
-  .employee-card {
-    display: flex;
-    flex-direction: column;
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  }
-  
-  .employee-card h3 {
-    margin: 0;
-    margin-bottom: 10px;
-    font-size: 1.5rem;
-  }
-  
-  .employee-card p {
-    margin: 5px 0;
-  }
-  .dashboard-content {
-    width: 100%;
-    background-color: white; /* Fundo branco para o PDF */
-    color: black; /* Texto preto para maior contraste */
-  }
-  
-  .card {
-    border: 1px solid #ddd;
-    padding: 16px;
-    margin-bottom: 16px;
-  }
-  
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.employee-card {
+  display: flex;
+  flex-direction: column;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.employee-card h3 {
+  margin: 0;
+  margin-bottom: 10px;
+  font-size: 1.5rem;
+}
+
+.employee-card p {
+  margin: 5px 0;
+}
+
+.card-header {
+  transition: transform 0.2s ease, background-color 0.2s ease;
+  cursor: pointer;
+}
+
+.card-header:hover {
+  transform: scale(1.01);
+  /* Aumenta levemente o tamanho */
+  background-color: #007bff;
+  /* Define a cor azul */
+  color: white;
+  /* Ajusta a cor do texto para branco */
+}

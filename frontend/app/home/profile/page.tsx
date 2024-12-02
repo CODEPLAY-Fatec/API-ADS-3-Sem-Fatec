@@ -15,7 +15,6 @@ import {
     Tooltip,
     XAxis,
     YAxis,
-    Rectangle,
     PieChart,
     Pie,
 } from "recharts";

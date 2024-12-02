@@ -136,7 +136,7 @@ export default function Page() {
                     onClick={handleDownloadPDF}
                     className="bg-blue-500 text-white px-4 py-2 rounded"
                 >
-                    Baixar PDF
+                    Exportar para PDF
                 </button>
             </div>
 

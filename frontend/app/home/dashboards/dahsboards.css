@@ -23,4 +23,15 @@
   .employee-card p {
     margin: 5px 0;
   }
+  .dashboard-content {
+    width: 100%;
+    background-color: white; /* Fundo branco para o PDF */
+    color: black; /* Texto preto para maior contraste */
+  }
+  
+  .card {
+    border: 1px solid #ddd;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
   

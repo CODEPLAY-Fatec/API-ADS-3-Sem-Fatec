@@ -21,7 +21,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { Dashboardsurvey } from "@/types/Survey";
 import Cookie from "js-cookie";
 import { jwtDecode } from "jwt-decode";
-
+import html2pdf from "html2pdf.js"; // Importando a biblioteca
 interface DecodedToken {
   id: string;
   name: string;
@@ -48,9 +48,7 @@ interface User {
   teamRoles: TeamRole[];
   photo?: string;
 }
-
-//pegar dessa rotas os dados /dashboard/user/:user_id/team/:team_id/survey/:survey_uid/answers, com o id do time o id do usuario e o id da base survey.
-
+// Dados de exemplo
 const data = [
   { name: "Page A", uv: 4000, pv: 2400, amt: 2400 },
   { name: "Page B", uv: 3000, pv: 1398, amt: 2210 },
@@ -72,6 +70,46 @@ export default function Page() {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [openUserId, setOpenUserId] = useState<number | null>(null);
+
+  // Função para gerar o PDF
+  const handleExportToPDF = (userId: number) => {
+    const element = document.getElementById(`user-dashboard-${userId}`);
+    if (!element) {
+      alert("Erro: conteúdo do usuário não encontrado!");
+      return;
+    }
+
+    // Ocultar os elementos indesejados
+    const dropdowns = element.querySelectorAll("select") as NodeListOf<HTMLSelectElement>;
+    const button = element.querySelector(`#export-button-${userId}`) as HTMLButtonElement | null;
+
+    dropdowns.forEach((dropdown) => (dropdown.style.display = "none"));
+    if (button) {
+      button.style.display = "none";
+    }
+
+    const opt = {
+      margin: 1,
+      filename: `dashboard-usuario-${userId}.pdf`,
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: { scale: 2, letterRendering: true }, 
+      jsPDF: { unit: "mm", format: "a4", orientation: "landscape" },
+    };
+
+    html2pdf()
+      .from(element)
+      .set(opt)
+      .save()
+      .finally(() => {
+        // Restaurar os elementos após a geração do PDF
+        dropdowns.forEach((dropdown) => (dropdown.style.display = ""));
+        if (button) {
+          button.style.display = "";
+        }
+      });
+  };
+
+
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -126,6 +164,8 @@ export default function Page() {
     }
   };
 
+
+
   const fetchBaseSurveys = async (userId: number, teamId: number) => {
     try {
       const response = await axios.get(`/api/dashboard/user/${userId}/team/${teamId}/base-surveys`);
@@ -175,127 +215,133 @@ export default function Page() {
   return (
     <div className="container mt-4">
       <h1 className="text-center font-bold mb-4">Dashboards</h1>
-      <div className="mb-3">
-        <input
-          type="text"
-          className="form-control"
-          placeholder="Pesquisar funcionário por nome ou por função"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      </div>
 
-      {filteredUsers.map((user) => (
-        <div key={user.id} className="card mb-3">
-          <div className="card-header">
-            <h2 className="user-title" onClick={() => handleToggleUser(user.id)}>
-              {user.name} - {user.isAdmin ? "Admin" : "Usuário"}
-            </h2>
-          </div>
-          <Collapse in={openUserId === user.id}>
-            <div className="p-4">
-              {/* Gráficos e informações do usuário */}
-              <div className="h-screen p-6">
-                <div className="flex justify-between items-center mb-3"></div>
+      {/* Container para o conteúdo a ser exportado */}
+      <div id="dashboard-content" className="dashboard-content">
+        <div className="mb-3">
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Pesquisar funcionário por nome ou por função"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
 
-                <div className="flex justify-between mx-6 space-x-6 h-[calc(95vh-8rem)]">
-                  <div className="w-1/2 h-full bg-[#152259] rounded-lg flex flex-col p-6 space-y-6">
-                    <div className="flex space-x-4">
-                      {/* Dropdown de times */}
-                      <select
-                        className="text-white bg-[#407CAD] px-4 py-2 rounded"
-                        onChange={(e) => handleTeamChange(user.id, Number(e.target.value))}
-                      >
-                        <option value="">Selecione um time</option>
-                        {teams[user.id]?.map((team) => (
-                          <option key={team.id} value={team.id}>
-                            {team.name}
-                          </option>
-                        ))}
-                      </select>
-
-                      {/* Dropdown de base surveys */}
-                      <select className="text-white bg-[#407CAD] px-4 py-2 rounded">
-                        <option value="">Selecione uma pesquisa base</option>
-                        {selectedTeamId &&
-                          baseSurveys[selectedTeamId]?.map((survey) => (
-                            <option key={survey.uid} value={survey.uid}>
-                              {survey.title}
+        {filteredUsers.map((user) => (
+          <div key={user.id} className="card mb-3">
+            <div className="card-header">
+              <h2 className="user-title" onClick={() => handleToggleUser(user.id)}>
+                {user.name} - {user.isAdmin ? "Admin" : "Usuário"}
+              </h2>
+            </div>
+            <Collapse in={openUserId === user.id}>
+              <div className="p-4" id={`user-dashboard-${user.id}`}> {/* Identificador único */}
+                {/* Gráficos e informações do usuário */}
+                <button
+                  onClick={() => handleExportToPDF(user.id)} // Exporta apenas esta seção
+                  className="btn btn-primary mb-4"
+                >
+                  Exportar para PDF
+                </button>
+                <div className="h-screen p-6">
+                  <div className="flex justify-between items-center mb-3"></div>
+                  <div className="flex justify-between mx-6 space-x-6 h-[calc(95vh-8rem)]">
+                    <div className="w-1/2 h-full bg-[#152259] rounded-lg flex flex-col p-6 space-y-6">
+                      <div className="flex space-x-4">
+                        {/* Dropdown de times */}
+                        <select
+                          className="text-white bg-[#407CAD] px-4 py-2 rounded"
+                          onChange={(e) => handleTeamChange(user.id, Number(e.target.value))}
+                        >
+                          <option value="">Selecione um time</option>
+                          {teams[user.id]?.map((team) => (
+                            <option key={team.id} value={team.id}>
+                              {team.name}
                             </option>
                           ))}
-                      </select>
-                    </div>
+                        </select>
 
-                    {/* Gráfico  */}
-                    <div className="flex justify-center">
-                      <BarChart width={400} height={150} data={data}>
-                        <Bar dataKey="uv" fill="#32ADE6" />
-                      </BarChart>
-                    </div>
-
-                    {/* Gráfico */}
-                    <div className="flex justify-center">
-                      <LineChart
-                        width={400}
-                        height={250}
-                        data={data}
-                        margin={{
-                          top: 5,
-                          right: 30,
-                          left: 20,
-                          bottom: 5,
-                        }}
-                      >
-                        <CartesianGrid stroke="#FFFFFF" />
-                        <XAxis dataKey="name" stroke="#FFFFFF" />
-                        <YAxis stroke="#FFFFFF" />
-                        <Tooltip />
-                        <Legend />
-                        <Line type="monotone" dataKey="pv" stroke="#32ADE6" activeDot={{ r: 8 }} />
-                        <Line type="monotone" dataKey="uv" stroke="#82ca9d" />
-                      </LineChart>
-                    </div>
-                  </div>
-
-                  <div className="w-1/2 h-full flex flex-col space-y-6">
-                    <div className="flex space-x-6 h-1/2">
-                      <div className="w-1/2 bg-[#152259] rounded-lg flex items-center justify-center">
-                        <PieChart width={400} height={400}>
-                          <Pie
-                            dataKey="value"
-                            isAnimationActive={false}
-                            data={data01}
-                            cx="50%"
-                            cy="50%"
-                            outerRadius={80}
-                            fill="#32ADE6"
-                            label
-                          />
-                          <Tooltip />
-                        </PieChart>
+                        {/* Dropdown de base surveys */}
+                        <select className="text-white bg-[#407CAD] px-4 py-2 rounded">
+                          <option value="">Selecione uma pesquisa base</option>
+                          {selectedTeamId &&
+                            baseSurveys[selectedTeamId]?.map((survey) => (
+                              <option key={survey.uid} value={survey.uid}>
+                                {survey.title}
+                              </option>
+                            ))}
+                        </select>
                       </div>
-                      <div className="w-1/2 bg-[#152259] rounded-lg p-6 flex flex-col justify-center space-y-6">
-                        <div className="text-left space-y-2">
-                          <h2 className="text-white text-xl font-bold">Nome: {user.name}</h2>
-                          <p className="text-white text-lg">ID: {user.id}</p>
-                          <p className="text-white text-lg">Email: {user.email}</p>
-                          <p className="text-white text-lg">Telefone: {user.phoneNumber}</p>
+                      {/* Gráficos */}
+                      <div className="flex justify-center">
+                        <BarChart width={400} height={150} data={data}>
+                          <Bar dataKey="uv" fill="#32ADE6" />
+                        </BarChart>
+                      </div>
+
+                      <div className="flex justify-center">
+                        <LineChart
+                          width={400}
+                          height={250}
+                          data={data}
+                          margin={{
+                            top: 5,
+                            right: 30,
+                            left: 20,
+                            bottom: 5,
+                          }}
+                        >
+                          <CartesianGrid stroke="#FFFFFF" />
+                          <XAxis dataKey="name" stroke="#FFFFFF" />
+                          <YAxis stroke="#FFFFFF" />
+                          <Tooltip />
+                          <Legend />
+                          <Line type="monotone" dataKey="pv" stroke="#32ADE6" activeDot={{ r: 8 }} />
+                          <Line type="monotone" dataKey="uv" stroke="#82ca9d" />
+                        </LineChart>
+                      </div>
+                    </div>
+
+                    <div className="w-1/2 h-full flex flex-col space-y-6">
+                      <div className="flex space-x-6 h-1/2">
+                        <div className="w-1/2 bg-[#152259] rounded-lg flex items-center justify-center">
+                          <PieChart width={400} height={400}>
+                            <Pie
+                              dataKey="value"
+                              isAnimationActive={false}
+                              data={data01}
+                              cx="50%"
+                              cy="50%"
+                              outerRadius={80}
+                              fill="#32ADE6"
+                              label
+                            />
+                            <Tooltip />
+                          </PieChart>
+                        </div>
+                        <div className="w-1/2 bg-[#152259] rounded-lg p-6 flex flex-col justify-center space-y-6">
+                          <div className="text-left space-y-2">
+                            <h2 className="text-white text-xl font-bold">Nome: {user.name}</h2>
+                            <p className="text-white text-lg">ID: {user.id}</p>
+                            <p className="text-white text-lg">Email: {user.email}</p>
+                            <p className="text-white text-lg">Telefone: {user.phoneNumber}</p>
+                          </div>
                         </div>
                       </div>
-                    </div>
-
-                    <div className="h-1/2 bg-[#152259] rounded-lg flex items-center justify-center">
-                      <p className="text-[#32ADE6]">
-                        As explicações/categorias/coisas extras dos dashboards podem ficar aqui
-                      </p>
+                      <div className="h-1/2 bg-[#152259] rounded-lg flex items-center justify-center">
+                        <p className="text-[#32ADE6]">
+                          Informações extras do dashboard do usuário podem ficar aqui.
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </Collapse>
-        </div>
-      ))}
+            </Collapse>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

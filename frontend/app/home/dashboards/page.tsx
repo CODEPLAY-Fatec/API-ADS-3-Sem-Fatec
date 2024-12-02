@@ -21,7 +21,14 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { Dashboardsurvey } from "@/types/Survey";
 import Cookie from "js-cookie";
 import { jwtDecode } from "jwt-decode";
-import html2pdf from "html2pdf.js"; // Importando a biblioteca
+import { Answer } from "@/types/dashboard";
+import { BaseSurvey } from "@/types/dashboard";
+import html2canvas from "html2canvas";
+import { jsPDF } from "jspdf";
+
+
+
+
 interface DecodedToken {
   id: string;
   name: string;
@@ -48,7 +55,8 @@ interface User {
   teamRoles: TeamRole[];
   photo?: string;
 }
-// Dados de exemplo
+
+
 const data = [
   { name: "Page A", uv: 4000, pv: 2400, amt: 2400 },
   { name: "Page B", uv: 3000, pv: 1398, amt: 2210 },
@@ -70,41 +78,12 @@ export default function Page() {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [openUserId, setOpenUserId] = useState<number | null>(null);
+  const [surveyAnswers, setSurveyAnswers] = useState<Answer[]>([]);
+  const [selectedSurveyUid, setSelectedSurveyUid] = useState<number | null>(null);
+  const [baseSurvey, setBaseSurvey] = useState<BaseSurvey | null>(null);
 
-  // Função para gerar o PDF
-  const handleExportToPDF = (userId: number) => {
-    const element = document.getElementById(`user-dashboard-${userId}`);
-    if (!element) {
-      alert("Erro: conteúdo do usuário não encontrado!");
-      return;
-    }
-  
-    // Ocultar os elementos indesejados
-    const dropdowns = element.querySelectorAll("select") as NodeListOf<HTMLSelectElement>;
-    const button = element.querySelector(`#export-button-${userId}`) as HTMLButtonElement | null;
-  
-    dropdowns.forEach((dropdown) => (dropdown.style.display = "none"));
-    if (button) button.style.display = "none";
-  
-    const opt = {
-      margin: 1,
-      filename: `dashboard-usuario-${userId}.pdf`,
-      image: { type: "jpeg", quality: 0.98 },
-      html2canvas: { dpi: 192, letterRendering: true },
-      jsPDF: { unit: "mm", format: "a4", orientation: "landscape" },
-    };
-  
-    html2pdf()
-      .from(element)
-      .set(opt)
-      .save()
-      .finally(() => {
-        // Restaurar os elementos após a geração do PDF
-        dropdowns.forEach((dropdown) => (dropdown.style.display = ""));
-        if (button) button.style.display = "";
-      });
-  };
-  
+
+  //pega os usuarios e filtra eles com base em qm esta logado
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -146,6 +125,52 @@ export default function Page() {
     fetchUsers();
   }, []);
 
+
+
+  //funçao q pega as respostas do usuario com base no time e na pesquisa
+  const fetchSurveyAnswers = async (userId: number, teamId: number, surveyUid: number) => {
+    try {
+      const response = await axios.get(
+        `/api/dashboard/user/${userId}/team/${teamId}/survey/${surveyUid}/answers`
+      );
+      setSurveyAnswers(response.data.Answers);
+      setBaseSurvey(response.data.BaseSurvey[0]);
+    } catch (error) {
+      console.error("Erro ao buscar respostas da pesquisa:", error);
+    }
+  };
+
+
+  const captureAndDownloadPDF = async (userId: number) => {
+    const content = document.getElementById(`capture-content-${userId}`);
+    if (!content) return;
+  
+    try {
+      // Captura o conteúdo como imagem usando html2canvas
+      const canvas = await html2canvas(content, {
+        ignoreElements: (element) =>
+          element.tagName === "BUTTON" || element.tagName === "SELECT", // Ignora botões e dropdowns
+      });
+  
+      const imgData = canvas.toDataURL("image/png"); // Converte o canvas para uma imagem
+  
+      // Cria um PDF usando jsPDF
+      const pdf = new jsPDF({
+        orientation: "landscape", // Altere para 'landscape' se necessário
+        unit: "px",
+        format: [canvas.width, canvas.height], // Ajusta ao tamanho do canvas
+      });
+  
+      pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height); // Adiciona a imagem ao PDF
+  
+      // Faz o download do PDF
+      pdf.save(`dashboard_user_${userId}.pdf`);
+    } catch (error) {
+      console.error("Erro ao gerar PDF:", error);
+    }
+  };
+
+  //busca os times do usuario(no caso nao esta filtrando direito mas o importante é colocar no grafico agora)
   const fetchTeams = async (userId: number) => {
     try {
       const response = await axios.get(`/api/user/${userId}/teams`);
@@ -158,8 +183,7 @@ export default function Page() {
     }
   };
 
-  
-
+  //pega as base surveys do time em questao
   const fetchBaseSurveys = async (userId: number, teamId: number) => {
     try {
       const response = await axios.get(`/api/dashboard/user/${userId}/team/${teamId}/base-surveys`);
@@ -172,16 +196,21 @@ export default function Page() {
     }
   };
 
+  //funçao q abre e fecha o collpase do usuario
   const handleToggleUser = (userId: number) => {
     setOpenUserId((prevId) => (prevId === userId ? null : userId));
     setBaseSurveys({});
     setSelectedTeamId(null);
+    setSurveyAnswers([]);
+    setSelectedSurveyUid(null);
+    setTeams({});
 
     if (!teams[userId]) {
       fetchTeams(userId);
     }
   };
 
+  //funçao q muda o time selecionado
   const handleTeamChange = (userId: number, teamId: number) => {
     setSelectedTeamId(teamId);
     fetchBaseSurveys(userId, teamId);
@@ -209,37 +238,37 @@ export default function Page() {
   return (
     <div className="container mt-4">
       <h1 className="text-center font-bold mb-4">Dashboards</h1>
+      <div className="mb-3">
+        <input
+          type="text"
+          className="form-control"
+          placeholder="Pesquisar funcionário por nome ou por função"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
 
-      {/* Container para o conteúdo a ser exportado */}
-      <div id="dashboard-content" className="dashboard-content">
-        <div className="mb-3">
-          <input
-            type="text"
-            className="form-control"
-            placeholder="Pesquisar funcionário por nome ou por função"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-
-        {filteredUsers.map((user) => (
-          <div key={user.id} className="card mb-3">
-            <div className="card-header">
-              <h2 className="user-title" onClick={() => handleToggleUser(user.id)}>
-                {user.name} - {user.isAdmin ? "Admin" : "Usuário"}
-              </h2>
-            </div>
+      {filteredUsers.map((user) => (
+        <div key={user.id} className="card mb-3">
+          <div className="card-header">
+            <h2 className="user-title" onClick={() => handleToggleUser(user.id)}>
+              {user.name} - {user.isAdmin ? "Admin" : "Usuário"}
+            </h2>
+          </div>
+          <div id={`capture-content-${user.id}`}>
             <Collapse in={openUserId === user.id}>
-              <div className="p-4" id={`user-dashboard-${user.id}`}> {/* Identificador único */}
-                {/* Gráficos e informações do usuário */}
+              <div className="p-4">
                 <button
-                  onClick={() => handleExportToPDF(user.id)} // Exporta apenas esta seção
-                  className="btn btn-primary mb-4"
+                  className="btn btn-secondary mt-3"
+                  onClick={() => captureAndDownloadPDF(user.id)}
                 >
-                  Exportar para PDF
+                  Baixar Dashboard
                 </button>
+
+                {/* Gráficos e informações do usuário */}
                 <div className="h-screen p-6">
                   <div className="flex justify-between items-center mb-3"></div>
+
                   <div className="flex justify-between mx-6 space-x-6 h-[calc(95vh-8rem)]">
                     <div className="w-1/2 h-full bg-[#152259] rounded-lg flex flex-col p-6 space-y-6">
                       <div className="flex space-x-4">
@@ -257,7 +286,10 @@ export default function Page() {
                         </select>
 
                         {/* Dropdown de base surveys */}
-                        <select className="text-white bg-[#407CAD] px-4 py-2 rounded">
+                        <select
+                          className="text-white bg-[#407CAD] px-4 py-2 rounded"
+                          onChange={(e) => setSelectedSurveyUid(Number(e.target.value))}
+                        >
                           <option value="">Selecione uma pesquisa base</option>
                           {selectedTeamId &&
                             baseSurveys[selectedTeamId]?.map((survey) => (
@@ -266,14 +298,31 @@ export default function Page() {
                               </option>
                             ))}
                         </select>
+
+
+
+
                       </div>
-                      {/* Gráficos */}
+                      <button
+                        className="btn btn-primary"
+                        onClick={() => {
+                          if (selectedTeamId && selectedSurveyUid) {
+                            fetchSurveyAnswers(user.id, selectedTeamId, selectedSurveyUid);
+                          }
+                        }}
+                        disabled={!selectedTeamId || !selectedSurveyUid}
+                      >
+                        Carregar Respostas
+                      </button>
+
+                      {/* Gráfico  */}
                       <div className="flex justify-center">
                         <BarChart width={400} height={150} data={data}>
                           <Bar dataKey="uv" fill="#32ADE6" />
                         </BarChart>
                       </div>
 
+                      {/* Gráfico */}
                       <div className="flex justify-center">
                         <LineChart
                           width={400}
@@ -323,19 +372,43 @@ export default function Page() {
                           </div>
                         </div>
                       </div>
+
                       <div className="h-1/2 bg-[#152259] rounded-lg flex items-center justify-center">
-                        <p className="text-[#32ADE6]">
-                          Informações extras do dashboard do usuário podem ficar aqui.
-                        </p>
+                        {surveyAnswers.length > 0 ? (
+                          <div className="mt-4 bg-[#152259] p-4 rounded-lg w-full max-h-80 overflow-y-auto">
+                            <h3 className="text-white text-lg font-bold">Respostas da Pesquisa</h3>
+                            <h4 className="text-white text-lg font-bold">Nome da pesquisa: {baseSurvey?.title}</h4>
+                            <h4 className="text-white text-lg font-bold">Descrição: {baseSurvey?.description}</h4>
+
+                            {surveyAnswers.map((answer) => (
+                              <div key={answer.answer_id} className="text-white mb-2">
+                                <p>-----------------------------------</p>
+                                <p>Categoria da avaliação: {answer.category}</p>
+                                <p>Respondido em: {new Date(answer.created).toLocaleDateString()}</p>
+                                <div>
+                                  {answer.data.map((dataItem, index) => (
+                                    <div key={index} className="mb-2">
+                                      <p>Pergunta: {dataItem.question}</p>
+                                      <p>Resposta: {dataItem.answer}</p>
+
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (<div className="text-white">Pesquisa as respostas escolhendo o time e o formulario em questão.</div>)}
+
                       </div>
+
                     </div>
                   </div>
                 </div>
               </div>
-              </Collapse>
+            </Collapse>
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
   );
 }

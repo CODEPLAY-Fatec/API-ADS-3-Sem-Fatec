@@ -9,7 +9,6 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "jspdf": "^2.4.0",
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
     "@mui/icons-material": "^6.1.5",
@@ -18,13 +17,16 @@
     "axios": "^1.7.7",
     "bootstrap": "^5.3.3",
     "chart.js": "^4.4.6",
+    "file-saver": "^2.0.5",
     "framer-motion": "^11.11.9",
     "frontend": "file:",
     "js-cookie": "^3.0.5",
+    "jspdf": "^2.4.0",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.453.0",
     "next": "14.2.14",
     "nookies": "^2.5.2",
+    "pdf-lib": "^1.17.1",
     "react": "^18",
     "react-bootstrap": "^2.10.5",
     "react-chartjs-2": "^5.2.0",
@@ -32,6 +34,7 @@
     "recharts": "^2.13.1"
   },
   "devDependencies": {
+    "@types/file-saver": "^2.0.7",
     "@types/js-cookie": "^3.0.6",
     "@types/jwt-decode": "^2.2.1",
     "@types/node": "^20",

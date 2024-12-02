@@ -21,6 +21,8 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { Dashboardsurvey } from "@/types/Survey";
 import Cookie from "js-cookie";
 import { jwtDecode } from "jwt-decode";
+import { Answer } from "@/types/dashboard";
+import { BaseSurvey } from "@/types/dashboard";
 
 interface DecodedToken {
   id: string;
@@ -49,7 +51,6 @@ interface User {
   photo?: string;
 }
 
-//pegar dessa rotas os dados /dashboard/user/:user_id/team/:team_id/survey/:survey_uid/answers, com o id do time o id do usuario e o id da base survey.
 
 const data = [
   { name: "Page A", uv: 4000, pv: 2400, amt: 2400 },
@@ -72,7 +73,12 @@ export default function Page() {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [openUserId, setOpenUserId] = useState<number | null>(null);
+  const [surveyAnswers, setSurveyAnswers] = useState<Answer[]>([]);
+  const [selectedSurveyUid, setSelectedSurveyUid] = useState<number | null>(null);
+  const [baseSurvey, setBaseSurvey] = useState<BaseSurvey | null>(null);
 
+
+//pega os usuarios e filtra eles com base em qm esta logado
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -114,6 +120,23 @@ export default function Page() {
     fetchUsers();
   }, []);
 
+
+
+  //funçao q pega as respostas do usuario com base no time e na pesquisa
+  const fetchSurveyAnswers = async (userId: number, teamId: number, surveyUid: number) => {
+    try {
+      const response = await axios.get(
+        `/api/dashboard/user/${userId}/team/${teamId}/survey/${surveyUid}/answers`
+      );
+      setSurveyAnswers(response.data.Answers);
+      setBaseSurvey(response.data.BaseSurvey[0]);
+    } catch (error) {
+      console.error("Erro ao buscar respostas da pesquisa:", error);
+    }
+  };
+
+
+//busca os times do usuario(no caso nao esta filtrando direito mas o importante é colocar no grafico agora)
   const fetchTeams = async (userId: number) => {
     try {
       const response = await axios.get(`/api/user/${userId}/teams`);
@@ -126,6 +149,7 @@ export default function Page() {
     }
   };
 
+//pega as base surveys do time em questao
   const fetchBaseSurveys = async (userId: number, teamId: number) => {
     try {
       const response = await axios.get(`/api/dashboard/user/${userId}/team/${teamId}/base-surveys`);
@@ -138,16 +162,21 @@ export default function Page() {
     }
   };
 
+  //funçao q abre e fecha o collpase do usuario
   const handleToggleUser = (userId: number) => {
     setOpenUserId((prevId) => (prevId === userId ? null : userId));
     setBaseSurveys({});
     setSelectedTeamId(null);
+    setSurveyAnswers([]);
+    setSelectedSurveyUid(null);
+    setTeams({});
 
     if (!teams[userId]) {
       fetchTeams(userId);
     }
   };
 
+  //funçao q muda o time selecionado
   const handleTeamChange = (userId: number, teamId: number) => {
     setSelectedTeamId(teamId);
     fetchBaseSurveys(userId, teamId);
@@ -215,7 +244,10 @@ export default function Page() {
                       </select>
 
                       {/* Dropdown de base surveys */}
-                      <select className="text-white bg-[#407CAD] px-4 py-2 rounded">
+                      <select
+                        className="text-white bg-[#407CAD] px-4 py-2 rounded"
+                        onChange={(e) => setSelectedSurveyUid(Number(e.target.value))}
+                      >
                         <option value="">Selecione uma pesquisa base</option>
                         {selectedTeamId &&
                           baseSurveys[selectedTeamId]?.map((survey) => (
@@ -224,7 +256,22 @@ export default function Page() {
                             </option>
                           ))}
                       </select>
+
+
+
+
                     </div>
+                    <button
+                      className="btn btn-primary"
+                      onClick={() => {
+                        if (selectedTeamId && selectedSurveyUid) {
+                          fetchSurveyAnswers(user.id, selectedTeamId, selectedSurveyUid);
+                        }
+                      }}
+                      disabled={!selectedTeamId || !selectedSurveyUid}
+                    >
+                      Carregar Respostas
+                    </button>
 
                     {/* Gráfico  */}
                     <div className="flex justify-center">
@@ -285,10 +332,33 @@ export default function Page() {
                     </div>
 
                     <div className="h-1/2 bg-[#152259] rounded-lg flex items-center justify-center">
-                      <p className="text-[#32ADE6]">
-                        As explicações/categorias/coisas extras dos dashboards podem ficar aqui
-                      </p>
+                      {surveyAnswers.length > 0 ? (
+                        <div className="mt-4 bg-[#152259] p-4 rounded-lg w-full max-h-80 overflow-y-auto">
+                          <h3 className="text-white text-lg font-bold">Respostas da Pesquisa</h3>
+                          <h4 className="text-white text-lg font-bold">Nome da pesquisa: {baseSurvey?.title}</h4>
+                          <h4 className="text-white text-lg font-bold">Descrição: {baseSurvey?.description}</h4>
+
+                          {surveyAnswers.map((answer) => (
+                            <div key={answer.answer_id} className="text-white mb-2">
+                              <p>-----------------------------------</p>
+                              <p>Categoria da avaliação: {answer.category}</p>
+                              <p>Respondido em: {new Date(answer.created).toLocaleDateString()}</p>
+                              <div>
+                                {answer.data.map((dataItem, index) => (
+                                  <div key={index} className="mb-2">
+                                    <p>Pergunta: {dataItem.question}</p>
+                                    <p>Resposta: {dataItem.answer}</p>
+                                    
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ):(<div className="text-white">Pesquisa as respostas escolhendo o time e o formulario em questão.</div>)}
+
                     </div>
+
                   </div>
                 </div>
               </div>

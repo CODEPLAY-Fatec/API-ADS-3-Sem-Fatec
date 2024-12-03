@@ -98,11 +98,37 @@ export const createUser = async ({ name, email, password, phoneNumber, isAdmin }
 
 // Atualiza um usuário
 export const updateUser = async (id: number, user: Partial<User>): Promise<void> => {
+    const fields = [];
+    const values = [];
+
+    if (user.name !== undefined) {
+        fields.push("name = ?");
+        values.push(user.name);
+    }
+    if (user.email !== undefined) {
+        fields.push("email = ?");
+        values.push(user.email);
+    }
+    if (user.password !== undefined) {
+        fields.push("password = ?");
+        values.push(user.password);
+    }
+    if (user.isAdmin !== undefined) {
+        fields.push("isAdmin = ?");
+        values.push(user.isAdmin);
+    }
+    if (user.phoneNumber !== undefined) {
+        fields.push("phoneNumber = ?");
+        values.push(user.phoneNumber);
+    }
+
+    values.push(id);
+
     const query = `
-    UPDATE users SET name = ?, email = ?, password = ?, isAdmin = ?, phoneNumber = ? 
+    UPDATE users SET ${fields.join(", ")} 
     WHERE id = ?
   `;
-    await db.query(query, [user.name, user.email, user.password, user.isAdmin, user.phoneNumber, id]);
+    await db.query(query, values);
 };
 
 export const updateUserPhoto = async (id: number, photo: Buffer): Promise<void> => {

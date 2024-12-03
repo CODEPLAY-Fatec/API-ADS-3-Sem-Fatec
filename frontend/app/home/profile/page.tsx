@@ -63,6 +63,8 @@ export default function Page() {
     const [userTeams, setUserTeams] = useState<TeamRole[]>([]);
     const [userPhoto, setUserPhoto] = useState<string | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [isEditingPhone, setIsEditingPhone] = useState(false);
+    const [newPhone, setNewPhone] = useState(userData?.phone || "");
 
     useEffect(() => {
         const token = Cookie.get("authToken") || Cookie.get("userToken");
@@ -120,6 +122,22 @@ export default function Page() {
                 }
             } catch (error) {
                 console.error("Erro ao atualizar a foto de perfil:", error);
+            }
+        }
+    };
+
+    const handlePhoneChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setNewPhone(event.target.value);
+    };
+
+    const handleUpdatePhone = async () => {
+        if (userData) {
+            try {
+                await axios.put(`/api/users/${userData.id}`, { phoneNumber: newPhone });
+                setUserData({ ...userData, phone: newPhone });
+                setIsEditingPhone(false);
+            } catch (error) {
+                console.error("Erro ao atualizar o número de telefone:", error);
             }
         }
     };
@@ -208,12 +226,24 @@ export default function Page() {
                                     : "Nenhum time associado"}
                             </p>
                         </div>
-                        <div className="mt-4">
+                        <div className="mt-4 flex items-center space-x-2">
                             <label className="text-blue-500 cursor-pointer">
                                 Alterar foto de perfil
                                 <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
                             </label>
+                            <span>|</span>
+                            <button onClick={() => setIsEditingPhone(true)} className="text-blue-500 cursor-pointer">
+                                Alterar Telefone
+                            </button>
                         </div>
+                        {isEditingPhone && (
+                            <div className="mt-4 flex flex-col items-center">
+                                <input type="text" value={newPhone} onChange={handlePhoneChange} className="border border-gray-300 rounded px-2 py-1" />
+                                <button onClick={handleUpdatePhone} className="bg-blue-500 text-white px-4 py-2 rounded mt-2">
+                                    Salvar
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
 

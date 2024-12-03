@@ -255,215 +255,210 @@ export default function Page() {
     return matchesName || matchesRole || matchesTeam;
   });
 
-  return (
-    <div className="container mt-4">
-      <h1 className="text-center font-bold mb-4">Dashboards</h1>
-      <div className="mb-3">
-        <input
-          type="text"
-          className="form-control"
-          placeholder="Pesquisar funcionário por nome ou por função"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-      </div>
+return (
+  <div className="container mt-4">
+    <h1 className="text-center font-bold mb-4">Dashboards</h1>
+    <div className="mb-3">
+      <input
+        type="text"
+        className="form-control"
+        placeholder="Pesquisar funcionário por nome ou por função"
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+      />
+    </div>
 
-      {filteredUsers.map((user) => (
-        <div key={user.id} className="card mb-3">
-          <div className="card-header">
-            <h2
-              className="user-title"
-              onClick={() => handleToggleUser(user.id)}
-            >
-              {user.name} - {user.isAdmin ? "Admin" : "Usuário"}
-            </h2>
-          </div>
-          <div id={`capture-content-${user.id}`}>
-            <Collapse in={openUserId === user.id}>
-              <div className="p-4">
-                <button
-                  className="btn btn-secondary mt-3"
-                  onClick={() => captureAndDownloadPDF(user.id)}
-                >
-                  Baixar Dashboard
-                </button>
+    {filteredUsers.map((user) => (
+      <div key={user.id} className="card mb-3">
+        <div className="card-header">
+          <h2
+            className="user-title cursor-pointer"
+            onClick={() => handleToggleUser(user.id)}
+          >
+            {user.name} - {user.isAdmin ? "Admin" : "Usuário"}
+          </h2>
+        </div>
+        <div id={`capture-content-${user.id}`}>
+          <Collapse in={openUserId === user.id}>
+            <div className="p-4">
+              <button
+                className="btn btn-secondary mt-3 mb-4"
+                onClick={() => captureAndDownloadPDF(user.id)}
+              >
+                Baixar Dashboard
+              </button>
 
-                {/* Gráficos e informações do usuário */}
-                <div className="h-screen p-6">
-                  <div className="flex justify-between items-center mb-3"></div>
+              {/* Gráficos e informações do usuário */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full p-6">
+                {/* Coluna Esquerda */}
+                <div className="bg-[#152259] rounded-lg flex flex-col p-6 space-y-6 w-full h-full">
+                  <div className="flex flex-col sm:flex-row sm:space-x-4 w-full">
+                    {/* Dropdown de times */}
+                    <select
+                      className="text-white bg-[#407CAD] px-4 py-2 rounded mb-4 sm:mb-0 w-full sm:w-[calc(50%-8px)]"
+                      onChange={(e) =>
+                        handleTeamChange(user.id, Number(e.target.value))
+                      }
+                    >
+                      <option value="">Selecione um time</option>
+                      {teams[user.id]?.map((team) => (
+                        <option key={team.id} value={team.id}>
+                          {team.name}
+                        </option>
+                      ))}
+                    </select>
 
-                  <div className="flex justify-between mx-6 space-x-6 h-[calc(95vh-8rem)]">
-                    <div className="w-1/2 h-full bg-[#152259] rounded-lg flex flex-col p-6 space-y-6">
-                      <div className="flex space-x-4">
-                        {/* Dropdown de times */}
-                        <select
-                          className="text-white bg-[#407CAD] px-4 py-2 rounded"
-                          onChange={(e) =>
-                            handleTeamChange(user.id, Number(e.target.value))
-                          }
-                        >
-                          <option value="">Selecione um time</option>
-                          {teams[user.id]?.map((team) => (
-                            <option key={team.id} value={team.id}>
-                              {team.name}
-                            </option>
-                          ))}
-                        </select>
+                    {/* Dropdown de base surveys */}
+                    <select
+                      className="text-white bg-[#407CAD] px-4 py-2 rounded mb-4 sm:mb-0 w-full sm:w-[calc(50%-8px)]"
+                      onChange={(e) =>
+                        setSelectedSurveyUid(Number(e.target.value))
+                      }
+                    >
+                      <option value="">Selecione uma pesquisa base</option>
+                      {selectedTeamId &&
+                        baseSurveys[selectedTeamId]?.map((survey) => (
+                          <option key={survey.uid} value={survey.uid}>
+                            {survey.title}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
 
-                        {/* Dropdown de base surveys */}
-                        <select
-                          className="text-white bg-[#407CAD] px-4 py-2 rounded"
-                          onChange={(e) =>
-                            setSelectedSurveyUid(Number(e.target.value))
-                          }
-                        >
-                          <option value="">Selecione uma pesquisa base</option>
-                          {selectedTeamId &&
-                            baseSurveys[selectedTeamId]?.map((survey) => (
-                              <option key={survey.uid} value={survey.uid}>
-                                {survey.title}
-                              </option>
-                            ))}
-                        </select>
-                      </div>
-                      <button
-                        className="btn btn-primary"
-                        onClick={() => {
-                          if (selectedTeamId && selectedSurveyUid) {
-                            fetchSurveyAnswers(
-                              user.id,
-                              selectedTeamId,
-                              selectedSurveyUid,
-                            );
-                          }
-                        }}
-                        disabled={!selectedTeamId || !selectedSurveyUid}
-                      >
-                        Carregar Respostas
-                      </button>
+                  <button
+                    className="btn btn-primary w-full sm:w-auto mt-0 mb-2"
+                    onClick={() => {
+                      if (selectedTeamId && selectedSurveyUid) {
+                        fetchSurveyAnswers(
+                          user.id,
+                          selectedTeamId,
+                          selectedSurveyUid,
+                        );
+                      }
+                    }}
+                    disabled={!selectedTeamId || !selectedSurveyUid}
+                  >
+                    Carregar Respostas
+                  </button>
 
-                      {/* Gráfico  */}
-                      <div className="flex justify-center">
-                        <BarChart width={400} height={150} data={data}>
-                          <Bar dataKey="uv" fill="#32ADE6" />
-                        </BarChart>
-                      </div>
+                  {/* Gráficos */}
+                  <div className="flex flex-col items-center space-y-6 w-full">
+                    <BarChart width={300} height={150} data={data} className="w-full sm:w-auto">
+                      <Bar dataKey="uv" fill="#32ADE6" />
+                    </BarChart>
 
-                      {/* Gráfico */}
-                      <div className="flex justify-center">
-                        <LineChart
-                          width={400}
-                          height={250}
-                          data={data}
-                          margin={{
-                            top: 5,
-                            right: 30,
-                            left: 20,
-                            bottom: 5,
-                          }}
-                        >
-                          <CartesianGrid stroke="#FFFFFF" />
-                          <XAxis dataKey="name" stroke="#FFFFFF" />
-                          <YAxis stroke="#FFFFFF" />
-                          <Tooltip />
-                          <Legend />
-                          <Line
-                            type="monotone"
-                            dataKey="pv"
-                            stroke="#32ADE6"
-                            activeDot={{ r: 8 }}
-                          />
-                          <Line type="monotone" dataKey="uv" stroke="#82ca9d" />
-                        </LineChart>
-                      </div>
+                    <LineChart
+                      width={300}
+                      height={250}
+                      data={data}
+                      margin={{
+                        top: 5,
+                        right: 30,
+                        left: 20,
+                        bottom: 5,
+                      }}
+                      className="w-full sm:w-auto lg:w-[400px] lg:h-[250px]"
+                    >
+                      <CartesianGrid stroke="#FFFFFF" />
+                      <XAxis dataKey="name" stroke="#FFFFFF" />
+                      <YAxis stroke="#FFFFFF" />
+                      <Tooltip />
+                      <Legend />
+                      <Line
+                        type="monotone"
+                        dataKey="pv"
+                        stroke="#32ADE6"
+                        activeDot={{ r: 8 }}
+                      />
+                      <Line type="monotone" dataKey="uv" stroke="#82ca9d" />
+                    </LineChart>
+                  </div>
+                </div>
+                {/* Coluna Direita */}
+                <div className="space-y-6 h-full">
+                  <div className="flex flex-col md:flex-row space-y-6 md:space-y-0 md:space-x-6 h-[calc(50%)-10px]">
+                    <div className="w-full md:w-1/2 bg-[#152259] rounded-lg flex items-center justify-center">
+                      <PieChart width={400} height={400}>
+                        <Pie
+                          dataKey="value"
+                          isAnimationActive={false}
+                          data={data01}
+                          cx="50%"
+                          cy="50%"
+                          outerRadius={80}
+                          fill="#32ADE6"
+                          label
+                        />
+                        <Tooltip />
+                      </PieChart>
                     </div>
-
-                    <div className="w-1/2 h-full flex flex-col space-y-6">
-                      <div className="flex space-x-6 h-1/2">
-                        <div className="w-1/2 bg-[#152259] rounded-lg flex items-center justify-center">
-                          <PieChart width={400} height={400}>
-                            <Pie
-                              dataKey="value"
-                              isAnimationActive={false}
-                              data={data01}
-                              cx="50%"
-                              cy="50%"
-                              outerRadius={80}
-                              fill="#32ADE6"
-                              label
-                            />
-                            <Tooltip />
-                          </PieChart>
-                        </div>
-                        <div className="w-1/2 bg-[#152259] rounded-lg p-6 flex flex-col justify-center space-y-6">
-                          <div className="text-left space-y-2">
-                            <h2 className="text-white text-xl font-bold">
-                              Nome: {user.name}
-                            </h2>
-                            <p className="text-white text-lg">ID: {user.id}</p>
-                            <p className="text-white text-lg">
-                              Email: {user.email}
-                            </p>
-                            <p className="text-white text-lg">
-                              Telefone: {user.phoneNumber}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="h-1/2 bg-[#152259] rounded-lg flex items-center justify-center">
-                        {surveyAnswers.length > 0 ? (
-                          <div className="mt-4 bg-[#152259] p-4 rounded-lg w-full max-h-80 overflow-y-auto">
-                            <h3 className="text-white text-lg font-bold">
-                              Respostas da Pesquisa
-                            </h3>
-                            <h4 className="text-white text-lg font-bold">
-                              Nome da pesquisa: {baseSurvey?.title}
-                            </h4>
-                            <h4 className="text-white text-lg font-bold">
-                              Descrição: {baseSurvey?.description}
-                            </h4>
-
-                            {surveyAnswers.map((answer) => (
-                              <div
-                                key={answer.answer_id}
-                                className="text-white mb-2"
-                              >
-                                <p>-----------------------------------</p>
-                                <p>Categoria da avaliação: {answer.category}</p>
-                                <p>
-                                  Respondido em:{" "}
-                                  {new Date(
-                                    answer.created,
-                                  ).toLocaleDateString()}
-                                </p>
-                                <div>
-                                  {answer.data.map((dataItem, index) => (
-                                    <div key={index} className="mb-2">
-                                      <p>Pergunta: {dataItem.question}</p>
-                                      <p>Resposta: {dataItem.answer}</p>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        ) : (
-                          <div className="text-white">
-                            Pesquisa as respostas escolhendo o time e o
-                            formulario em questão.
-                          </div>
-                        )}
+                    <div className="w-full md:w-1/2 bg-[#152259] rounded-lg p-6 flex flex-col justify-center space-y-6">
+                      <div className="text-left space-y-2">
+                        <h2 className="text-white text-xl font-bold">
+                          Nome: {user.name}
+                        </h2>
+                        <p className="text-white text-lg">ID: {user.id}</p>
+                        <p className="text-white text-lg">
+                          Email: {user.email}
+                        </p>
+                        <p className="text-white text-lg">
+                          Telefone: {user.phoneNumber}
+                        </p>
                       </div>
                     </div>
                   </div>
+
+                  <div className="bg-[#152259] rounded-lg flex items-center justify-center p-4">
+                    {surveyAnswers.length > 0 ? (
+                      <div className="bg-[#152259] p-4 rounded-lg w-full overflow-y-auto">
+                        <h3 className="text-white text-lg font-bold">
+                          Respostas da Pesquisa
+                        </h3>
+                        <h4 className="text-white text-lg font-bold">
+                          Nome da pesquisa: {baseSurvey?.title}
+                        </h4>
+                        <h4 className="text-white text-lg font-bold">
+                          Descrição: {baseSurvey?.description}
+                        </h4>
+
+                        {surveyAnswers.map((answer) => (
+                          <div
+                            key={answer.answer_id}
+                            className="text-white mb-2"
+                          >
+                            <p>-----------------------------------</p>
+                            <p>
+                              Categoria da avaliação: {answer.category}
+                            </p>
+                            <p>
+                              Respondido em:{" "}
+                              {new Date(answer.created).toLocaleDateString()}
+                            </p>
+                            <div>
+                              {answer.data.map((dataItem, index) => (
+                                <div key={index} className="mb-2">
+                                  <p>Pergunta: {dataItem.question}</p>
+                                  <p>Resposta: {dataItem.answer}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-white">
+                        Pesquisa as respostas escolhendo o time e o formulário.
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-            </Collapse>
-          </div>
+            </div>
+          </Collapse>
         </div>
-      ))}
-    </div>
-  );
+      </div>
+    ))}
+  </div>
+);
 }
 

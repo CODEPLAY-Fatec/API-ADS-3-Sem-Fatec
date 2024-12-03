@@ -1,23 +1,13 @@
 "use client";
 
-import { useRef, useState, useEffect } from "react";
-import { saveAs } from "file-saver";
-import { PDFDocument } from "pdf-lib";
-import html2canvas from "html2canvas";
 import axios from "axios";
+import { saveAs } from "file-saver";
+import html2canvas from "html2canvas";
 import Cookie from "js-cookie";
 import { jwtDecode } from "jwt-decode";
-import {
-    Bar,
-    BarChart,
-    CartesianGrid,
-    Legend,
-    Tooltip,
-    XAxis,
-    YAxis,
-    PieChart,
-    Pie,
-} from "recharts";
+import { PDFDocument } from "pdf-lib";
+import { useEffect, useRef, useState } from "react";
+import { Bar, BarChart, CartesianGrid, Legend, Pie, PieChart, Tooltip, XAxis, YAxis } from "recharts";
 
 interface DecodedToken {
     id: string;
@@ -72,6 +62,7 @@ export default function Page() {
     const [userData, setUserData] = useState<DecodedToken | null>(null);
     const [userTeams, setUserTeams] = useState<TeamRole[]>([]);
     const [userPhoto, setUserPhoto] = useState<string | null>(null);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
     useEffect(() => {
         const token = Cookie.get("authToken") || Cookie.get("userToken");
@@ -102,6 +93,37 @@ export default function Page() {
         }
     }, []);
 
+    const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files && event.target.files[0]) {
+            setSelectedFile(event.target.files[0]);
+            await handleUploadPhoto(event.target.files[0]);
+        }
+    };
+
+    const handleUploadPhoto = async (file: File) => {
+        if (file && userData) {
+            const formData = new FormData();
+            formData.append("photo", file);
+
+            try {
+                await axios.put(`/api/users/${userData.id}/photo`, formData, {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                });
+                // Refresh the user data to show the new photo
+                const response = await axios.get("/api/users");
+                const allUsers: UserData[] = response.data;
+                const currentUser = allUsers.find((user) => user.id === userData.id);
+                if (currentUser && currentUser.photo) {
+                    setUserPhoto(`data:image/jpeg;base64,${currentUser.photo}`);
+                }
+            } catch (error) {
+                console.error("Erro ao atualizar a foto de perfil:", error);
+            }
+        }
+    };
+
     const handleDownloadPDF = async () => {
         if (contentRef.current) {
             const canvas = await html2canvas(contentRef.current);
@@ -131,10 +153,7 @@ export default function Page() {
         <div>
             <div className="flex justify-between items-center p-4">
                 <h1 className="text-2xl font-bold">Perfil pessoal</h1>
-                <button
-                    onClick={handleDownloadPDF}
-                    className="bg-blue-500 text-white px-4 py-2 rounded"
-                >
+                <button onClick={handleDownloadPDF} className="bg-blue-500 text-white px-4 py-2 rounded">
                     Exportar para PDF
                 </button>
             </div>
@@ -147,12 +166,7 @@ export default function Page() {
                     <div className="bg-white rounded-lg p-4 border border-gray-300">
                         <h2 className="text-xl font-semibold mb-4">Dashboard</h2>
                         <div className="flex justify-center">
-                            <BarChart
-                                width={400}
-                                height={300}
-                                data={data}
-                                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                            >
+                            <BarChart width={400} height={300} data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                                 <CartesianGrid strokeDasharray="3 3" />
                                 <XAxis dataKey="name" />
                                 <YAxis />
@@ -167,13 +181,7 @@ export default function Page() {
                     {/* Perfil do usuário */}
                     <div className="bg-white rounded-lg p-6 border border-gray-300 flex flex-col items-center">
                         <div className="w-32 h-32 lg:w-40 lg:h-40 bg-gray-300 rounded-full mb-4">
-                            {userPhoto && (
-                                <img
-                                    src={userPhoto}
-                                    alt="Foto de perfil"
-                                    className="w-full h-full rounded-full"
-                                />
-                            )}
+                            {userPhoto && <img src={userPhoto} alt="Foto de perfil" className="w-full h-full rounded-full" />}
                         </div>
                         <h2 className="font-bold text-xl mb-2 text-center">{userData.name}</h2>
                         <div className="space-y-2 text-center">
@@ -184,8 +192,7 @@ export default function Page() {
                                 <strong>Email:</strong> {userData.email}
                             </p>
                             <p>
-                                <strong>Nível de acesso:</strong>{" "}
-                                {userData.isAdmin ? "Admin" : "Membro"}
+                                <strong>Nível de acesso:</strong> {userData.isAdmin ? "Admin" : "Membro"}
                             </p>
                             <p>
                                 <strong>Telefone:</strong> {userData.phone}
@@ -194,13 +201,18 @@ export default function Page() {
                                 <strong>Times:</strong>{" "}
                                 {userTeams.length > 0
                                     ? userTeams.map((team, index) => (
-                                        <span key={index}>
-                                            {team.team} ({team.role})
-                                            {index < userTeams.length - 1 ? ", " : ""}
-                                        </span>
-                                    ))
+                                          <span key={index}>
+                                              {team.team} ({team.role}){index < userTeams.length - 1 ? ", " : ""}
+                                          </span>
+                                      ))
                                     : "Nenhum time associado"}
                             </p>
+                        </div>
+                        <div className="mt-4">
+                            <label className="text-blue-500 cursor-pointer">
+                                Alterar foto de perfil
+                                <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
+                            </label>
                         </div>
                     </div>
                 </div>
@@ -209,31 +221,13 @@ export default function Page() {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
                     <div className="bg-white rounded-lg p-4 border border-gray-300 flex justify-center">
                         <PieChart width={300} height={300}>
-                            <Pie
-                                dataKey="value"
-                                data={data01}
-                                cx="50%"
-                                cy="50%"
-                                outerRadius={80}
-                                fill="#32ADE6"
-                                label
-                            />
-                            <Pie
-                                dataKey="value"
-                                data={data02}
-                                cx="50%"
-                                cy="50%"
-                                innerRadius={60}
-                                outerRadius={100}
-                                fill="#82ca9d"
-                            />
+                            <Pie dataKey="value" data={data01} cx="50%" cy="50%" outerRadius={80} fill="#32ADE6" label />
+                            <Pie dataKey="value" data={data02} cx="50%" cy="50%" innerRadius={60} outerRadius={100} fill="#82ca9d" />
                             <Tooltip />
                         </PieChart>
                     </div>
                     <div className="bg-white rounded-lg p-4 border border-gray-300 flex items-center justify-center">
-                        <p className="text-gray-500 text-center">
-                            As explicações/categorias/coisas extras dos dashboards podem ficar aqui
-                        </p>
+                        <p className="text-gray-500 text-center">As explicações/categorias/coisas extras dos dashboards podem ficar aqui</p>
                     </div>
                 </div>
             </div>

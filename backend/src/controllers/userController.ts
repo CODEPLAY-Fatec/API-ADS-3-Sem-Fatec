@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import fs from "fs";
 import path from "path";
 import { db } from "../config/database2"; // Import the db variable
-import { createUser, deleteUser, getAllUsersWithDetails, getLeaders, updateUser } from "../services/userService";
+import { createUser, deleteUser, getAllUsersWithDetails, getLeaders, updateUser, updateUserPhoto } from "../services/userService";
 
 export const getUsersController = async (req: Request, res: Response) => {
     try {
@@ -41,6 +41,22 @@ export const updateUserController = async (req: Request, res: Response) => {
     const user = req.body;
     try {
         await updateUser(Number(id), user);
+        res.status(204).send();
+    } catch (error: any) {
+        res.status(400).json({ error: error.message });
+    }
+};
+
+export const updateUserPhotoController = async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const photo = req.file?.buffer;
+
+    if (!photo) {
+        return res.status(400).json({ error: "No photo uploaded" });
+    }
+
+    try {
+        await updateUserPhoto(Number(id), photo);
         res.status(204).send();
     } catch (error: any) {
         res.status(400).json({ error: error.message });

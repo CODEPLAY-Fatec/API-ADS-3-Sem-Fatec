@@ -105,6 +105,15 @@ export const updateUser = async (id: number, user: Partial<User>): Promise<void>
     await db.query(query, [user.name, user.email, user.password, user.isAdmin, user.phoneNumber, id]);
 };
 
+export const updateUserPhoto = async (id: number, photo: Buffer): Promise<void> => {
+    const query = `
+    INSERT INTO user_pictures (user_id, image) 
+    VALUES (?, ?)
+    ON DUPLICATE KEY UPDATE image = VALUES(image);
+  `;
+    await db.query(query, [id, photo]);
+};
+
 // Deleta um usuário
 export const deleteUser = async (id: number): Promise<void> => {
     const query = "DELETE FROM users WHERE id = ?";

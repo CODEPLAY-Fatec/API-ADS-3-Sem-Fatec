@@ -326,7 +326,7 @@ export default function Page() {
 
       // Cria um PDF usando jsPDF
       const pdf = new jsPDF({
-        orientation: "landscape", // Altere para 'landscape' se necessário
+        orientation: "portrait",
         unit: "px",
         format: [canvas.width, canvas.height], // Ajusta ao tamanho do canvas
       });

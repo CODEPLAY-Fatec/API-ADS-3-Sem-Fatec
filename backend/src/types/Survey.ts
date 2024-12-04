@@ -37,13 +37,14 @@ type UsableSurvey = {
   team_id: number;
 }
 
-type AnsweredSurvey = {
+type AnsweredSurvey = { // this is one instance of a user's answers for a specific survey. the creation date is when it was ANSWERED, not created.
   base_survey: BaseSurvey;
   answer_id: number;
   user_id: number;
   survey_id: number;
   survey_uid: number;
   created: Date;
+  instance_created: Date;
   data: Answer[];
   target_id?: number;
   category: SurveyCategory;

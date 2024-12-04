@@ -1,11 +1,8 @@
 import { BaseSurvey, Dashboardsurvey } from "@/types/Survey";
 import React from "react";
 import {
-  PieChart,
-  Pie,
-  BarChart,
-  Bar,
   LineChart,
+  RadarChart,
   Line,
   XAxis,
   YAxis,
@@ -95,14 +92,6 @@ const SurveyGraphs: React.FC<{
   console.log(answersBySurveyId);
   console.log(answersByUserId);
 
-  // esboço dos gráficos:
-  // gráfico de linha:
-  // APENAS PARA TEMPO
-  // comparar a evolução das respostas ao longo do tempo
-  // caso se aplique, também comparar a resposta de outros usuários como gráfico sincronizado
-  // caso hajam respostas antigas E respostas comparativas, exibir um botão para exibir as respostas comparativas
-  // caso não hajam respostas antigas, não exibir o gráfico
-
   // gráfico de pizza
   // PARA DADOS EXTRAS
   // quantas pessoas responderam tal pesquisa?
@@ -123,18 +112,6 @@ const SurveyGraphs: React.FC<{
     <div>
       {/* GRÁFICO TEMPORAL */}
       {Object.keys(answersBySurveyId).map((surveyId) => {
-        // this currently generates one whole ass graph for a single question.
-        // this is bad.
-        // we want to generate one graph per question (assuming there's multiple answers for the same question that we want to compare)
-        // so; let's do this correctly.
-        // we format the AnsweredSurvey, that is following this format:
-        // inst1: answers for instance 1
-        // inst2: answers for instance 2
-        // so we want to group the answers based on their survey instances;
-        // such that we get all answers for Q1 in one table, and all answers for Q2 in another table, and so on.
-        // so, how to do it?
-        // we iterate through all the answeredsurveys based on their index, inserting them into a graph array, with length equal to usable question number.
-
         const surveyAnswers = answersBySurveyId[Number(surveyId)];
         const groupedAnswers: {
           [key: string]: (Answer & {
@@ -200,4 +177,3 @@ const SurveyGraphs: React.FC<{
 };
 
 export default SurveyGraphs;
-

@@ -132,7 +132,7 @@ export const getRelevantAnswersForBaseSurvey = async (
   // nah, eu ganharia
 
   const answersQuery = `
-    SELECT sa.*, si.category FROM survey_answer sa
+    SELECT sa.*, si.category, si.created as instance_created FROM survey_answer sa
     JOIN survey_instance si ON sa.survey_id = si.id
     WHERE sa.user_id = ? AND si.uid = ? AND si.team_id = ? AND (si.category = ${isLeader ? "'Avaliação de liderado'" : "'Avaliação de líder'"} OR si.category = ${isLeader ? "'Autoavaliação de líder'" : "'Autoavaliação de liderado'"} OR si.category = 'Autoavaliação')
     `;
@@ -143,7 +143,7 @@ export const getRelevantAnswersForBaseSurvey = async (
     team_id,
   ]);
   groupedSurvey.Answers = answerRows;
-  console.log(answersQuery, answerRows);
+  console.log(answersQuery, JSON.stringify(answerRows, null, 2));
 
   // TODO: TEST
   // combine all of the answers into a single object

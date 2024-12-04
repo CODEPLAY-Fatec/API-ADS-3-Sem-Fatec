@@ -7,7 +7,6 @@ import Cookie from "js-cookie";
 import { jwtDecode } from "jwt-decode";
 import { PDFDocument } from "pdf-lib";
 import { useEffect, useRef, useState } from "react";
-import { Bar, BarChart, CartesianGrid, Legend, Pie, PieChart, Tooltip, XAxis, YAxis } from "recharts";
 
 interface DecodedToken {
     id: string;
@@ -181,7 +180,7 @@ export default function Page() {
                 {/* Grid responsivo */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     {/* Gráfico de barras */}
-                    <div className="bg-white rounded-lg p-4 border border-gray-300">
+                    {/* <div className="bg-white rounded-lg p-4 border border-gray-300">
                         <h2 className="text-xl font-semibold mb-4">Dashboard</h2>
                         <div className="flex justify-center">
                             <BarChart width={400} height={300} data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
@@ -194,7 +193,7 @@ export default function Page() {
                                 <Bar dataKey="uv" fill="#82ca9d" />
                             </BarChart>
                         </div>
-                    </div>
+                    </div> */}
 
                     {/* Perfil do usuário */}
                     <div className="bg-white rounded-lg p-6 border border-gray-300 flex flex-col items-center">
@@ -248,7 +247,7 @@ export default function Page() {
                 </div>
 
                 {/* Segunda linha: gráficos e explicações */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+                {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
                     <div className="bg-white rounded-lg p-4 border border-gray-300 flex justify-center">
                         <PieChart width={300} height={300}>
                             <Pie dataKey="value" data={data01} cx="50%" cy="50%" outerRadius={80} fill="#32ADE6" label />
@@ -259,7 +258,7 @@ export default function Page() {
                     <div className="bg-white rounded-lg p-4 border border-gray-300 flex items-center justify-center">
                         <p className="text-gray-500 text-center">As explicações/categorias/coisas extras dos dashboards podem ficar aqui</p>
                     </div>
-                </div>
+                </div> */}
             </div>
         </div>
     );

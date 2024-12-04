@@ -173,7 +173,7 @@ const SurveyGraphs: React.FC<{
             {lineChartData.map((data) => {
               return (
                 <div>
-                  <h3>Questão: {data[0].question}</h3>
+                  <h5 style={{ color: 'white', fontWeight: 'bold' }}>Questão: {data[0].question}</h5>
                   <ResponsiveContainer width="100%" height={300}>
                     <LineChart data={data} syncId="lineSync">
                       <CartesianGrid strokeDasharray="3 3" />
@@ -184,7 +184,7 @@ const SurveyGraphs: React.FC<{
                       <Line
                         type="monotone"
                         dataKey="answer"
-                        stroke="#8884d8"
+                        stroke="#ffffff"
                         activeDot={{ r: 8 }}
                       />
                     </LineChart>

@@ -18,6 +18,18 @@ export const getAllUserSurveyAnswers = async (user_id: number) => {
   return surveyAnswers;
 };
 
+export const getAnswersTargetingUser = async (
+  user_id: number,
+  team_id: number,
+) => {
+  const rows = await db.typedQuery(
+    `SELECT * FROM survey_answer WHERE target_id = ? AND team_id = ?`,
+    [user_id, team_id],
+  );
+
+  return rows;
+};
+
 export const getBaseSurveysForTeam = async (
   user_id: number,
   team_id: number,
@@ -28,10 +40,13 @@ export const getBaseSurveysForTeam = async (
   // from a user_id and team_id; get all the survey instances (grouped by their base surveys) that the user has access to
   // from this, we can then get the answers the user has given to these instances
   // (function getRelevantAnswersForBaseSurvey(user_id, team_id, survey_uid: number) -> AnsweredSurvey[])
-  const isLeaderRows = await db.typedQuery(
-    `SELECT * FROM team_leader WHERE team_id = ? AND user_id = ?`,
-    [team_id, user_id],
-  );
+  const isLeaderRows = await db.typedQuery<{
+    team_id: number;
+    user_id: number;
+  }>(`SELECT * FROM team_leader WHERE team_id = ? AND user_id = ?`, [
+    team_id,
+    user_id,
+  ]);
 
   const baseSurveysQuery = `
     SELECT * FROM base_survey
@@ -100,15 +115,15 @@ export const getRelevantAnswersForBaseSurvey = async (
   team_id: number,
   survey_uid: number,
 ) => {
-  const baseSurvey: BaseSurvey = (await getBaseSurveyByUID(
+  const baseSurvey = (await getBaseSurveyByUID(
     survey_uid,
-  )) as unknown as BaseSurvey;
+  ))
   const leaderRows = await db.typedQuery<{ user_id: number; team_id: number }>(
     `SELECT * FROM team_leader WHERE team_id = ? AND user_id = ?`,
     [team_id, user_id],
   );
   const groupedSurvey: SurveyAnswers = {
-    BaseSurvey: baseSurvey,
+    BaseSurvey: baseSurvey[0],
     Answers: [],
   };
   const isLeader = leaderRows.length > 0;

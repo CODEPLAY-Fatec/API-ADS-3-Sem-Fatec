@@ -25,6 +25,157 @@ import { Answer } from "@/types/dashboard";
 import { BaseSurvey } from "@/types/dashboard";
 import html2canvas from "html2canvas";
 import { jsPDF } from "jspdf";
+import SurveyGraphs from "@/components/surveyGraphs";
+
+let ExampleProps = {
+  "Dashboardsurvey": {
+    "BaseSurvey": {
+      "last_category": "Autoavaliação",
+      "uid": 11,
+      "title": "TESTER",
+      "description": "TESTERDESC",
+      "questions": [
+        {
+          "type": "Single(number)",
+          "options": [
+            "1",
+            "2"
+          ],
+          "category": "HARD",
+          "question": "HARD1",
+          "categoryId": 3
+        },
+        {
+          "type": "Single(number)",
+          "options": [
+            "11",
+            "12"
+          ],
+          "category": "HARD",
+          "question": "HARD2",
+          "categoryId": 3
+        },
+        {
+          "type": "Multiple",
+          "options": [
+            "UM",
+            "DOIS"
+          ],
+          "category": "HARD",
+          "question": "HARD3",
+          "categoryId": 3
+        },
+        {
+          "type": "Single(number)",
+          "options": [
+            "1",
+            "2"
+          ],
+          "category": "SOFT",
+          "question": "SOFT1",
+          "categoryId": 2
+        },
+        {
+          "type": "Single(number)",
+          "options": [
+            "11",
+            "12"
+          ],
+          "category": "SOFT",
+          "question": "SOFT2",
+          "categoryId": 2
+        },
+        {
+          "type": "Single(text)",
+          "options": [
+            "UM",
+            "DOIS"
+          ],
+          "category": "SOFT",
+          "question": "SOFT3",
+          "categoryId": 2
+        }
+      ]
+    },
+    "Answers": [
+      {
+          "answer_id": 10,
+          "user_id": 1,
+          "survey_id": 10,
+          "survey_uid": 11,
+          "created": new Date("2024-12-03T03:00:00.000Z"),
+          "data": [
+              {
+                  "type": "Single(number)",
+                  "answer": "2",
+                  "options": [
+                      "1",
+                      "2"
+                  ],
+                  "question": "HARD1"
+              },
+              {
+                  "type": "Single(number)",
+                  "answer": "12",
+                  "options": [
+                      "11",
+                      "12"
+                  ],
+                  "question": "HARD2"
+              },
+              {
+                  "type": "Multiple",
+                  "answer": "DOIS",
+                  "options": [
+                      "UM",
+                      "DOIS"
+                  ],
+                  "question": "HARD3"
+              },
+              {
+                  "type": "Single(number)",
+                  "answer": "2",
+                  "options": [
+                      "1",
+                      "2"
+                  ],
+                  "question": "SOFT1"
+              },
+              {
+                  "type": "Single(number)",
+                  "answer": "12",
+                  "options": [
+                      "11",
+                      "12"
+                  ],
+                  "question": "SOFT2"
+              },
+              {
+                  "type": "Single(text)",
+                  "answer": "DOIS",
+                  "options": [
+                      "UM",
+                      "DOIS"
+                  ],
+                  "question": "SOFT3"
+              }
+          ],
+          "target_id": undefined,
+          "category": "Autoavaliação",
+          base_survey: {
+              id: undefined,
+              title: "",
+              description: "",
+              last_category: "Autoavaliação",
+              questions: [],
+              target_id: undefined,
+              uid: undefined
+          }
+      }
+    ]
+  },
+  "SelectedCategory": "HARD"
+}
 
 // dadas as respostas, o que fazer?
 // iterar pelas perguntas:
@@ -92,7 +243,10 @@ export default function Page() {
   const [selectedSurveyUid, setSelectedSurveyUid] = useState<number | null>(
     null,
   );
+  const [surveyCategories, setSurveyCategories] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string | undefined>(undefined);
   const [baseSurvey, setBaseSurvey] = useState<BaseSurvey | null>(null);
+  const [graphElement, setGraphElement] = useState<React.ReactNode>(null);
 
   //pega os usuarios e filtra eles com base em qm esta logado
   useEffect(() => {
@@ -107,7 +261,8 @@ export default function Page() {
 
           if (decoded.isAdmin) {
             setUsers(
-              allUsers.filter((user: User) => user.id !== parseInt(decoded.id)),
+              allUsers,
+              //allUsers.filter((user: User) => user.id !== parseInt(decoded.id)),
             ); // Admin vê todos os usuários exceto ele mesmo
           } else {
             // Filtrar times liderados pelo usuário logado
@@ -153,7 +308,10 @@ export default function Page() {
         `/api/dashboard/user/${userId}/team/${teamId}/survey/${surveyUid}/answers`,
       );
       setSurveyAnswers(response.data.Answers);
-      setBaseSurvey(response.data.BaseSurvey[0]);
+      setBaseSurvey(response.data.BaseSurvey);
+      console.log(response, selectedCategory);
+      
+      setGraphElement(<SurveyGraphs Dashboardsurvey={response.data} SelectedCategory={selectedCategory} />);
     } catch (error) {
       console.error("Erro ao buscar respostas da pesquisa:", error);
     }
@@ -255,210 +413,205 @@ export default function Page() {
     return matchesName || matchesRole || matchesTeam;
   });
 
-return (
-  <div className="container mt-4">
-    <h1 className="text-center font-bold mb-4">Dashboards</h1>
-    <div className="mb-3">
-      <input
-        type="text"
-        className="form-control"
-        placeholder="Pesquisar funcionário por nome ou por função"
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-      />
-    </div>
+  return (
+    <div className="container mt-4">
+      <h1 className="text-center font-bold mb-4">Dashboards</h1>
+      <div className="mb-3">
+        <input
+          type="text"
+          className="form-control"
+          placeholder="Pesquisar funcionário por nome ou por função"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
 
-    {filteredUsers.map((user) => (
-      <div key={user.id} className="card mb-3">
-        <div className="card-header">
-          <h2
-            className="user-title cursor-pointer"
-            onClick={() => handleToggleUser(user.id)}
-          >
-            {user.name} - {user.isAdmin ? "Admin" : "Usuário"}
-          </h2>
-        </div>
-        <div id={`capture-content-${user.id}`}>
-          <Collapse in={openUserId === user.id}>
-            <div className="p-4">
-              <button
-                className="btn btn-secondary mt-3 mb-4"
-                onClick={() => captureAndDownloadPDF(user.id)}
-              >
-                Baixar Dashboard
-              </button>
+      {filteredUsers.map((user) => (
+        <div key={user.id} className="card mb-3">
+          <div className="card-header">
+            <h2
+              className="user-title cursor-pointer"
+              onClick={() => handleToggleUser(user.id)}
+            >
+              {user.name} - {user.isAdmin ? "Admin" : "Usuário"}
+            </h2>
+          </div>
+          <div id={`capture-content-${user.id}`}>
+            <Collapse in={openUserId === user.id}>
+              <div className="p-4">
+                <button
+                  className="btn btn-secondary mt-3 mb-4"
+                  onClick={() => captureAndDownloadPDF(user.id)}
+                >
+                  Baixar Dashboard
+                </button>
 
-              {/* Gráficos e informações do usuário */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full p-6">
-                {/* Coluna Esquerda */}
-                <div className="bg-[#152259] rounded-lg flex flex-col p-6 space-y-6 w-full h-full">
-                  <div className="flex flex-col sm:flex-row sm:space-x-4 w-full">
-                    {/* Dropdown de times */}
+                {/* Gráficos e informações do usuário */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full p-6">
+                  {/* Coluna Esquerda */}
+                  <div className="bg-[#152259] rounded-lg flex flex-col p-6 space-y-6 w-full h-full">
+                    <div className="flex flex-col sm:flex-row sm:space-x-4 w-full">
+                      {/* Dropdown de times */}
+                      <select
+                        className="text-white bg-[#407CAD] px-4 py-2 rounded mb-4 sm:mb-0 w-full sm:w-[calc(50%-8px)]"
+                        onChange={(e) =>
+                          handleTeamChange(user.id, Number(e.target.value))
+                        }
+                      >
+                        <option value="">Selecione um time</option>
+                        {teams[user.id]?.map((team) => (
+                          <option key={team.id} value={team.id}>
+                            {team.name}
+                          </option>
+                        ))}
+                      </select>
+
+                      {/* Dropdown de base surveys */}
+                      <select
+                        className="text-white bg-[#407CAD] px-4 py-2 rounded mb-4 sm:mb-0 w-full sm:w-[calc(50%-8px)]"
+                        onChange={(e) => {
+                          setSelectedSurveyUid(Number(e.target.value));
+                          if (selectedTeamId !== null) {
+                            const selectedSurvey = baseSurveys[
+                              selectedTeamId
+                            ]?.find(
+                              (survey) => survey.uid === Number(e.target.value),
+                            );
+                            setSurveyCategories(
+                              selectedSurvey?.questions.map(
+                                (survey) => survey.category,
+                              ) || [],
+                            );
+                          }
+                        }}
+                      >
+                        <option value="">Selecione uma pesquisa base</option>
+                        {selectedTeamId &&
+                          baseSurveys[selectedTeamId]?.map((survey) => (
+                            <option key={survey.uid} value={survey.uid}>
+                              {survey.title}
+                            </option>
+                          ))}
+                      </select>
+                    </div>
+                    {/* Dropdown de categorias */}
                     <select
-                      className="text-white bg-[#407CAD] px-4 py-2 rounded mb-4 sm:mb-0 w-full sm:w-[calc(50%-8px)]"
-                      onChange={(e) =>
-                        handleTeamChange(user.id, Number(e.target.value))
-                      }
+                      className="text-white bg-[#407CAD] px-4 py-2 rounded mb-4 w-full"
+                      onChange={(e) => setSelectedCategory(e.target.value)}
                     >
-                      <option value="">Selecione um time</option>
-                      {teams[user.id]?.map((team) => (
-                        <option key={team.id} value={team.id}>
-                          {team.name}
+                      <option value="">Selecione uma categoria</option>
+                      {surveyCategories.map((category) => (
+                        <option key={category} value={category}>
+                          {category}
                         </option>
                       ))}
                     </select>
 
-                    {/* Dropdown de base surveys */}
-                    <select
-                      className="text-white bg-[#407CAD] px-4 py-2 rounded mb-4 sm:mb-0 w-full sm:w-[calc(50%-8px)]"
-                      onChange={(e) =>
-                        setSelectedSurveyUid(Number(e.target.value))
-                      }
-                    >
-                      <option value="">Selecione uma pesquisa base</option>
-                      {selectedTeamId &&
-                        baseSurveys[selectedTeamId]?.map((survey) => (
-                          <option key={survey.uid} value={survey.uid}>
-                            {survey.title}
-                          </option>
-                        ))}
-                    </select>
-                  </div>
-
-                  <button
-                    className="btn btn-primary w-full sm:w-auto mt-0 mb-2"
-                    onClick={() => {
-                      if (selectedTeamId && selectedSurveyUid) {
-                        fetchSurveyAnswers(
-                          user.id,
-                          selectedTeamId,
-                          selectedSurveyUid,
-                        );
-                      }
-                    }}
-                    disabled={!selectedTeamId || !selectedSurveyUid}
-                  >
-                    Carregar Respostas
-                  </button>
-
-                  {/* Gráficos */}
-                  <div className="flex flex-col items-center space-y-6 w-full">
-                    <BarChart width={300} height={150} data={data} className="w-full sm:w-auto">
-                      <Bar dataKey="uv" fill="#32ADE6" />
-                    </BarChart>
-
-                    <LineChart
-                      width={300}
-                      height={250}
-                      data={data}
-                      margin={{
-                        top: 5,
-                        right: 30,
-                        left: 20,
-                        bottom: 5,
+                    <button
+                      className="btn btn-primary w-full sm:w-auto mt-0 mb-2"
+                      onClick={() => {
+                        if (selectedTeamId && selectedSurveyUid) {
+                          fetchSurveyAnswers(
+                            user.id,
+                            selectedTeamId,
+                            selectedSurveyUid,
+                          );
+                        }
                       }}
-                      className="w-full sm:w-auto lg:w-[400px] lg:h-[250px]"
+                      disabled={!selectedTeamId || !selectedSurveyUid}
                     >
-                      <CartesianGrid stroke="#FFFFFF" />
-                      <XAxis dataKey="name" stroke="#FFFFFF" />
-                      <YAxis stroke="#FFFFFF" />
-                      <Tooltip />
-                      <Legend />
-                      <Line
-                        type="monotone"
-                        dataKey="pv"
-                        stroke="#32ADE6"
-                        activeDot={{ r: 8 }}
-                      />
-                      <Line type="monotone" dataKey="uv" stroke="#82ca9d" />
-                    </LineChart>
-                  </div>
-                </div>
-                {/* Coluna Direita */}
-                <div className="space-y-6 h-full">
-                  <div className="flex flex-col md:flex-row space-y-6 md:space-y-0 md:space-x-6 h-[calc(50%)-10px]">
-                    <div className="w-full md:w-1/2 bg-[#152259] rounded-lg flex items-center justify-center">
-                      <PieChart width={400} height={400}>
-                        <Pie
-                          dataKey="value"
-                          isAnimationActive={false}
-                          data={data01}
-                          cx="50%"
-                          cy="50%"
-                          outerRadius={80}
-                          fill="#32ADE6"
-                          label
-                        />
-                        <Tooltip />
-                      </PieChart>
+                      Carregar Respostas
+                    </button>
+
+                    {/* Gráficos */}
+                    <div className="flex flex-col items-center space-y-6 w-full">
+                      {graphElement}
+                      <SurveyGraphs Dashboardsurvey={ExampleProps.Dashboardsurvey} SelectedCategory={selectedCategory} />
                     </div>
-                    <div className="w-full md:w-1/2 bg-[#152259] rounded-lg p-6 flex flex-col justify-center space-y-6">
-                      <div className="text-left space-y-2">
-                        <h2 className="text-white text-xl font-bold">
-                          Nome: {user.name}
-                        </h2>
-                        <p className="text-white text-lg">ID: {user.id}</p>
-                        <p className="text-white text-lg">
-                          Email: {user.email}
-                        </p>
-                        <p className="text-white text-lg">
-                          Telefone: {user.phoneNumber}
-                        </p>
+                  </div>
+                  {/* Coluna Direita */}
+                  <div className="space-y-6 h-full">
+                    <div className="flex flex-col md:flex-row space-y-6 md:space-y-0 md:space-x-6 h-[calc(50%)-10px]">
+                      <div className="w-full md:w-1/2 bg-[#152259] rounded-lg flex items-center justify-center">
+                        <PieChart width={400} height={400}>
+                          <Pie
+                            dataKey="value"
+                            isAnimationActive={false}
+                            data={data01}
+                            cx="50%"
+                            cy="50%"
+                            outerRadius={80}
+                            fill="#32ADE6"
+                            label
+                          />
+                          <Tooltip />
+                        </PieChart>
+                      </div>
+                      <div className="w-full md:w-1/2 bg-[#152259] rounded-lg p-6 flex flex-col justify-center space-y-6">
+                        <div className="text-left space-y-2">
+                          <h2 className="text-white text-xl font-bold">
+                            Nome: {user.name}
+                          </h2>
+                          <p className="text-white text-lg">ID: {user.id}</p>
+                          <p className="text-white text-lg">
+                            Email: {user.email}
+                          </p>
+                          <p className="text-white text-lg">
+                            Telefone: {user.phoneNumber}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="bg-[#152259] rounded-lg flex items-center justify-center p-4">
-                    {surveyAnswers.length > 0 ? (
-                      <div className="bg-[#152259] p-4 rounded-lg w-full overflow-y-auto">
-                        <h3 className="text-white text-lg font-bold">
-                          Respostas da Pesquisa
-                        </h3>
-                        <h4 className="text-white text-lg font-bold">
-                          Nome da pesquisa: {baseSurvey?.title}
-                        </h4>
-                        <h4 className="text-white text-lg font-bold">
-                          Descrição: {baseSurvey?.description}
-                        </h4>
+                    <div className="bg-[#152259] rounded-lg flex items-center justify-center p-4">
+                      {surveyAnswers.length > 0 ? (
+                        <div className="bg-[#152259] p-4 rounded-lg w-full overflow-y-auto">
+                          <h3 className="text-white text-lg font-bold">
+                            Respostas da Pesquisa
+                          </h3>
+                          <h4 className="text-white text-lg font-bold">
+                            Nome da pesquisa: {baseSurvey?.title}
+                          </h4>
+                          <h4 className="text-white text-lg font-bold">
+                            Descrição: {baseSurvey?.description}
+                          </h4>
 
-                        {surveyAnswers.map((answer) => (
-                          <div
-                            key={answer.answer_id}
-                            className="text-white mb-2"
-                          >
-                            <p>-----------------------------------</p>
-                            <p>
-                              Categoria da avaliação: {answer.category}
-                            </p>
-                            <p>
-                              Respondido em:{" "}
-                              {new Date(answer.created).toLocaleDateString()}
-                            </p>
-                            <div>
-                              {answer.data.map((dataItem, index) => (
-                                <div key={index} className="mb-2">
-                                  <p>Pergunta: {dataItem.question}</p>
-                                  <p>Resposta: {dataItem.answer}</p>
-                                </div>
-                              ))}
+                          {surveyAnswers.map((answer) => (
+                            <div
+                              key={answer.answer_id}
+                              className="text-white mb-2"
+                            >
+                              <p>-----------------------------------</p>
+                              <p>Categoria da avaliação: {answer.category}</p>
+                              <p>
+                                Respondido em:{" "}
+                                {new Date(answer.created).toLocaleDateString()}
+                              </p>
+                              <div>
+                                {answer.data.map((dataItem, index) => (
+                                  <div key={index} className="mb-2">
+                                    <p>Pergunta: {dataItem.question}</p>
+                                    <p>Resposta: {dataItem.answer}</p>
+                                  </div>
+                                ))}
+                              </div>
                             </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-white">
-                        Pesquisa as respostas escolhendo o time e o formulário.
-                      </div>
-                    )}
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-white">
+                          Pesquisa as respostas escolhendo o time e o
+                          formulário.
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          </Collapse>
+            </Collapse>
+          </div>
         </div>
-      </div>
-    ))}
-  </div>
-);
+      ))}
+    </div>
+  );
 }
-
